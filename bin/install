@@ -445,3 +445,7 @@ fi
 
 # Ensure output directory exists for simulation logs
 mkdir -p output
+
+# Record the Julia version used for this install
+echo "$julia_version" > install_version.txt
+echo "Recorded Julia version $julia_version to install_version.txt"
