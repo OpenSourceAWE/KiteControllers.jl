@@ -33,6 +33,16 @@ if [[ $julia_major == "1.1" ]]; then
 else
     GCT=""
 fi
+
+# Check that the current Julia version matches the one used during install
+if [[ -f "install_version_${julia_major}.txt" ]]; then
+    install_version=$(cat "install_version_${julia_major}.txt")
+    if [[ "$julia_version" != "$install_version" ]]; then
+        echo -e "\033[1;31mWarning:\033[0m The Julia version has changed (installed: $install_version, current: $julia_version)."
+        echo "Please run bin/install again!"
+        exit 1
+    fi
+fi
 if [[ $HOSTNAME == "ufryzen" || $HOSTNAME == "framework" ]]; then
     export NO_MTK=true
 fi

@@ -447,5 +447,5 @@ fi
 mkdir -p output
 
 # Record the Julia version used for this install
-echo "$julia_version" > install_version.txt
-echo "Recorded Julia version $julia_version to install_version.txt"
+echo "$julia_version" > "install_version_${julia_major}.txt"
+echo "Recorded Julia version $julia_version to install_version_${julia_major}.txt"
