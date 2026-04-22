@@ -15,8 +15,11 @@ function read_project()
     dict["gui"]["project"]
 end
 
-PROJECT = read_project()
-set = load_settings(PROJECT; relax=true)
-am::AtmosphericModel = AtmosphericModel(set)
-new_windfields(am::AtmosphericModel; prn=true)
+let
+    PROJECT = read_project()
+    set = load_settings(PROJECT; relax=true)
+    am::AtmosphericModel = AtmosphericModel(set)
+    new_windfields(am::AtmosphericModel; prn=true)
+end
 toc()
+nothing
