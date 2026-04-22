@@ -36,3 +36,7 @@ bin/kps-image-1.12-main.so.bak
 docs/build
 install_version_1.11.txt
 install_version_1.12.txt
+data/windfield_100_4050_500_70_0.0_3.5.npz
+.gitignore
+data/windfield_100_4050_500_70_0.0_5.3.npz
+data/windfield_100_4050_500_70_0.0_8.2.npz
