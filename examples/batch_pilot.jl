@@ -374,11 +374,11 @@ let
 
     println()
     @info("Results summary:")
-    println(rpad("Project", 18), " | ", rpad("error.code", 14), " | ", rpad("av_power [W]", 12), " | error.message")
-    println(repeat("-", 18), "-+-", repeat("-", 14), "-+-", repeat("-", 12), "-+-", repeat("-", 42))
+    println(rpad("Project", 19), " | ", rpad("error.code", 14), " | ", rpad("av_power [W]", 12), " | error.message")
+    println(repeat("-", 19), "-+-", repeat("-", 14), "-+-", repeat("-", 12), "-+-", repeat("-", 42))
     for i in eachindex(results)
         project, error = results[i]
-        @printf("%s | %s | %12.1f | %s\n", rpad(project, 18), rpad(string(error.code), 14), av_powers[i], error.message)
+        @printf("%s | %s | %12.1f | %s\n", rpad(project, 19), rpad(string(error.code), 14), av_powers[i], error.message)
     end
     println()
     @info "You can find the results in the output folder."
