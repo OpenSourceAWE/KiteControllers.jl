@@ -62,12 +62,12 @@ if [[ $# -gt 0 ]]; then
     fi
 fi
 
-if test -f "bin/kps-image-${julia_major}-${branch}.so"; then
+if test -f "bin/kps-image-${julia_major}.so"; then
     echo "Found system image!"
     if [[ -n "$script_file" ]]; then
-        PLOT=1 julia -J bin/kps-image-${julia_major}-${branch}.so -t 1 $GCT --project "$script_file" "$@"
+        PLOT=1 julia -J bin/kps-image-${julia_major}.so -t 1 $GCT --project "$script_file" "$@"
     else
-        PLOT=1 julia -J bin/kps-image-${julia_major}-${branch}.so -t 1 $GCT --project -i -e 'using KiteControllers; test_menu() = Base.include(Main, joinpath(pkgdir(KiteControllers), "test", "test_menu.jl"))'
+        PLOT=1 julia -J bin/kps-image-${julia_major}.so -t 1 $GCT --project -i -e 'using KiteControllers; test_menu() = Base.include(Main, joinpath(pkgdir(KiteControllers), "test", "test_menu.jl"))'
     fi
 else
     if [[ -n "$script_file" ]]; then
