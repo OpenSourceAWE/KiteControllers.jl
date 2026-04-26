@@ -38,3 +38,5 @@ install_version_1.12.txt
 .gitignore
 data/windfield*.npz
 bin/kps-image-1.12-turbulence.so
+bin/kps-image-1.11.so
+bin/kps-image-1.12.so
