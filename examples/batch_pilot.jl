@@ -19,7 +19,7 @@ using Timers
 using KiteControllers, KiteModels, Statistics
 using Dates, LinearAlgebra, Printf
 
-DEFAULT_PROJECTS = ["hydra20_600.yml", "hydra20_426.yml", "hydra20_920.yml", "hydra10_951.yml"]
+DEFAULT_PROJECTS = ["hydra10_951.yml", "hydra20_600_TI0.yml", "hydra20_600.yml", "hydra20_426.yml", "hydra20_920.yml"]
 PROJECTS = isempty(ARGS) ? DEFAULT_PROJECTS : [
     (endswith(lowercase(project), ".yml") || endswith(lowercase(project), ".yaml")) ? project : "$(project).yml"
     for project in ARGS
@@ -52,11 +52,27 @@ end
 SimulationError() = SimulationError(NoError, "")
 
 const tolerance  =   1.1 # allow 10% tolerance for velocity limits, to avoid false positives due to numerical issues
-const min_height =  40.0 # minimum height for simulation to be considered valid
+const min_height =  30.0 # minimum height for simulation to be considered valid
 const max_height = 600.0 # maximum height for simulation to be considered valid
 
 function read_project(index::Int = 1)
     return PROJECTS[index]  
+end
+
+"""
+    get_use_turbulence(project::String) -> Union{Float64, Nothing}
+
+Return the `use_turbulence` overwrite value defined in the project yaml file,
+or `nothing` if no overwrite is defined.
+"""
+function get_use_turbulence(project::String)
+    config_file = joinpath(get_data_path(), project)
+    dict = KiteControllers.YAML.load_file(config_file)
+    overwrite = get(dict, "overwrite", nothing)
+    isnothing(overwrite) && return nothing
+    result = get(overwrite, "use_turbulence", nothing)
+    isnothing(result) && return nothing
+    return Float64(result)
 end
 
 # ensure KiteUtils uses this project's data/ directory, regardless of cwd
@@ -84,6 +100,7 @@ function init(app::KiteApp)
     app.kcu  = KCU(app.set)
     project  = KiteUtils.PROJECT
     app.kps4 = KPS4(app.kcu::KCU)
+    app.kps4.wm.v_min = 0.1
     KiteUtils.PROJECT = project
 
     app.wcs     = WCSettings(true; dt = 1/app.set.sample_freq)
@@ -107,7 +124,13 @@ end
 
 function simulate(app::KiteApp)
     on_parking(app.ssc::SystemStateControl)
-    integrator = KiteModels.init!(app.kps4::KPS4; delta = app.set.delta, stiffness_factor = app.set.stiffness_factor)
+    saved_use_turbulence = app.set.use_turbulence
+    app.set.use_turbulence = 0.0
+    integrator = try
+        KiteModels.init!(app.kps4::KPS4; delta = app.set.delta, stiffness_factor = app.set.stiffness_factor)
+    finally
+        app.set.use_turbulence = saved_use_turbulence
+    end
 
     sys_state = SysState(app.kps4::KPS4)
     sys_state.e_mech   = 0
@@ -286,6 +309,8 @@ let
         app = KiteApp(deepcopy(load_settings(project)), 0.0,
                     nothing, nothing, nothing, nothing, nothing, nothing, nothing,
                     0.0, 0, 0, false)
+        use_turbulence = get_use_turbulence(project)
+        isnothing(use_turbulence) || (app.set.use_turbulence = use_turbulence)
         app.max_time = app.set.sim_time
         @printf("\nInit parameters: delta=%.6f, stiffness_factor=%.3f\n", app.set.delta, app.set.stiffness_factor)
 

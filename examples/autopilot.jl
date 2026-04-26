@@ -29,6 +29,22 @@ function read_project()
     dict["gui"]["project"]
 end
 
+"""
+    get_use_turbulence(project::String) -> Union{Float64, Nothing}
+
+Return the `use_turbulence` overwrite value defined in the project yaml file,
+or `nothing` if no overwrite is defined.
+"""
+function get_use_turbulence(project::String)
+    config_file = joinpath(get_data_path(), project)
+    dict = YAML.load_file(config_file)
+    overwrite = get(dict, "overwrite", nothing)
+    isnothing(overwrite) && return nothing
+    result = get(overwrite, "use_turbulence", nothing)
+    isnothing(result) && return nothing
+    return Float64(result)
+end
+
 PROJECT = read_project()
 GLMakie.activate!(title = PROJECT)
 OUTPUT_DIR::String = "output"
@@ -69,6 +85,9 @@ mutable struct KiteApp
 end
 app::KiteApp = KiteApp(deepcopy(load_settings(PROJECT)), 0, 0, true, nothing, nothing, nothing, 
                        nothing, nothing, nothing, nothing, nothing, 0, 0, 0, 0, false, false)
+let use_turbulence = get_use_turbulence(PROJECT)
+    isnothing(use_turbulence) || (app.set.use_turbulence = use_turbulence)
+end
 app.max_time      = app.set.sim_time
 app.next_max_time = app.max_time
 
@@ -165,7 +184,7 @@ function simulate(integrator, stopped=true)
     last_yaw = 0.0
     last_yaw_rate = 0.0
     while app.initialized
-        local v_ro
+        v_ro = 0.0
         if app.viewer.stop
             sleep(app.dt)
         else
@@ -175,7 +194,13 @@ function simulate(integrator, stopped=true)
                 app.particles = app.set.segments + 5
                 app.logger = Logger(app.particles, app.steps)
                 log!(app.logger::Logger, sys_state)
-                integrator = KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
+                saved_use_turbulence = app.set.use_turbulence
+                app.set.use_turbulence = 0.0
+                try
+                    integrator = KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
+                finally
+                    app.set.use_turbulence = saved_use_turbulence
+                end
             end
             if mod(i, 100) == 0 && app.set.log_level > 0
                 println("Free memory: $(round(Sys.free_memory()/1e9, digits=1)) GB") 
@@ -304,7 +329,13 @@ function play(stopped=false)
         end
         KiteViewers.plot_file[]=DEFAULT_LOG
         on_parking(app.ssc::SystemStateControl)
-        integrator = KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
+        saved_use_turbulence = app.set.use_turbulence
+        app.set.use_turbulence = 0.0
+        integrator = try
+            KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
+        finally
+            app.set.use_turbulence = saved_use_turbulence
+        end
         if !isnothing(app.viewer)
             _ss = SysState(app.kps4::KPS4)
             _ss.sys_state = Int16(app.ssc.fpp._state)
@@ -426,7 +457,7 @@ function show_stats(stats::Stats)
     line = print("max elev_ro:  ", @sprintf("%5.1f  °", stats.max_elev_ro); line)
     line = print("min az_ro:    ", @sprintf("%5.1f  °", stats.min_az_ro); line)
     line = print("max az_ro:    ", @sprintf("%5.1f  °", stats.max_az_ro); line)
-    line = print("cycles:       ", @sprintf("%5d   ", stats.cycles); line)
+    print("cycles:       ", @sprintf("%5d   ", stats.cycles); line)
 
     display(GLMakie.Screen(), fig)
     nothing
@@ -536,6 +567,9 @@ on(app.viewer.menu_project.i_selected) do _
                 writefile(lines, joinpath(KiteControllers.KiteUtils.get_data_path(), "gui.yaml"))
                 sleep(0.1)
                 app.set = deepcopy(load_settings(PROJECT))
+                let use_turbulence = get_use_turbulence(PROJECT)
+                    isnothing(use_turbulence) || (app.set.use_turbulence = use_turbulence)
+                end
                 app.max_time      = app.set.sim_time
                 app.next_max_time = app.max_time
                 app.initialized = false
