@@ -175,7 +175,10 @@ function simulate(integrator, stopped=true)
                 app.particles = app.set.segments + 5
                 app.logger = Logger(app.particles, app.steps)
                 log!(app.logger::Logger, sys_state)
+                saved_use_turbulence = app.set.use_turbulence
+                app.set.use_turbulence = 0.0
                 integrator = KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
+                app.set.use_turbulence = saved_use_turbulence
             end
             if mod(i, 100) == 0 && app.set.log_level > 0
                 println("Free memory: $(round(Sys.free_memory()/1e9, digits=1)) GB") 
@@ -304,7 +307,10 @@ function play(stopped=false)
         end
         KiteViewers.plot_file[]=DEFAULT_LOG
         on_parking(app.ssc::SystemStateControl)
+        saved_use_turbulence = app.set.use_turbulence
+        app.set.use_turbulence = 0.0
         integrator = KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
+        app.set.use_turbulence = saved_use_turbulence
         if !isnothing(app.viewer)
             _ss = SysState(app.kps4::KPS4)
             _ss.sys_state = Int16(app.ssc.fpp._state)
