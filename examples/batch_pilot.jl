@@ -52,7 +52,7 @@ end
 SimulationError() = SimulationError(NoError, "")
 
 const tolerance  =   1.1 # allow 10% tolerance for velocity limits, to avoid false positives due to numerical issues
-const min_height =  40.0 # minimum height for simulation to be considered valid
+const min_height =  30.0 # minimum height for simulation to be considered valid
 const max_height = 600.0 # maximum height for simulation to be considered valid
 
 function read_project(index::Int = 1)
@@ -84,6 +84,7 @@ function init(app::KiteApp)
     app.kcu  = KCU(app.set)
     project  = KiteUtils.PROJECT
     app.kps4 = KPS4(app.kcu::KCU)
+    app.kps4.wm.v_min = 0.15
     KiteUtils.PROJECT = project
 
     app.wcs     = WCSettings(true; dt = 1/app.set.sample_freq)
@@ -107,7 +108,13 @@ end
 
 function simulate(app::KiteApp)
     on_parking(app.ssc::SystemStateControl)
-    integrator = KiteModels.init!(app.kps4::KPS4; delta = app.set.delta, stiffness_factor = app.set.stiffness_factor)
+    saved_use_turbulence = app.set.use_turbulence
+    app.set.use_turbulence = 0.0
+    integrator = try
+        KiteModels.init!(app.kps4::KPS4; delta = app.set.delta, stiffness_factor = app.set.stiffness_factor)
+    finally
+        app.set.use_turbulence = saved_use_turbulence
+    end
 
     sys_state = SysState(app.kps4::KPS4)
     sys_state.e_mech   = 0
