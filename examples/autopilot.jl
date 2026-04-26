@@ -29,6 +29,22 @@ function read_project()
     dict["gui"]["project"]
 end
 
+"""
+    get_use_turbulence(project::String) -> Union{Float64, Nothing}
+
+Return the `use_turbulence` overwrite value defined in the project yaml file,
+or `nothing` if no overwrite is defined.
+"""
+function get_use_turbulence(project::String)
+    config_file = joinpath(get_data_path(), project)
+    dict = YAML.load_file(config_file)
+    overwrite = get(dict, "overwrite", nothing)
+    isnothing(overwrite) && return nothing
+    result = get(overwrite, "use_turbulence", nothing)
+    isnothing(result) && return nothing
+    return Float64(result)
+end
+
 PROJECT = read_project()
 GLMakie.activate!(title = PROJECT)
 OUTPUT_DIR::String = "output"
@@ -69,6 +85,9 @@ mutable struct KiteApp
 end
 app::KiteApp = KiteApp(deepcopy(load_settings(PROJECT)), 0, 0, true, nothing, nothing, nothing, 
                        nothing, nothing, nothing, nothing, nothing, 0, 0, 0, 0, false, false)
+let use_turbulence = get_use_turbulence(PROJECT)
+    isnothing(use_turbulence) || (app.set.use_turbulence = use_turbulence)
+end
 app.max_time      = app.set.sim_time
 app.next_max_time = app.max_time
 
@@ -548,6 +567,9 @@ on(app.viewer.menu_project.i_selected) do _
                 writefile(lines, joinpath(KiteControllers.KiteUtils.get_data_path(), "gui.yaml"))
                 sleep(0.1)
                 app.set = deepcopy(load_settings(PROJECT))
+                let use_turbulence = get_use_turbulence(PROJECT)
+                    isnothing(use_turbulence) || (app.set.use_turbulence = use_turbulence)
+                end
                 app.max_time      = app.set.sim_time
                 app.next_max_time = app.max_time
                 app.initialized = false
