@@ -84,7 +84,7 @@ function init(app::KiteApp)
     app.kcu  = KCU(app.set)
     project  = KiteUtils.PROJECT
     app.kps4 = KPS4(app.kcu::KCU)
-    app.kps4.wm.v_min = 0.15
+    app.kps4.wm.v_min = 0.1
     KiteUtils.PROJECT = project
 
     app.wcs     = WCSettings(true; dt = 1/app.set.sample_freq)
