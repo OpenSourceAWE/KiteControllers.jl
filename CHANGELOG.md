@@ -10,6 +10,7 @@
 . reduced default order of solver from 4 to 3 to improve stability
 ### Fixed
 - decreased v_min to 0.10 m/s (the speed when the brake gets released) to fix sporadic winch controller failures
+- initial state of hydra20_426.yml
 
 ## KiteControllers v0.2.20 - 2026-03-15
 ### Changed
