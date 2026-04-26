@@ -45,5 +45,11 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v2
+      - name: Remove OpenGL packages on Windows (no display)
+        if: runner.os == 'Windows' && matrix.version == '1.11'
+        shell: julia --project=test {0}
+        run: |
+          import Pkg
+          Pkg.rm(["KiteViewers", "NativeFileDialog", "Joysticks"])
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
