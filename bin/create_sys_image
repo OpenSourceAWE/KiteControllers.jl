@@ -149,11 +149,7 @@ fi
 $JULIA_CMD --startup-file=no --project -e "using Pkg; Pkg.instantiate();"
 $JULIA_CMD --startup-file=no --project=test --heap-size-hint=8000M -e "include(\"./test/create_sys_image.jl\")"
 
-if [[ $branch != "" ]]; then
-    SOFILE="bin/kps-image-${julia_major}-${branch}.so"
-else
-    SOFILE="bin/kps-image-${julia_major}.so"
-fi
+SOFILE="bin/kps-image-${julia_major}.so"
 if test -f $SOFILE; then
     mv $SOFILE $SOFILE.bak
 fi
