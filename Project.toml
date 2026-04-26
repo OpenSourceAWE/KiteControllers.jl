@@ -1,7 +1,7 @@
 name = "KiteControllers"
 uuid = "b19fd437-5b3a-4cca-b199-c3ded0f20ded"
-authors = ["Uwe Fechner <fechner@aenarete.eu> and contributors"]
 version = "0.2.20"
+authors = ["Uwe Fechner <fechner@aenarete.eu> and contributors"]
 
 [workspace]
 projects = ["examples", "docs", "test"]
@@ -9,6 +9,7 @@ projects = ["examples", "docs", "test"]
 [deps]
 DiscretePIDs = "c1363496-6848-4723-8758-079b737f6baf"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+KiteModels = "b94af626-7959-4878-9336-2adc27959007"
 KiteUtils = "90980105-b163-44e5-ba9f-8b1c83bb0533"
 NLSolversBase = "d41bc354-129a-5804-8e4c-c37616107c6c"
 NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
@@ -29,7 +30,8 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 [compat]
 DiscretePIDs = "0.1.5, 1.0"
 JLD2 = "0.5.11"
-KiteUtils = "0.11.4"
+KiteModels = "0.11.8"
+KiteUtils = "0.11.7"
 NLSolversBase = "7.10.0, 8.0"
 NLsolve = "4.5"
 Observables = "0.3, 0.4, 0.5"
