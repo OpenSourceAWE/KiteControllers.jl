@@ -8,7 +8,7 @@
 - bump KiteUtils to 0.11.7
 - default is now 100% turbulence relative to Cabauw, NL for 6 m/s wind speed
 ### Fixed
-- decreased v_min to 0.15 m/s (the speed when the brake gets released) to fix sporadic winch controller failures
+- decreased v_min to 0.10 m/s (the speed when the brake gets released) to fix sporadic winch controller failures
 
 ## KiteControllers v0.2.20 - 2026-03-15
 ### Changed
