@@ -165,7 +165,7 @@ function simulate(integrator, stopped=true)
     last_yaw = 0.0
     last_yaw_rate = 0.0
     while app.initialized
-        local v_ro
+        v_ro = 0.0
         if app.viewer.stop
             sleep(app.dt)
         else
@@ -177,8 +177,11 @@ function simulate(integrator, stopped=true)
                 log!(app.logger::Logger, sys_state)
                 saved_use_turbulence = app.set.use_turbulence
                 app.set.use_turbulence = 0.0
-                integrator = KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
-                app.set.use_turbulence = saved_use_turbulence
+                try
+                    integrator = KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
+                finally
+                    app.set.use_turbulence = saved_use_turbulence
+                end
             end
             if mod(i, 100) == 0 && app.set.log_level > 0
                 println("Free memory: $(round(Sys.free_memory()/1e9, digits=1)) GB") 
@@ -309,8 +312,11 @@ function play(stopped=false)
         on_parking(app.ssc::SystemStateControl)
         saved_use_turbulence = app.set.use_turbulence
         app.set.use_turbulence = 0.0
-        integrator = KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
-        app.set.use_turbulence = saved_use_turbulence
+        integrator = try
+            KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor)
+        finally
+            app.set.use_turbulence = saved_use_turbulence
+        end
         if !isnothing(app.viewer)
             _ss = SysState(app.kps4::KPS4)
             _ss.sys_state = Int16(app.ssc.fpp._state)
@@ -432,7 +438,7 @@ function show_stats(stats::Stats)
     line = print("max elev_ro:  ", @sprintf("%5.1f  °", stats.max_elev_ro); line)
     line = print("min az_ro:    ", @sprintf("%5.1f  °", stats.min_az_ro); line)
     line = print("max az_ro:    ", @sprintf("%5.1f  °", stats.max_az_ro); line)
-    line = print("cycles:       ", @sprintf("%5d   ", stats.cycles); line)
+    print("cycles:       ", @sprintf("%5d   ", stats.cycles); line)
 
     display(GLMakie.Screen(), fig)
     nothing
