@@ -40,3 +40,4 @@ data/windfield_100_4050_500_70_0.0_3.5.npz
 .gitignore
 data/windfield_100_4050_500_70_0.0_5.3.npz
 data/windfield_100_4050_500_70_0.0_8.2.npz
+bin/kps-image-1.12-turbulence.so
