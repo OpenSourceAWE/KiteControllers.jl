@@ -41,3 +41,34 @@ end
         end
     end
 end
+
+@testset "copy_bin" begin
+    mktempdir() do tmpdir
+        cd(tmpdir) do
+            @test !isdir("bin")
+            KiteControllers.copy_bin()
+            @test isdir("bin")
+            files = readdir("bin")
+            @test "run_julia" in files
+            @test "setup_env" in files
+            # run_julia must be executable
+            @test (filemode(joinpath("bin", "run_julia")) & 0o111) != 0
+        end
+    end
+end
+
+@testset "install_examples" begin
+    mktempdir() do tmpdir
+        cd(tmpdir) do
+            # add_packages=false to avoid triggering Pkg operations in tests
+            KiteControllers.install_examples(false)
+            @test isdir("examples")
+            @test isdir("data")
+            @test isdir("bin")
+            @test isdir("output")
+            @test any(endswith(f, ".jl") for f in readdir("examples"))
+            @test "settings.yaml" in readdir("data")
+            @test "run_julia" in readdir("bin")
+        end
+    end
+end
