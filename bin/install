@@ -276,6 +276,21 @@ if [[ $julia_major == "1.11" ]]; then
     elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("examples (1.11)"); fi
     echo "Precompiling examples project..."
     julia --project=examples -e 'using Pkg; Pkg.precompile()'
+    # On Linux, verify that ControlPlots loads correctly before building docs.
+    if [[ "$(uname -s)" == "Linux" ]]; then
+        echo "Checking if ControlPlots is working in the examples project..."
+        if env -u LD_PRELOAD -u LD_LIBRARY_PATH \
+                julia --project=examples -e 'using ControlPlots' &>/dev/null 2>&1; then
+            echo "ControlPlots is working."
+        else
+            echo "ControlPlots is not working. Running install_controlplots..."
+            if [[ -x "bin/install_controlplots" ]]; then
+                bash bin/install_controlplots
+            else
+                echo "Warning: bin/install_controlplots not found. Please run it manually."
+            fi
+        fi
+    fi
     _ec=0; run_resolve_with_retry "test" 0 || _ec=$?
     if [[ $_ec -eq 2 ]]; then RETRIED_RESOLVES+=("test (1.11)")
     elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("test (1.11)"); fi
@@ -305,6 +320,21 @@ else
     elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("examples (1.12)"); fi
     echo "Precompiling examples project..."
     julia --project=examples -e 'using Pkg; Pkg.precompile()'
+    # On Linux, verify that ControlPlots loads correctly before building docs.
+    if [[ "$(uname -s)" == "Linux" ]]; then
+        echo "Checking if ControlPlots is working in the examples project..."
+        if env -u LD_PRELOAD -u LD_LIBRARY_PATH \
+                julia --project=examples -e 'using ControlPlots' &>/dev/null 2>&1; then
+            echo "ControlPlots is working."
+        else
+            echo "ControlPlots is not working. Running install_controlplots..."
+            if [[ -x "bin/install_controlplots" ]]; then
+                bash bin/install_controlplots
+            else
+                echo "Warning: bin/install_controlplots not found. Please run it manually."
+            fi
+        fi
+    fi
     _ec=0; run_resolve_with_retry "test" 0 || _ec=$?
     if [[ $_ec -eq 2 ]]; then RETRIED_RESOLVES+=("test (1.12)")
     elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("test (1.12)"); fi
