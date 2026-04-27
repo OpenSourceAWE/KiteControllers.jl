@@ -31,7 +31,11 @@ jobs:
 
     steps:
       - name: Install matplotlib and display libraries
-        run: if [ "$RUNNER_OS" = "Linux" ]; then sudo apt-get install -y python3-matplotlib xvfb libgl1-mesa-dri; export PYTHON=$PYTHON_PATH; fi
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get install -y python3-matplotlib xvfb libgl1-mesa-dri
+            echo "PYTHON=$(which python3)" >> $GITHUB_ENV
+          fi
         shell: bash
       - name: Start virtual display (Linux only)
         if: runner.os == 'Linux'
