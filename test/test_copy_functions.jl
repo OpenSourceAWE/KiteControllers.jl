@@ -61,6 +61,9 @@ end
 @testset "install_examples" begin
     mktempdir() do tmpdir
         cd(tmpdir) do
+            # Reset data path so copy_settings doesn't use a stale (deleted) tmpdir path
+            # left behind by a previous test that called copy_control_settings.
+            KiteUtils.set_data_path("")
             # add_packages=false to avoid triggering Pkg operations in tests
             KiteControllers.install_examples(false)
             @test isdir("examples")
