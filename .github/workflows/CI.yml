@@ -55,4 +55,7 @@ jobs:
           (Get-Content test\Project.toml) -notmatch 'KiteViewers|NativeFileDialog|Joysticks|ControlPlots' | Set-Content test\Project.toml
       - uses: julia-actions/cache@v3
       - uses: julia-actions/julia-buildpkg@v1
+      - name: Build PyCall against system Python (Linux)
+        if: runner.os == 'Linux'
+        run: julia --project=test -e 'using Pkg; Pkg.build("PyCall")'
       - uses: julia-actions/julia-runtest@v1
