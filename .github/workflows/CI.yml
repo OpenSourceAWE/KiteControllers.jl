@@ -30,35 +30,21 @@ jobs:
           - x64
 
     steps:
-      - name: Install matplotlib and display libraries
-        run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            sudo apt-get install -y python3-matplotlib xvfb libgl1-mesa-dri
-            echo "PYTHON=$(which python3)" >> $GITHUB_ENV
-          fi
-        shell: bash
-      - name: Start virtual display (Linux only)
-        if: runner.os == 'Linux'
-        run: |
-          Xvfb :99 -screen 0 1024x768x24 &
-          echo "DISPLAY=:99" >> $GITHUB_ENV
-          echo "LIBGL_ALWAYS_SOFTWARE=1" >> $GITHUB_ENV
       - uses: actions/checkout@v6
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - name: Remove OpenGL and PyPlot packages on Windows (no display/Conda)
+      - name: Remove plotting packages (Linux)
+        if: runner.os == 'Linux'
+        run: sed -i '/KiteViewers\|NativeFileDialog\|Joysticks\|ControlPlots\|PyPlot/d' test/Project.toml
+        shell: bash
+      - name: Remove plotting packages (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: |
-          (Get-Content test\Project.toml) -notmatch 'KiteViewers|NativeFileDialog|Joysticks|ControlPlots' | Set-Content test\Project.toml
+        run: (Get-Content test\Project.toml) -notmatch 'KiteViewers|NativeFileDialog|Joysticks|ControlPlots|PyPlot' | Set-Content test\Project.toml
       - uses: julia-actions/cache@v3
       - uses: julia-actions/julia-buildpkg@v1
-      - name: Build PyCall against system Python (Linux)
-        if: runner.os == 'Linux'
-        run: julia --project=test -e 'ENV["PYTHON"]="python3"; using Pkg; Pkg.instantiate(); Pkg.add("PyCall"); Pkg.build("PyCall")'
-        shell: bash
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v5
