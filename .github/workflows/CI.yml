@@ -57,5 +57,6 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - name: Build PyCall against system Python (Linux)
         if: runner.os == 'Linux'
-        run: julia --project=test -e 'using Pkg; Pkg.build("PyCall")'
+        run: julia --project=test -e 'ENV["PYTHON"]="python3"; using Pkg; Pkg.instantiate(); Pkg.add("PyCall"); Pkg.build("PyCall")'
+        shell: bash
       - uses: julia-actions/julia-runtest@v1
