@@ -91,7 +91,8 @@ function copy_examples()
         mkdir(PATH)
     end
     src_path = joinpath(@__DIR__, "..", PATH)
-    copy_files("examples", readdir(src_path))
+    files = filter(f -> !startswith(f, "Manifest"), readdir(src_path))
+    copy_files("examples", files)
 end
 
 function copy_control_settings()

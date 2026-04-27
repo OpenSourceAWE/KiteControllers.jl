@@ -22,6 +22,7 @@ end
             files = readdir("examples")
             @test length(files) > 0
             @test any(endswith(f, ".jl") for f in files)
+            @test !any(startswith(f, "Manifest") for f in files)
         end
     end
 end
