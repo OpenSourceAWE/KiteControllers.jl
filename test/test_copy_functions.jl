@@ -28,17 +28,22 @@ end
 end
 
 @testset "copy_control_settings" begin
+    saved_data_path = KiteUtils.get_data_path()
     mktempdir() do tmpdir
         cd(tmpdir) do
-            @test !isdir("data")
-            KiteControllers.copy_control_settings()
-            @test isdir("data")
-            files = readdir("data")
-            @test "settings.yaml" in files
-            @test "system.yaml" in files
-            @test "fpc_settings.yaml" in files
-            @test "fpp_settings.yaml" in files
-            @test "wc_settings.yaml" in files
+            try
+                @test !isdir("data")
+                KiteControllers.copy_control_settings()
+                @test isdir("data")
+                files = readdir("data")
+                @test "settings.yaml" in files
+                @test "system.yaml" in files
+                @test "fpc_settings.yaml" in files
+                @test "fpp_settings.yaml" in files
+                @test "wc_settings.yaml" in files
+            finally
+                KiteUtils.set_data_path(saved_data_path)
+            end
         end
     end
 end
@@ -61,20 +66,22 @@ end
 end
 
 @testset "install_examples" begin
+    saved_data_path = KiteUtils.get_data_path()
     mktempdir() do tmpdir
         cd(tmpdir) do
-            # Reset data path so copy_settings doesn't use a stale (deleted) tmpdir path
-            # left behind by a previous test that called copy_control_settings.
-            KiteUtils.set_data_path("")
-            # add_packages=false to avoid triggering Pkg operations in tests
-            KiteControllers.install_examples(false)
-            @test isdir("examples")
-            @test isdir("data")
-            @test isdir("bin")
-            @test isdir("output")
-            @test any(endswith(f, ".jl") for f in readdir("examples"))
-            @test "settings.yaml" in readdir("data")
-            @test "run_julia" in readdir("bin")
+            try
+                # add_packages=false to avoid triggering Pkg operations in tests
+                KiteControllers.install_examples(false)
+                @test isdir("examples")
+                @test isdir("data")
+                @test isdir("bin")
+                @test isdir("output")
+                @test any(endswith(f, ".jl") for f in readdir("examples"))
+                @test "settings.yaml" in readdir("data")
+                @test "run_julia" in readdir("bin")
+            finally
+                KiteUtils.set_data_path(saved_data_path)
+            end
         end
     end
 end
