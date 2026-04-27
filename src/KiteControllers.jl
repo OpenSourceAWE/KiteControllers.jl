@@ -82,8 +82,11 @@ end
 """
     copy_examples()
 
-Copy all example scripts to the folder "examples"
-(it will be created if it doesn't exist).
+Copy all example scripts from the package to the folder `examples` in the current
+working directory (it will be created if it doesn't exist).
+
+Manifest files are excluded; all other files (`.jl` scripts, `Project.toml`, etc.)
+are copied with executable permissions (`0o774`).
 """
 function copy_examples()
     PATH = "examples"
@@ -91,7 +94,8 @@ function copy_examples()
         mkdir(PATH)
     end
     src_path = joinpath(@__DIR__, "..", PATH)
-    copy_files("examples", readdir(src_path))
+    files = filter(f -> !startswith(f, "Manifest"), readdir(src_path))
+    copy_files("examples", files)
 end
 
 function copy_control_settings()
