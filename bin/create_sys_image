@@ -137,14 +137,7 @@ else
     fi
 fi
 
-if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1 ; then
-    branch=$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')
-else
-    branch=""
-fi
-if test -f "kps-image-${julia_major}-${branch}.so"; then
-    mv bin/kps-image-${julia_major}-${branch}.so kps-image-${julia_major}-${branch}.so.bak
-fi
+
 
 $JULIA_CMD --startup-file=no --project -e "using Pkg; Pkg.instantiate();"
 $JULIA_CMD --startup-file=no --project=test --heap-size-hint=8000M -e "include(\"./test/create_sys_image.jl\")"
@@ -155,14 +148,14 @@ if test -f $SOFILE; then
 fi
 mv kps-image_tmp.so $SOFILE
 $JULIA_CMD --startup-file=no  --project -e "using Pkg; Pkg.precompile(); Pkg.resolve()"
-$JULIA_CMD --project -J bin/kps-image-${julia_major}-${branch}.so -e "using KiteUtils, KiteControllers"
-$JULIA_CMD --project=test -J bin/kps-image-${julia_major}-${branch}.so -e "using ControlPlots, NativeFileDialog"
-$JULIA_CMD --project -J bin/kps-image-${julia_major}-${branch}.so -e "using Pkg; Pkg.instantiate()"
-$JULIA_CMD --project=examples -J bin/kps-image-${julia_major}-${branch}.so -e "using NOMAD, KiteViewers, Pkg; Pkg.instantiate(); Pkg.precompile()"
+$JULIA_CMD --project -J bin/kps-image-${julia_major}.so -e "using KiteUtils, KiteControllers"
+$JULIA_CMD --project=test -J bin/kps-image-${julia_major}.so -e "using ControlPlots, NativeFileDialog"
+$JULIA_CMD --project -J bin/kps-image-${julia_major}.so -e "using Pkg; Pkg.instantiate()"
+$JULIA_CMD --project=examples -J bin/kps-image-${julia_major}.so -e "using NOMAD, KiteViewers, Pkg; Pkg.instantiate(); Pkg.precompile()"
 
 # On Linux, suppress known-harmless Julia extension loading warnings (e.g. DistributionsTestExt).
 # The error spans multiple lines (┌ Error: ... │ ... └ @ Base), so use sed range deletion.
 if [[ "$(uname -s)" == "Linux" ]]; then
     exec 2> >(sed '/Error during loading of extension FilePathsURIsExt of FilePaths/,/^└/d' >&2)
 fi
-$JULIA_CMD --project=docs -J bin/kps-image-${julia_major}-${branch}.so -e "using LiveServer, Documenter, Pkg; Pkg.instantiate()"
+$JULIA_CMD --project=docs -J bin/kps-image-${julia_major}.so -e "using LiveServer, Documenter, Pkg; Pkg.instantiate()"
