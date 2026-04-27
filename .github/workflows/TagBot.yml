@@ -11,9 +11,8 @@ jobs:
     permissions:
       contents: write
       issues: write
-      workflows: write
     steps:
       - uses: JuliaRegistries/TagBot@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TAGBOT_PAT }}
           ssh: ${{ secrets.TAGBOT_KEY }}
