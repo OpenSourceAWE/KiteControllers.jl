@@ -1,5 +1,9 @@
 # Changelog
 
+## KiteControllers v0.2.23 - 2026-04-27
+### Fixed
+- updated TagBot.yml
+
 ## KiteControllers v0.2.22 - 2026-04-27
 ### Fixed
 - the script `autopilot` did not use the renamed system image
