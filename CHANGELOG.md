@@ -1,5 +1,9 @@
 # Changelog
 
+## KiteControllers v0.2.22 - 2026-04-27
+### Fixed
+- the script `autopilot` did not use the renamed system image
+
 ## KiteControllers v0.2.21 - 2026-04-26
 ### Changed
 - improved `install` script to do a complete installation also with Julia 1.11
