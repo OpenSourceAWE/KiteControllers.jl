@@ -273,3 +273,4 @@ end
 end
 
 include("aqua.jl")
+include("test_copy_functions.jl")
