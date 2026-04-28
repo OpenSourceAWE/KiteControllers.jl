@@ -1,3 +1,11 @@
+# activate the test environment if needed
+using Pkg
+if ! ("Test" ∈ keys(Pkg.project().dependencies))
+     Pkg.activate(@__DIR__)
+end
+
+using Test, KiteControllers
+
 @testset "FPCSettings defaults" begin
     fcs = FPCSettings(dt=0.05)
     # scalar/numeric fields
@@ -68,3 +76,4 @@ end
     @test fcs.reset_int1_to_zero == true
     @test fcs.init_opt_to_zero == false
 end
+nothing
