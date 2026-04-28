@@ -17,7 +17,7 @@ function test_menu()
     while active
         scripts = _test_scripts(test_dir)
         if isempty(scripts)
-            println("No test scripts matching test_*.jl found in $(test_dir).")
+            println("No test scripts matching test-*.jl found in $(test_dir).")
             break
         end
 
