@@ -97,7 +97,13 @@ function residual(corr_vec=nothing; sim_time=500)
     end
 
     on_parking(ssc)
-    integrator=KiteModels.init!(kps4; delta=0.001, stiffness_factor=0.004)
+    saved_use_turbulence = set.use_turbulence
+    set.use_turbulence = 0.0
+    integrator = try
+        KiteModels.init!(kps4; delta=set.delta, stiffness_factor=set.stiffness_factor)
+    finally
+        set.use_turbulence = saved_use_turbulence
+    end
     simulate(integrator)
     on_stop(ssc)
     KiteControllers.save_log(logger, "tmp")
