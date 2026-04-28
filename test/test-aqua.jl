@@ -1,4 +1,12 @@
+# activate the test environment if needed
+using Pkg
+if ! ("Test" ∈ keys(Pkg.project().dependencies))
+    Pkg.activate(@__DIR__)
+end
+using Test, KiteControllers
+
 using Aqua
+
 @testset "Aqua.jl" begin
     Aqua.test_all(
       KiteControllers;

@@ -53,7 +53,7 @@ end
     v_set = calc_v_set(ssc)
     @test v_set >= 0.0 && v_set < 0.1
     u_s = calc_steering(ssc)
-    println(u_s)
+    @test u_s ≈ 0.0
 end
 
 @testset "FlightPathCalculator" begin
@@ -157,4 +157,5 @@ end
     KiteControllers._switch(fpp, PARKING)
     @test fpp._state == PARKING
 end
+println()
 nothing
