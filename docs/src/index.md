@@ -95,6 +95,16 @@ On Linux you can install the `autopilot` GUI app as normal application with the 
 ```@raw html
 </details>
 ```
+### Running the tests
+You can now start Julia with `./bin/run_julia` and run all tests with:
+```julia
+using Pkg
+Pkg.test()
+```
+or run only some of the tests with:
+```julia
+include("test/test_menu.jl")
+```
 
 ### Running the first example
 
