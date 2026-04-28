@@ -4,6 +4,7 @@ if ! ("Test" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
 end
 using Test, KiteControllers
+_old_data_path = KiteUtils.get_data_path()
 KiteUtils.set_data_path("")
 
 @testset "FPPSettings defaults" begin
@@ -64,3 +65,5 @@ end
     @test fpps.corr_vec[1]       ≈ 24.02
     @test fpps.corr_vec[end]     ≈ 3.84
 end
+KiteUtils.set_data_path(_old_data_path)
+nothing
