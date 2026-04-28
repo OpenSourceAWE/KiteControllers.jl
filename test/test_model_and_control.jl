@@ -1,9 +1,9 @@
 # activate the test environment if needed
-if !@isdefined(KiteControllers)
-    import Pkg
+using Pkg
+if ! ("Test" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
-    using Test, KiteControllers, KiteModels
 end
+using Test, KiteControllers, KiteModels
 
 @testset "KiteModel" begin
     fcs = FPCSettings(dt=0.05)
