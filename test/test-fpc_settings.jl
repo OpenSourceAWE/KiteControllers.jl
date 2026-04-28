@@ -4,6 +4,7 @@ if ! ("Test" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
 end
 using Test, KiteControllers
+KiteUtils.set_data_path("")
 
 @testset "FPCSettings defaults" begin
     fcs = FPCSettings(dt=0.05)

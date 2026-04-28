@@ -2,7 +2,7 @@ using REPL.TerminalMenus
 
 function _test_scripts(test_dir::AbstractString)
     scripts = filter(readdir(test_dir; join=false)) do name
-        startswith(name, "test_") && endswith(name, ".jl") && isfile(joinpath(test_dir, name))
+        startswith(name, "test-") && endswith(name, ".jl") && isfile(joinpath(test_dir, name))
     end
     # Avoid offering this menu script itself to prevent accidental recursion.
     filter!(name -> name != basename(@__FILE__), scripts)
