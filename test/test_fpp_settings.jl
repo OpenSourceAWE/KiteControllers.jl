@@ -1,9 +1,9 @@
 # activate the test environment if needed
-if !@isdefined(KiteControllers)
-    import Pkg
+using Pkg
+if ! ("Test" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
-    using Test, KiteControllers
 end
+using Test, KiteControllers
 
 @testset "FPPSettings defaults" begin
     fpps = FPPSettings()
