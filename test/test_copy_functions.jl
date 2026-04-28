@@ -1,11 +1,9 @@
 # activate the test environment if needed
 using Pkg
-if ! ("KiteModels" ∈ keys(Pkg.project().dependencies))
-     Pkg.activate(@__DIR__)
+if ! ("Test" ∈ keys(Pkg.project().dependencies))
+    Pkg.activate(@__DIR__)
 end
-
 using Test, KiteControllers, KiteModels
-using KiteUtils: Settings, load_settings
 
 @testset "copy_files" begin
     mktempdir() do tmpdir
