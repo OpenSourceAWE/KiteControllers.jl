@@ -79,3 +79,10 @@ function FPPSettings(update)
     end
     fpp
 end
+
+function save_corr(corr_vec::Vector{Float64})
+    config_file = joinpath(get_data_path(), fpp_settings())
+    dict = YAML.load_file(config_file)
+    dict["fpp_settings"]["corr_vec"] = corr_vec
+    YAML.write_file(config_file, dict)
+end

@@ -18,17 +18,6 @@ function KiteObserver()
     KiteObserver(Float64[], Float64[], Int64[], Float64[], Float64[])
 end
 
-function load_corr()
-    try
-        return JLD2.load(joinpath(get_data_path(), "corr_vec.jld2"))["corr_vec"]
-    catch
-        return zeros(20)
-    end
-end
-function save_corr(corr_vec)
-    JLD2.save(joinpath(get_data_path(), "corr_vec.jld2"), Dict("corr_vec" => corr_vec))
-end
-
 """
     observe!(ob::KiteObserver, log::SysLog, elev_nom=26)
 

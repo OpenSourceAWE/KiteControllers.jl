@@ -36,7 +36,6 @@ end
 function residual(corr_vec=nothing; sim_time=nothing)
     l_in = 0
     if ! isnothing(corr_vec) 
-        KiteControllers.save_corr(corr_vec)
         l_in=length(corr_vec)
     end
     set = deepcopy(KiteControllers.se(PROJECT))
@@ -175,7 +174,7 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
         end
         KiteControllers.save_corr(corr_vec)
     end
-    initial = KiteControllers.load_corr()
+    initial = FPPSettings(true).corr_vec
     if norm(initial) > 50.0
         @warn "Loaded corr_vec has large norm $(norm(initial)), resetting to zeros."
         initial = zeros(length(initial))
