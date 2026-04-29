@@ -63,6 +63,7 @@ function residual(corr_vec=nothing; sim_time=nothing)
     end
     kcu   = KiteModels.KCU(set)
     kps4 = KiteModels.KPS4(kcu)
+    kps4.wm.v_min = 0.1
     wcs = WCSettings(dt = 1/set.sample_freq); update(wcs)
     fcs = FPCSettings(dt=wcs.dt)
     fpps = FPPSettings()
