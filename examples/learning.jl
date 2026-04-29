@@ -19,6 +19,25 @@ end
 
 PROJECT=read_project()
 
+@enum SimError begin
+    NoError
+    TooLow
+    TooHigh
+    VelocityTooHigh
+    VelocityTooLow
+end
+
+struct SimulationError
+    code::SimError
+    message::String
+end
+
+SimulationError() = SimulationError(NoError, "")
+
+const tolerance  =   1.1 # allow 10% tolerance for velocity limits
+const min_height =  20.0 # minimum height for simulation to be considered valid
+const max_height = 600.0 # maximum height for simulation to be considered valid
+
 using ControlPlots, KiteControllers, LinearAlgebra, NonlinearSolve
 import JLD2
 
@@ -60,6 +79,7 @@ function residual(corr_vec=nothing; sim_time=nothing)
 
     function simulate(integrator)
         i = 1
+        error = SimulationError()
         sys_state = KiteModels.SysState(kps4)
         sys_state.e_mech = 0
         e_mech = 0
@@ -111,12 +131,30 @@ function residual(corr_vec=nothing; sim_time=nothing)
                 sys_state.t_sim = t_sim*1000
             end
             KiteControllers.log!(logger, sys_state)
+            if i > 200
+                if sys_state.Z[end] < min_height
+                    error = SimulationError(TooLow, "Height $(round(sys_state.Z[end], digits=2)) m is below minimum $(min_height) m")
+                    break
+                end
+                if sys_state.Z[end] > max_height
+                    error = SimulationError(TooHigh, "Height $(round(sys_state.Z[end], digits=2)) m exceeds maximum $(max_height) m")
+                    break
+                end
+                if sys_state.v_reelout[1] > tolerance * set.v_ro_max
+                    error = SimulationError(VelocityTooHigh, "Reel-out speed $(round(sys_state.v_reelout[1], digits=3)) m/s exceeds limit $(round(tolerance * set.v_ro_max, digits=3)) m/s")
+                    break
+                end
+                if sys_state.v_reelout[1] < tolerance * set.v_ro_min
+                    error = SimulationError(VelocityTooLow, "Reel-out speed $(round(sys_state.v_reelout[1], digits=3)) m/s is below limit $(round(tolerance * set.v_ro_min, digits=3)) m/s")
+                    break
+                end
+            end
             i += 1
             if i*dt > sim_time
                 break 
             end
         end
-        nothing
+        error
     end
 
     on_parking(ssc)
@@ -127,8 +165,12 @@ function residual(corr_vec=nothing; sim_time=nothing)
     finally
         set.use_turbulence = saved_use_turbulence
     end
-    simulate(integrator)
+    sim_error = simulate(integrator)
     on_stop(ssc)
+    if sim_error.code != NoError
+        @warn "Simulation ended with error: $(sim_error.message). Skipping result."
+        return l_in > 0 ? fill(1000.0, l_in) : Float64[]
+    end
     KiteControllers.save_log(logger, "tmp")
     lg = KiteControllers.load_log("tmp")
     ob = test_ob(lg, false)
