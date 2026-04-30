@@ -204,6 +204,16 @@ function residual(corr_vec=nothing; sim_time=nothing)
     ob.corr_vec
 end
 
+function plot()
+    lg = KiteControllers.load_log("tmp")
+    sl = lg.syslog
+    display(ControlPlots.plotx(sl.time, rad2deg.(sl.azimuth), rad2deg.(sl.elevation);
+            ylabels=["azimuth [°]", "elevation [°]"],
+            xlabel="time [s]",
+            fig="azimuth_elevation"))
+    nothing
+end
+
 function train(use_last=true; max_iter=40, norm_tol=1.0)
     local corr_vec
     if ! use_last
