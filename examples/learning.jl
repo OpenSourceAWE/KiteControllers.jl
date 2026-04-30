@@ -53,6 +53,7 @@ end
 
 # run a simulation using a correction vector, return a log object
 function residual(corr_vec=nothing; sim_time=nothing)
+    global scc
     l_in = 0
     if ! isnothing(corr_vec) 
         l_in=length(corr_vec)
@@ -66,7 +67,7 @@ function residual(corr_vec=nothing; sim_time=nothing)
     kps4.wm.v_min = 0.1
     wcs = WCSettings(dt = 1/set.sample_freq); update(wcs)
     fcs = FPCSettings(dt=wcs.dt)
-    fpps = FPPSettings()
+    fpps = FPPSettings(true)
     u_d0 = 0.01 * set.depower_offset
     u_d  = 0.01 * set.depowers[1]
     ssc = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind=set.v_wind)
@@ -204,13 +205,20 @@ function residual(corr_vec=nothing; sim_time=nothing)
     ob.corr_vec
 end
 
-function plot()
-    lg = KiteControllers.load_log("tmp")
+function plot(last_sim=false)
+    if last_sim
+        lg = KiteControllers.load_log("last_sim_log"; path="output")
+        @info "Plotting last simulation log from output/last_sim_log.jld2"
+    else
+        lg = KiteControllers.load_log("tmp")
+        @info "Plotting current simulation log from tmp.jld2"
+    end
     sl = lg.syslog
+    fig_name = last_sim ? "azimuth_elevation_last" : "azimuth_elevation"
     display(ControlPlots.plotx(sl.time, rad2deg.(sl.azimuth), rad2deg.(sl.elevation);
             ylabels=["azimuth [°]", "elevation [°]"],
             xlabel="time [s]",
-            fig="azimuth_elevation"))
+            fig=fig_name))
     nothing
 end
 
