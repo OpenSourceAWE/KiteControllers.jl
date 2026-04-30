@@ -257,10 +257,15 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
     best_corr_vec = deepcopy(initial)
     best_norm = Inf
     j = 0
+    correction_applied = false
     for i in 1:max_iter
         res = residual(initial)
         println("i: $(i), norm: $(norm(res))")
         crashed = length(res) > 0 && res[1] == 1000.0
+        if norm(res) < norm_tol
+            println("Converged successfully using $i iterations!")
+            break
+        end
         if ! crashed
             common_size=min(length(initial), length(res))
             for i = 1:common_size
@@ -272,6 +277,7 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
                     initial[i] += 0.125*res[i]
                 end
             end
+            correction_applied = true
         end
         if best_norm > norm(res) && ! crashed
             best_norm = norm(res)
@@ -282,10 +288,6 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
             j+=1
             println("j: $j")
         end
-        if norm(res) < norm_tol
-            println("Converged successfully using $i iterations!")
-            break
-        end
         if j > 4
             println("Convergence failed!")
             println("Best norm: $best_norm")
@@ -294,8 +296,10 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
     end
     last_nonzero = something(findlast(!iszero, best_corr_vec), 0)
     best_corr_vec = best_corr_vec[1:last_nonzero]
-    if best_norm < Inf
+    if best_norm < Inf && correction_applied
         KiteControllers.save_corr(best_corr_vec)
+    elseif !correction_applied
+        @info "Already converged before applying any correction; yaml file not updated."
     else
         @warn "Training produced no valid result. corr_vec.jld2 not updated."
     end
