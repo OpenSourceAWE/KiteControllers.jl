@@ -70,6 +70,10 @@ function update(fpps::FPPSettings)
     dict = YAML.load_file(config_file)
     sec_dict = Dict(Symbol(k) => v for (k, v) in dict["fpp_settings"])
     StructTypes.constructfrom!(fpps, sec_dict)
+    default_len = length(FPPSettings().corr_vec)
+    if length(fpps.corr_vec) < default_len
+        append!(fpps.corr_vec, zeros(default_len - length(fpps.corr_vec)))
+    end
 end
 
 function FPPSettings(update)
@@ -83,7 +87,9 @@ end
 function save_corr(corr_vec::Vector{Float64})
     config_file = joinpath(get_data_path(), fpp_settings())
     lines = KiteUtils.readfile(config_file)
-    vec_str = "[" * join(round.(corr_vec, digits=2), ", ") * "]"
+    last_nonzero = something(findlast(!iszero, corr_vec), 1)
+    trimmed = corr_vec[1:last_nonzero]
+    vec_str = "[" * join(round.(trimmed, digits=2), ", ") * "]"
     result = String[]
     for line in lines
         if startswith(lstrip(line), "corr_vec")
