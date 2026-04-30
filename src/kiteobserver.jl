@@ -26,20 +26,57 @@ elevation measurements and correction values for the flight path planner.
 """
 function observe!(ob::KiteObserver, log::SysLog, elev_nom=26)
     sl  = log.syslog
-    last_sign = -1
+
+    # Collect indices of valid entries (cycle 2, sys_state in (6, 8))
+    valid_indices = Int[]
     for i in 1:length(sl.azimuth)
-        # only look at the second cycle
-        if sl.cycle[i] == 2 &&  sl.sys_state[i] in (6, 8)
-            if sign(sl.azimuth[i]) != last_sign
-                push!(ob.time, Float64(sl.time[i]))
-                push!(ob.length, Float64(sl.l_tether[i][1]))
-                push!(ob.fig8, Int64(sl.fig_8[i]))
-                push!(ob.elevation, Float64(rad2deg(sl.elevation[i])))
-            end
-            last_sign = sign(sl.azimuth[i])
+        if sl.cycle[i] == 2 && sl.sys_state[i] in (6, 8)
+            push!(valid_indices, i)
         end
     end
-    if length(ob.fig8)==0
+
+    if isempty(valid_indices)
+        return nothing
+    end
+
+    # Find positions within valid_indices where the sign of azimuth changes
+    crossing_positions = Int[]
+    last_sign = -1
+    for j in 1:length(valid_indices)
+        s = sign(sl.azimuth[valid_indices[j]])
+        if s != last_sign
+            push!(crossing_positions, j)
+            last_sign = s
+        end
+    end
+
+    if isempty(crossing_positions)
+        return nothing
+    end
+
+    # Pre-compute elevation in degrees for all valid entries
+    n_valid = length(valid_indices)
+    elevs = [rad2deg(sl.elevation[valid_indices[j]]) for j in 1:n_valid]
+
+    # For each crossing record metadata and the average of:
+    #   last_max  – max elevation from the previous crossing to this crossing
+    #   next_min  – min elevation from this crossing to the next crossing
+    for k in 1:length(crossing_positions)
+        cp       = crossing_positions[k]
+        prev_cp  = k > 1                          ? crossing_positions[k-1] : 1
+        next_cp  = k < length(crossing_positions) ? crossing_positions[k+1] : n_valid
+
+        last_max = maximum(elevs[prev_cp:cp])
+        next_min = minimum(elevs[cp:next_cp])
+
+        i = valid_indices[cp]
+        push!(ob.time,      Float64(sl.time[i]))
+        push!(ob.length,    Float64(sl.l_tether[i][1]))
+        push!(ob.fig8,      Int64(sl.fig_8[i]))
+        push!(ob.elevation, (last_max + next_min) / 2.0)
+    end
+
+    if length(ob.fig8) == 0
         return nothing
     end
     for fig8 in 0:maximum(ob.fig8)
