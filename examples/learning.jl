@@ -277,3 +277,5 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
     end
     best_corr_vec
 end
+
+println("Available functions: plot(), train(), residual()")
