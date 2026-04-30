@@ -143,8 +143,8 @@ function residual(corr_vec=nothing; sim_time=nothing)
             e_mech += (sys_state.winch_force[1] * sys_state.v_reelout[1])/3600*dt
             sys_state.e_mech = e_mech
             sys_state.sys_state = Int16(ssc.fpp._state)
-            sys_state.var_01 = ssc.fpp.fpca.cycle
-            sys_state.var_02 = ssc.fpp.fpca.fig8
+            sys_state.cycle = ssc.fpp.fpca.cycle
+            sys_state.fig_8 = ssc.fpp.fpca.fig8
             if i > 10
                 sys_state.t_sim = t_sim*1000
             end
@@ -222,6 +222,15 @@ function plot(last_sim=false)
     nothing
 end
 
+function observe()
+    lg = KiteControllers.load_log("tmp"; path="output")
+    ob = KiteObserver()
+    KiteControllers.observe!(ob, lg)
+    println("corr_vec (length=$(length(ob.corr_vec))):")
+    println(ob.corr_vec)
+    ob
+end
+
 function train(use_last=true; max_iter=40, norm_tol=1.0)
     local corr_vec
     if ! use_last
@@ -297,4 +306,4 @@ function plot_batch()
     nothing
 end
 
-println("Available functions: plot(), plot_batch(), train(), residual()")
+println("Available functions: plot(), plot_batch(), observe(), train(), residual()")

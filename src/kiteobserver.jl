@@ -29,11 +29,11 @@ function observe!(ob::KiteObserver, log::SysLog, elev_nom=26)
     last_sign = -1
     for i in 1:length(sl.azimuth)
         # only look at the second cycle
-        if sl.var_01[i] == 2 &&  sl.sys_state[i] in (6, 8)
+        if sl.cycle[i] == 2 &&  sl.sys_state[i] in (6, 8)
             if sign(sl.azimuth[i]) != last_sign
                 push!(ob.time, Float64(sl.time[i]))
                 push!(ob.length, Float64(sl.l_tether[i][1]))
-                push!(ob.fig8, Int64(sl.var_02[i]))
+                push!(ob.fig8, Int64(sl.fig_8[i]))
                 push!(ob.elevation, Float64(rad2deg(sl.elevation[i])))
             end
             last_sign = sign(sl.azimuth[i])
