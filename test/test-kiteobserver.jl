@@ -22,8 +22,8 @@ function build_test_log(entries; n_steps=length(entries))
         ss = SysState{P_TEST}()
         ss.time      = Float64(i) * 0.05
         ss.sys_state = Int16(get(e, :sys_state, 0))
-        ss.var_01    = Float32(get(e, :cycle,    0))
-        ss.var_02    = Float32(get(e, :fig8,     0))
+        ss.cycle     = Int16(get(e, :cycle,    0))
+        ss.fig_8     = Int16(get(e, :fig8,     0))
         ss.azimuth   = Float32(get(e, :azimuth,  0.0))
         ss.elevation = Float32(get(e, :elevation, 0.0))
         ss.l_tether .= MVector{4, Float32}(get(e, :l_tether, 150.0), 0, 0, 0)
@@ -53,16 +53,19 @@ end
 
     # Build entries:
     #  start with negative azimuth to match the initial last_sign=-1 (no spurious sign change)
-    #  then alternate: positive (FLY_RIGHT), negative (FLY_LEFT)
+    #  Use elev_right_rad for the initial block so that last_max before the first crossing
+    #  equals elev_right_rad, and next_min (all positive-azimuth entries) also equals
+    #  elev_right_rad → average = elev_right_rad for crossing 1.
     entries = [
         # negative azimuth block – no sign change from initial last_sign=-1
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.3, :elevation => elev_left_rad,  :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.2, :elevation => elev_left_rad,  :fig8 => 0),
-        # sign change to positive azimuth → record elevation (FLY_RIGHT, fig8=0)
+        # elevation = elev_right_rad so last_max at crossing 1 = elev_right_rad
+        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.3, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.2, :elevation => elev_right_rad, :fig8 => 0),
+        # sign change to positive azimuth → crossing 1 (FLY_RIGHT, fig8=0)
         Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.1, :elevation => elev_right_rad, :fig8 => 0),
         Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.2, :elevation => elev_right_rad, :fig8 => 0),
         Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.3, :elevation => elev_right_rad, :fig8 => 0),
-        # sign change to negative azimuth → record elevation (FLY_LEFT, fig8=0)
+        # sign change to negative azimuth → crossing 2 (FLY_LEFT, fig8=0)
         Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.1, :elevation => elev_left_rad,  :fig8 => 0),
         Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.2, :elevation => elev_left_rad,  :fig8 => 0),
     ]
