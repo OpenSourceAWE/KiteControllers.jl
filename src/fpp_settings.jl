@@ -82,7 +82,16 @@ end
 
 function save_corr(corr_vec::Vector{Float64})
     config_file = joinpath(get_data_path(), fpp_settings())
-    dict = YAML.load_file(config_file)
-    dict["fpp_settings"]["corr_vec"] = corr_vec
-    YAML.write_file(config_file, dict)
+    lines = KiteUtils.readfile(config_file)
+    vec_str = "[" * join(corr_vec, ", ") * "]"
+    result = String[]
+    for line in lines
+        if startswith(lstrip(line), "corr_vec")
+            indent = match(r"^(\s*)", line).captures[1]
+            push!(result, indent * "corr_vec: " * vec_str)
+        else
+            push!(result, line)
+        end
+    end
+    KiteUtils.writefile(result, config_file)
 end
