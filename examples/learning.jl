@@ -10,6 +10,17 @@ if ! ("ControlPlots" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
 end
 using KiteControllers, KiteModels, YAML
+using KiteUtils: load_settings
+
+function get_use_turbulence(project::String)
+    config_file = joinpath(get_data_path(), project)
+    dict = YAML.load_file(config_file)
+    overwrite = get(dict, "overwrite", nothing)
+    isnothing(overwrite) && return nothing
+    result = get(overwrite, "use_turbulence", nothing)
+    isnothing(result) && return nothing
+    return Float64(result)
+end
 
 function read_project()
     config_file = joinpath(get_data_path(), "gui.yaml")
@@ -58,14 +69,18 @@ function residual(corr_vec=nothing; sim_time=nothing)
     if ! isnothing(corr_vec) 
         l_in=length(corr_vec)
     end
-    set = deepcopy(KiteControllers.se(PROJECT))
+    set = deepcopy(load_settings(PROJECT))
+    use_turbulence = get_use_turbulence(PROJECT)
+    isnothing(use_turbulence) || (set.use_turbulence = use_turbulence)
     if isnothing(sim_time)
         sim_time = set.sim_time
     end
     kcu   = KiteModels.KCU(set)
     kps4 = KiteModels.KPS4(kcu)
     kps4.wm.v_min = 0.1
+    KiteUtils.PROJECT = PROJECT
     wcs = WCSettings(true; dt = 1/set.sample_freq)
+    wcs.dt = 1/set.sample_freq
     fcs = FPCSettings(true, dt=wcs.dt)
     fpps = FPPSettings(true)
     u_d0 = 0.01 * set.depower_offset
@@ -161,33 +176,17 @@ function residual(corr_vec=nothing; sim_time=nothing)
     end
 
     on_parking(ssc)
-    saved_use_turbulence = set.use_turbulence
-    set.use_turbulence = 0.0
-    integrator = try
-        KiteModels.init!(kps4; delta=set.delta, stiffness_factor=set.stiffness_factor)
-    finally
-        set.use_turbulence = saved_use_turbulence
-    end
+    integrator = KiteModels.init!(kps4; delta=set.delta, stiffness_factor=set.stiffness_factor)
     sim_error = simulate(integrator)
     on_stop(ssc)
     if sim_error.code != NoError
         @warn "Simulation ended with error: $(sim_error.message). Skipping result."
         return l_in > 0 ? fill(1000.0, l_in) : Float64[]
     end
-    KiteControllers.save_log(logger, "tmp")
-    lg = KiteControllers.load_log("tmp")
+    KiteControllers.save_log(logger, "tmp"; path="output")
+    lg = KiteControllers.load_log("tmp"; path="output")
     ob = test_ob(lg, false)
     test_ob(lg, true)
-    # debug: show what the log contains
-    sl = lg.syslog
-    println("DEBUG: sim duration = $(sl.time[end]) s")
-    println("DEBUG: max cycle (var_01) = $(maximum(sl.var_01))")
-    println("DEBUG: max fig8  (var_02) = $(maximum(sl.var_02))")
-    unique_states = sort(unique(sl.sys_state))
-    println("DEBUG: sys_states seen = $unique_states")
-    n_cycle2 = count(sl.var_01 .== 2 .&& sl.sys_state .∈ Ref([6, 8]))
-    println("DEBUG: steps with cycle==2 and sys_state in (6,8) = $n_cycle2")
-    println("DEBUG: length(ob.corr_vec) = $(length(ob.corr_vec))")
     println("\n --> norm: ", norm(ob.corr_vec), "\n")
     l_out = length(ob.corr_vec)
     println("l_out: $l_out")
@@ -211,8 +210,8 @@ function plot(last_sim=false)
         lg = KiteControllers.load_log("last_sim_log"; path="output")
         @info "Plotting last simulation log from output/last_sim_log.arrow"
     else
-        lg = KiteControllers.load_log("tmp")
-        @info "Plotting current simulation log from tmp.arrow"
+        lg = KiteControllers.load_log("tmp"; path="output")
+        @info "Plotting current simulation log from output/tmp.arrow"
     end
     sl = lg.syslog
     fig_name = last_sim ? "azimuth_elevation_last" : "azimuth_elevation"
