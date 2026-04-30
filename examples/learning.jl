@@ -53,7 +53,7 @@ end
 
 # run a simulation using a correction vector, return a log object
 function residual(corr_vec=nothing; sim_time=nothing)
-    global scc
+    global ssc
     l_in = 0
     if ! isnothing(corr_vec) 
         l_in=length(corr_vec)
@@ -65,7 +65,7 @@ function residual(corr_vec=nothing; sim_time=nothing)
     kcu   = KiteModels.KCU(set)
     kps4 = KiteModels.KPS4(kcu)
     kps4.wm.v_min = 0.1
-    wcs = WCSettings(dt = 1/set.sample_freq); update(wcs)
+    wcs = WCSettings(true; dt = 1/set.sample_freq)
     fcs = FPCSettings(true, dt=wcs.dt)
     fpps = FPPSettings(true)
     u_d0 = 0.01 * set.depower_offset
@@ -87,6 +87,7 @@ function residual(corr_vec=nothing; sim_time=nothing)
         e_mech = 0
         sys_state.sys_state = Int16(ssc.fpp._state)
         on_new_systate(ssc, sys_state)
+        KiteControllers.log!(logger, sys_state)
         while true
             if i > 100
                 dp = KiteControllers.get_depower(ssc)
@@ -208,10 +209,10 @@ end
 function plot(last_sim=false)
     if last_sim
         lg = KiteControllers.load_log("last_sim_log"; path="output")
-        @info "Plotting last simulation log from output/last_sim_log.jld2"
+        @info "Plotting last simulation log from output/last_sim_log.arrow"
     else
         lg = KiteControllers.load_log("tmp")
-        @info "Plotting current simulation log from tmp.jld2"
+        @info "Plotting current simulation log from tmp.arrow"
     end
     sl = lg.syslog
     fig_name = last_sim ? "azimuth_elevation_last" : "azimuth_elevation"
@@ -286,4 +287,15 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
     best_corr_vec
 end
 
-println("Available functions: plot(), train(), residual()")
+function plot_batch()
+    lg = KiteControllers.load_log("batch-hydra20_600_TI0"; path="output")
+    @info "Plotting batch log from output/batch-hydra20_600_TI0.arrow"
+    sl = lg.syslog
+    display(ControlPlots.plotx(sl.time, rad2deg.(sl.azimuth), rad2deg.(sl.elevation);
+            ylabels=["azimuth [°]", "elevation [°]"],
+            xlabel="time [s]",
+            fig="azimuth_elevation_batch"))
+    nothing
+end
+
+println("Available functions: plot(), plot_batch(), train(), residual()")
