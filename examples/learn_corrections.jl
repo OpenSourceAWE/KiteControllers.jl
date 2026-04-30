@@ -52,6 +52,8 @@ const max_height = 600.0 # maximum height for simulation to be considered valid
 using ControlPlots, KiteControllers, LinearAlgebra, NonlinearSolve
 import JLD2
 
+ssc = nothing
+
 function test_ob(lg, plot=true)
     ob = KiteObserver()
     KiteControllers.observe!(ob, lg)
@@ -63,7 +65,7 @@ function test_ob(lg, plot=true)
 end
 
 # run a simulation using a correction vector, return a log object
-function residual(corr_vec=nothing; sim_time=nothing)
+function residual(corr_vec=nothing)
     global ssc
     l_in = 0
     if ! isnothing(corr_vec) 
@@ -72,9 +74,7 @@ function residual(corr_vec=nothing; sim_time=nothing)
     set = deepcopy(load_settings(PROJECT))
     use_turbulence = get_use_turbulence(PROJECT)
     isnothing(use_turbulence) || (set.use_turbulence = use_turbulence)
-    if isnothing(sim_time)
-        sim_time = set.sim_time
-    end
+    sim_time = set.sim_time
     kcu   = KiteModels.KCU(set)
     kps4 = KiteModels.KPS4(kcu)
     kps4.wm.v_min = 0.1
@@ -130,10 +130,8 @@ function residual(corr_vec=nothing; sim_time=nothing)
                 @warn "calc_v_set crashed at t=$(round(i*dt, digits=1)) s: $e"
                 break
             end
-            #
-            local t_sim = 0.0
             try
-                t_sim = @elapsed KiteModels.next_step!(kps4, integrator; set_speed=v_ro, dt=dt)
+                KiteModels.next_step!(kps4, integrator; set_speed=v_ro, dt=dt)
             catch e
                 @warn "Simulation crashed at t=$(round(i*dt, digits=1)) s: $e"
                 break
@@ -145,9 +143,6 @@ function residual(corr_vec=nothing; sim_time=nothing)
             sys_state.sys_state = Int16(ssc.fpp._state)
             sys_state.cycle = ssc.fpp.fpca.cycle
             sys_state.fig_8 = ssc.fpp.fpca.fig8
-            if i > 10
-                sys_state.t_sim = t_sim*1000
-            end
             KiteControllers.log!(logger, sys_state)
             if i > 200
                 if sys_state.Z[end] < min_height
