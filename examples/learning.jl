@@ -171,6 +171,9 @@ function residual(corr_vec=nothing; sim_time=nothing)
             if i*dt > sim_time
                 break 
             end
+            if ssc.fpp.fpca.cycle >= 3
+                break
+            end
         end
         error
     end
@@ -289,6 +292,8 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
             break
         end
     end
+    last_nonzero = something(findlast(!iszero, best_corr_vec), 0)
+    best_corr_vec = best_corr_vec[1:last_nonzero]
     if best_norm < Inf
         KiteControllers.save_corr(best_corr_vec)
     else
