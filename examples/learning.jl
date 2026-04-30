@@ -227,8 +227,10 @@ function observe()
     ob = KiteObserver()
     KiteControllers.observe!(ob, lg)
     println("corr_vec (length=$(length(ob.corr_vec))):")
-    println(ob.corr_vec)
-    ob
+    for v in ob.corr_vec
+        println("  ", v)
+    end
+    nothing
 end
 
 function train(use_last=true; max_iter=40, norm_tol=1.0)
