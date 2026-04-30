@@ -83,7 +83,7 @@ end
 function save_corr(corr_vec::Vector{Float64})
     config_file = joinpath(get_data_path(), fpp_settings())
     lines = KiteUtils.readfile(config_file)
-    vec_str = "[" * join(corr_vec, ", ") * "]"
+    vec_str = "[" * join(round.(corr_vec, digits=2), ", ") * "]"
     result = String[]
     for line in lines
         if startswith(lstrip(line), "corr_vec")
