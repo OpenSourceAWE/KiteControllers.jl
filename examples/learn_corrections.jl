@@ -13,10 +13,14 @@ end
 using KiteControllers, KiteModels, YAML
 using KiteUtils: load_settings
 
-function read_project()
-    config_file = joinpath(get_data_path(), "gui.yaml")
+function get_use_turbulence(project::String)
+    config_file = joinpath(get_data_path(), project)
     dict = YAML.load_file(config_file)
-    dict["gui"]["project"]
+    overwrite = get(dict, "overwrite", nothing)
+    isnothing(overwrite) && return nothing
+    result = get(overwrite, "use_turbulence", nothing)
+    isnothing(result) && return nothing
+    return Float64(result)
 end
 
 PROJECT=read_project()

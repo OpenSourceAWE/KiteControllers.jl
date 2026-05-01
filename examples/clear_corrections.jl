@@ -7,12 +7,6 @@ if ! ("ControlPlots" ∈ keys(Pkg.project().dependencies))
 end
 using KiteControllers, YAML
 
-function read_project()
-    config_file = joinpath(get_data_path(), "gui.yaml")
-    dict = YAML.load_file(config_file)
-    dict["gui"]["project"]
-end
-
 PROJECT = read_project()
 KiteUtils.PROJECT = PROJECT
 

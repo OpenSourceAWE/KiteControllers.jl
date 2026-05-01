@@ -11,6 +11,7 @@ end
 function select_project()
     data_dir = joinpath(@__DIR__, "..", "data")
     gui_yaml = joinpath(data_dir, "gui.yaml")
+    gui_yaml_default = gui_yaml * ".default"
 
     # Collect all *.yml project files from the data directory
     projects = sort(filter(f -> endswith(f, ".yml"), readdir(data_dir)))
@@ -18,6 +19,15 @@ function select_project()
     if isempty(projects)
         println("No *.yml project files found in $data_dir")
         return
+    end
+
+    if !isfile(gui_yaml)
+        if isfile(gui_yaml_default)
+            cp(gui_yaml_default, gui_yaml)
+        else
+            println("Missing $gui_yaml and fallback $gui_yaml_default")
+            return
+        end
     end
 
     # Read current project from gui.yaml

@@ -39,11 +39,20 @@ function observe!(ob::KiteObserver, log::SysLog, elev_nom=26)
         return nothing
     end
 
-    # Find positions within valid_indices where the sign of azimuth changes
+    # Find positions where azimuth transitions between negative and positive.
+    # Ignore values near zero to avoid spurious crossings around the center line.
     crossing_positions = Int[]
-    last_sign = -1
+    last_sign = 0
     for j in 1:length(valid_indices)
-        s = sign(sl.azimuth[valid_indices[j]])
+        az = sl.azimuth[valid_indices[j]]
+        if abs(az) <= EPSILON
+            continue
+        end
+        s = az > 0 ? 1 : -1
+        if last_sign == 0
+            last_sign = s
+            continue
+        end
         if s != last_sign
             push!(crossing_positions, j)
             last_sign = s
