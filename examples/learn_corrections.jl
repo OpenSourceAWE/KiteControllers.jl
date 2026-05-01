@@ -58,7 +58,7 @@ ssc = nothing
 
 function test_ob(lg, plot=true)
     ob = KiteObserver()
-    KiteControllers.observe!(ob, lg)
+    KiteControllers.observe!(ob, lg, FPPSettings(true).beta_set)
     if plot
         plotxy(ob.fig8, ob.elevation, xlabel="fig8", ylabel="elevation")
     else
@@ -229,7 +229,7 @@ end
 function observe()
     lg = KiteControllers.load_log("tmp"; path="output")
     ob = KiteObserver()
-    KiteControllers.observe!(ob, lg)
+    KiteControllers.observe!(ob, lg, FPPSettings(true).beta_set)
     println("corr_vec (length=$(length(ob.corr_vec))):")
     for v in ob.corr_vec
         println("  ", v)
@@ -243,7 +243,7 @@ function train(use_last=true; max_iter=MAX_ITER, norm_tol=1.0)
         try
             log = load_log("uncorrected")
             ob = KiteObserver()
-            observe!(ob, log)
+            observe!(ob, log, FPPSettings(true).beta_set)
             corr_vec=ob.corr_vec
         catch
             corr_vec=residual()
