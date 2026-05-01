@@ -9,6 +9,29 @@ using REPL.TerminalMenus
 include("select_project.jl")
 include("learn_corrections.jl")
 
+function open_documentation()
+    println("\nOpening documentation in browser...")
+    doc_url = "https://opensourceawe.github.io/KiteControllers.jl/dev/"
+    
+    try
+        if Sys.islinux()
+            run(pipeline(`xdg-open $doc_url`, stdout=devnull, stderr=devnull))
+        elseif Sys.iswindows()
+            run(pipeline(`cmd /c start $doc_url`, stdout=devnull, stderr=devnull))
+        elseif Sys.isapple()
+            run(pipeline(`open $doc_url`, stdout=devnull, stderr=devnull))
+        else
+            println("Cannot automatically open browser on this system.")
+            println("Please manually open: $doc_url")
+        end
+        println("Documentation URL: $doc_url")
+    catch e
+        println("Could not open browser automatically.")
+        println("Please manually open: $doc_url")
+    end
+end
+
+
 options = ["select_project()",
            "include(\"clear_corrections.jl\")",
            "train()",
@@ -16,6 +39,7 @@ options = ["select_project()",
            "residual(full_sim=true)",
            "plot(full_sim=true)",
            "include(\"autopilot.jl\")",
+           "open_documentation()",
            "quit"]
 
 function learning_menu()
