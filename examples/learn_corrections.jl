@@ -49,7 +49,7 @@ MAX_ITER = 70           # maximum number of training iterations
 using ControlPlots, KiteControllers, LinearAlgebra, NonlinearSolve
 import JLD2
 
-ssc = nothing
+global ssc::SystemStateControl
 
 # Effective norm: exclude residuals for elements that are floor-clamped and still
 # pushing lower — those crossings are physically unreachable and should not block
@@ -101,7 +101,7 @@ function residual(corr_vec=nothing; full_sim=false)
     fpps.log_level = full_sim ? fpps.log_level : 1  # dots only during training; full output for full_sim
     u_d0 = 0.01 * set.depower_offset
     u_d  = 0.01 * set.depowers[1]
-    ssc = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind=set.v_wind)
+    ssc::SystemStateControl = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind=set.v_wind)
     if ! isnothing(corr_vec)
         ssc.fpp.corr_vec = corr_vec
     end
