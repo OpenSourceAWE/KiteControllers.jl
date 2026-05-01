@@ -66,6 +66,37 @@ try
         @test fpps.corr_vec[1]       ≈ 24.02
         @test fpps.corr_vec[end]     ≈ 3.84
     end
+
+    @testset "FPPSettings corr_vec padding" begin
+        # Verify that a short corr_vec loaded from YAML is padded with trailing
+        # zeros up to the default length, and that the original values are preserved.
+        mktempdir() do tmpdir
+            open(joinpath(tmpdir, "system.yaml"), "w") do f
+                println(f, "system:")
+                println(f, "    fpp_settings: \"fpp_settings.yaml\"")
+            end
+            open(joinpath(tmpdir, "fpp_settings.yaml"), "w") do f
+                println(f, "fpp_settings:")
+                println(f, "    corr_vec: [1.0, 2.0, 3.0]")
+            end
+            old_project = KiteUtils.PROJECT
+            try
+                KiteUtils.set_data_path(tmpdir)
+                KiteUtils.PROJECT = "system.yaml"
+                fpps = FPPSettings(true)
+                default_len = length(FPPSettings().corr_vec)
+                @test length(fpps.corr_vec) == default_len
+                @test fpps.corr_vec[1] ≈ 1.0
+                @test fpps.corr_vec[2] ≈ 2.0
+                @test fpps.corr_vec[3] ≈ 3.0
+                for i in 4:default_len
+                    @test fpps.corr_vec[i] ≈ 0.0
+                end
+            finally
+                KiteUtils.PROJECT = old_project
+            end
+        end
+    end
 finally
     KiteUtils.set_data_path(_old_data_path)
 end
