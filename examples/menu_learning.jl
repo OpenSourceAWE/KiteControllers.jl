@@ -12,15 +12,16 @@ include("learn_corrections.jl")
 options = ["select_project()",
            "clear_corrections = include(\"clear_corrections.jl\")",
            "train()",
-            "plot()",
+           "plot()",
            "residual(full_sim=true)",
            "plot(full_sim=true)",
+           "autopilot = include(\"autopilot.jl\")",
            "quit"]
 
 function learning_menu()
     active = true
     while active
-        menu = RadioMenu(options, pagesize=8)
+        menu = RadioMenu(options, pagesize=9)
         choice = request("\nProject: $(read_project())  — Choose function to execute or `q` to quit: ", menu)
 
         if choice != -1 && choice != length(options)
