@@ -22,8 +22,8 @@ function build_test_log(entries; n_steps=length(entries))
         ss = SysState{P_TEST}()
         ss.time      = Float64(i) * 0.05
         ss.sys_state = Int16(get(e, :sys_state, 0))
-        ss.var_01    = Float32(get(e, :cycle,    0))
-        ss.var_02    = Float32(get(e, :fig8,     0))
+        ss.cycle     = Int16(get(e, :cycle,    0))
+        ss.fig_8     = Int16(get(e, :fig8,     0))
         ss.azimuth   = Float32(get(e, :azimuth,  0.0))
         ss.elevation = Float32(get(e, :elevation, 0.0))
         ss.l_tether .= MVector{4, Float32}(get(e, :l_tether, 150.0), 0, 0, 0)
@@ -32,7 +32,7 @@ function build_test_log(entries; n_steps=length(entries))
     KiteUtils.sys_log(logger)
 end
 
-@testset "KiteObserver – empty log (no cycle-2 data)" begin
+@testset "KiteObserver – empty log (no cycle-3 data)" begin
     # All entries have cycle=0 → observe! should find nothing
     entries = [Dict(:cycle => 0, :sys_state => 6, :azimuth => 0.1f0, :elevation => deg2rad(26.0)) for _ in 1:10]
     flight_log = build_test_log(entries)
@@ -43,8 +43,8 @@ end
     @test isempty(ob.elevation)
 end
 
-@testset "KiteObserver – cycle-2 data with known elevations" begin
-    # Simulate a sequence of cycle-2 entries where azimuth changes sign.
+@testset "KiteObserver – cycle-3 data with known elevations" begin
+    # Simulate a sequence of cycle-3 entries where azimuth changes sign.
     # The observer records elevation at each sign change.
     # We arrange two sign changes (right-to-left, left-to-right) at known elevations.
     elev_nom = 26.0                       # nominal elevation [deg]
@@ -53,18 +53,21 @@ end
 
     # Build entries:
     #  start with negative azimuth to match the initial last_sign=-1 (no spurious sign change)
-    #  then alternate: positive (FLY_RIGHT), negative (FLY_LEFT)
+    #  Use elev_right_rad for the initial block so that last_max before the first crossing
+    #  equals elev_right_rad, and next_min (all positive-azimuth entries) also equals
+    #  elev_right_rad → average = elev_right_rad for crossing 1.
     entries = [
         # negative azimuth block – no sign change from initial last_sign=-1
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.3, :elevation => elev_left_rad,  :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.2, :elevation => elev_left_rad,  :fig8 => 0),
-        # sign change to positive azimuth → record elevation (FLY_RIGHT, fig8=0)
-        Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.1, :elevation => elev_right_rad, :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.2, :elevation => elev_right_rad, :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.3, :elevation => elev_right_rad, :fig8 => 0),
-        # sign change to negative azimuth → record elevation (FLY_LEFT, fig8=0)
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.1, :elevation => elev_left_rad,  :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.2, :elevation => elev_left_rad,  :fig8 => 0),
+        # elevation = elev_right_rad so last_max at crossing 1 = elev_right_rad
+        Dict(:cycle => 3, :sys_state => 8, :azimuth => -0.3, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 8, :azimuth => -0.2, :elevation => elev_right_rad, :fig8 => 0),
+        # sign change to positive azimuth → crossing 1 (FLY_RIGHT, fig8=0)
+        Dict(:cycle => 3, :sys_state => 6, :azimuth =>  0.1, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 6, :azimuth =>  0.2, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 6, :azimuth =>  0.3, :elevation => elev_right_rad, :fig8 => 0),
+        # sign change to negative azimuth → crossing 2 (FLY_LEFT, fig8=0)
+        Dict(:cycle => 3, :sys_state => 8, :azimuth => -0.1, :elevation => elev_left_rad,  :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 8, :azimuth => -0.2, :elevation => elev_left_rad,  :fig8 => 0),
     ]
     flight_log = build_test_log(entries)
     ob = KiteObserver()

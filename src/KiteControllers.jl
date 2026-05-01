@@ -29,6 +29,7 @@ export get_depower, on_winchcontrol                                   # methods 
 export is_active, on_new_data, start                                  # methods of FlightPathPlanner
 export ssManualOperation, ssParking, ssPowerProduction, ssReelIn
 export observe!, update
+export read_project
 
 abstract type AbstractForceController end
 const AFC = AbstractForceController
@@ -150,5 +151,20 @@ end
 precompile(SystemStateControl, (WCSettings,))
 precompile(on_parking, (SystemStateControl,))
 precompile(on_autopilot, (SystemStateControl,))
+
+"""
+    read_project() -> String
+
+Read the active project filename from `data/gui.yaml`.
+If the file does not exist it is created from `gui.yaml.default`.
+"""
+function read_project()
+    config_file = joinpath(get_data_path(), "gui.yaml")
+    if ! isfile(config_file)
+        cp(config_file * ".default", config_file)
+    end
+    dict = YAML.load_file(config_file)
+    dict["gui"]["project"]
+end
 
 end

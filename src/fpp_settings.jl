@@ -70,6 +70,10 @@ function update(fpps::FPPSettings)
     dict = YAML.load_file(config_file)
     sec_dict = Dict(Symbol(k) => v for (k, v) in dict["fpp_settings"])
     StructTypes.constructfrom!(fpps, sec_dict)
+    default_len = length(FPPSettings().corr_vec)
+    if length(fpps.corr_vec) < default_len
+        append!(fpps.corr_vec, zeros(default_len - length(fpps.corr_vec)))
+    end
 end
 
 function FPPSettings(update)
@@ -78,4 +82,33 @@ function FPPSettings(update)
         KiteControllers.update(fpp)
     end
     fpp
+end
+
+function save_corr(corr_vec::Vector{Float64})
+    config_file = joinpath(get_data_path(), fpp_settings())
+    if Sys.iswindows()
+        config_file = replace(config_file, "/" => "\\")
+    end
+    if !isfile(config_file)
+        @error "save_corr: config file not found: $config_file"
+        return
+    end
+    lines = KiteUtils.readfile(config_file)
+    if isempty(corr_vec)
+        vec_str = "[]"
+    else
+        last_nonzero = something(findlast(!iszero, corr_vec), length(corr_vec))
+        trimmed = corr_vec[1:last_nonzero]
+        vec_str = "[" * join(round.(trimmed, digits=2), ", ") * "]"
+    end
+    result = String[]
+    for line in lines
+        if startswith(lstrip(line), "corr_vec")
+            indent = match(r"^(\s*)", line).captures[1]
+            push!(result, indent * "corr_vec: " * vec_str)
+        else
+            push!(result, line)
+        end
+    end
+    KiteUtils.writefile(result, config_file)
 end

@@ -32,7 +32,7 @@ by running a state machine whose transitions are evaluated on every call to
 @with_kw mutable struct FlightPathPlanner @deftype Float64
     fpps::FPPSettings
     fpca::FlightPathCalculator
-    corr_vec::Vector{Float64} = load_corr()
+    corr_vec::Vector{Float64} = fpps.corr_vec
     _state::FPPS = INITIAL
     delta_depower = 0    # this value must be increased, if the power is too high
     const_dd      = 0.7  # greek delta_depower
@@ -109,7 +109,7 @@ function _switch(fpp::FlightPathPlanner, state)
     # see Table 5.5
     elseif state == TURN_LEFT
         ###fpps.beta_set
-        elev_right, elev_left = corrected_elev(fpp.corr_vec, fpp.fpca.fig8, fpp.fpps.beta_set)
+        elev_right, _ = corrected_elev(fpp.corr_vec, fpp.fpca.fig8, fpp.fpps.beta_set)
         beta_set = elev_right
         # println("TURN_LEFT: ", beta_set)
         publish(fpp.fpca, beta_set)
@@ -121,7 +121,7 @@ function _switch(fpp::FlightPathPlanner, state)
         _publish_fpc_command(fpp, false, attractor = fpp.fpca._p3)
         sys_state = ssKiteReelOut
     elseif state == TURN_RIGHT
-        elev_right, elev_left = corrected_elev(fpp.corr_vec, fpp.fpca.fig8, fpp.fpps.beta_set)
+        _, elev_left = corrected_elev(fpp.corr_vec, fpp.fpca.fig8, fpp.fpps.beta_set)
         beta_set = elev_left
         # println("TURN_RIGHT: ", beta_set)
         publish(fpp.fpca, beta_set)
@@ -303,8 +303,10 @@ function on_new_data(fpp::FlightPathPlanner, depower, length, heading, height, _
     elseif state == FLY_RIGHT && phi < -fpp.fpca._phi_sw # && 
         _switch(fpp, TURN_RIGHT)
     elseif state == TURN_RIGHT && (psi < deg2rad(180.0 + fpp.fpca._heading_offset) || fpp.timeout > fpp.fpps.timeout) 
-        if fpp.fpps.log_level > 0
+        if fpp.fpps.log_level > 1
             println("timeout TURN_RIGHT: $(fpp.timeout)")
+        elseif fpp.fpps.log_level > 0
+            print(".")
         end
         _switch(fpp, FLY_LEFT)
     elseif state == FLY_LEFT && phi <= -phi_3
