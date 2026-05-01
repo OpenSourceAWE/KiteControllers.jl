@@ -51,6 +51,24 @@ import JLD2
 
 ssc = nothing
 
+# Effective norm: exclude residuals for elements that are floor-clamped and still
+# pushing lower — those crossings are physically unreachable and should not block
+# convergence of the correctable crossings.
+function effective_norm(res, vec, min_corr)
+    s = 0.0
+    for k = 1:min(length(res), length(vec)-1)
+        if vec[k+1] <= min_corr + 1e-9 && res[k] < 0
+            # floor-clamped and pushing lower — skip
+        else
+            s += res[k]^2
+        end
+    end
+    for k = length(vec):length(res)
+        s += res[k]^2
+    end
+    sqrt(s)
+end
+
 function test_ob(lg, plot=true)
     ob = KiteObserver()
     KiteControllers.observe!(ob, lg, FPPSettings(true).beta_set)
@@ -184,7 +202,8 @@ function residual(corr_vec=nothing; full_sim=false)
     lg = KiteControllers.load_log(full_sim ? "last_sim_log" : "tmp"; path="output")
     ob = test_ob(lg, false)
     test_ob(lg, true)
-    println("\n --> norm: ", norm(ob.corr_vec), "\n")
+    min_safe_beta = 10.0
+    min_corr = min_safe_beta - fpps.beta_set
     l_out = length(ob.corr_vec)
     if l_out == 0
         @warn "No flight path data collected (simulation may have crashed early). Skipping update."
@@ -197,9 +216,15 @@ function residual(corr_vec=nothing; full_sim=false)
     end
     if l_in > 0
         result = ob.corr_vec[begin:l_in]
+        n = norm(result)
+        en = effective_norm(result, corr_vec, min_corr)
+        println("\n --> norm: ", n, " (effective: ", en, ")\n")
         println("residual: ", round.(result, digits=3))
         return result
     end
+    n = norm(ob.corr_vec)
+    en = effective_norm(ob.corr_vec, ob.corr_vec, min_corr)
+    println("\n --> norm: ", n, " (effective: ", en, ")\n")
     println("residual: ", round.(ob.corr_vec, digits=3))
     ob.corr_vec
 end
@@ -294,27 +319,9 @@ function train(use_last=true; max_iter=MAX_ITER, norm_tol=1.0)
         end
     end
 
-    # Effective norm: exclude residuals for elements that are floor-clamped and still
-    # pushing lower — those crossings are physically unreachable and should not block
-    # convergence of the correctable crossings.
-    function eff_norm(res, vec)
-        s = 0.0
-        for k = 1:min(length(res), length(vec)-1)
-            if vec[k+1] <= min_corr + 1e-9 && res[k] < 0
-                # floor-clamped and pushing lower — skip
-            else
-                s += res[k]^2
-            end
-        end
-        for k = length(vec):length(res)
-            s += res[k]^2
-        end
-        sqrt(s)
-    end
-
     for i in 1:max_iter
         res = residual(initial)
-        en = eff_norm(res, initial)
+        en = effective_norm(res, initial, min_corr)
         n  = norm(res)
         if en < n - 1e-6
             println("i: $(i), norm: $(round(n, digits=4)) (effective: $(round(en, digits=4))), corr_vec[1:min(4,end)]=$(round.(initial[1:min(4,end)], digits=2))")
@@ -344,7 +351,7 @@ function train(use_last=true; max_iter=MAX_ITER, norm_tol=1.0)
             end
         else
             j_crash = 0
-            en = eff_norm(res, initial)
+            en = effective_norm(res, initial, min_corr)
             # Save best BEFORE updating initial (snapshot of the vector that produced best_norm).
             if best_norm > en
                 best_norm = en
