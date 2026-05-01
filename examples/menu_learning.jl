@@ -21,7 +21,7 @@ function learning_menu()
     active = true
     while active
         menu = RadioMenu(options, pagesize=8)
-        choice = request("\nChoose function to execute or `q` to quit: ", menu)
+        choice = request("\nProject: $(read_project())  — Choose function to execute or `q` to quit: ", menu)
 
         if choice != -1 && choice != length(options)
             eval(Meta.parse(options[choice]))

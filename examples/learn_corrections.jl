@@ -84,6 +84,7 @@ function residual(corr_vec=nothing; full_sim=false)
     wcs.dt = 1/set.sample_freq
     fcs = FPCSettings(true, dt=wcs.dt)
     fpps = FPPSettings(true)
+    fpps.log_level = full_sim ? fpps.log_level : 1  # dots only during training; full output for full_sim
     u_d0 = 0.01 * set.depower_offset
     u_d  = 0.01 * set.depowers[1]
     ssc = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind=set.v_wind)
@@ -177,6 +178,7 @@ function residual(corr_vec=nothing; full_sim=false)
     on_parking(ssc)
     integrator = KiteModels.init!(kps4; delta=set.delta, stiffness_factor=set.stiffness_factor)
     sim_error = simulate(integrator)
+    println()  # end the progress-dot line
     on_stop(ssc)
     if sim_error.code != NoError
         @warn "Simulation ended with error: $(sim_error.message). Skipping result."
@@ -188,7 +190,6 @@ function residual(corr_vec=nothing; full_sim=false)
     test_ob(lg, true)
     println("\n --> norm: ", norm(ob.corr_vec), "\n")
     l_out = length(ob.corr_vec)
-    println("l_out: $l_out")
     if l_out == 0
         @warn "No flight path data collected (simulation may have crashed early). Skipping update."
         return l_in > 0 ? fill(1000.0, l_in) : Float64[]
@@ -199,8 +200,11 @@ function residual(corr_vec=nothing; full_sim=false)
         end
     end
     if l_in > 0
-        return ob.corr_vec[begin:l_in]
+        result = ob.corr_vec[begin:l_in]
+        println("residual: ", round.(result, digits=3))
+        return result
     end
+    println("residual: ", round.(ob.corr_vec, digits=3))
     ob.corr_vec
 end
 
