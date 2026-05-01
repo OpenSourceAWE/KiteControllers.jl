@@ -46,8 +46,9 @@ end
 SimulationError() = SimulationError(NoError, "")
 
 const tolerance  =   1.1 # allow 10% tolerance for velocity limits
-const min_height =  20.0 # minimum height for simulation to be considered valid
+const min_height =  10.0 # minimum height for simulation to be considered valid
 const max_height = 600.0 # maximum height for simulation to be considered valid
+MAX_NORM = 100.0         # maximum allowed norm for corr_vec
 
 using ControlPlots, KiteControllers, LinearAlgebra, NonlinearSolve
 import JLD2
@@ -245,7 +246,7 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
         KiteControllers.save_corr(corr_vec)
     end
     initial = FPPSettings(true).corr_vec
-    if norm(initial) > 50.0
+    if norm(initial) > MAX_NORM
         @warn "Loaded corr_vec has large norm $(norm(initial)), resetting to zeros."
         initial = zeros(length(initial))
     end
