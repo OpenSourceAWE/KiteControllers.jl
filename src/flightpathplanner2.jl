@@ -109,7 +109,7 @@ function _switch(fpp::FlightPathPlanner, state)
     # see Table 5.5
     elseif state == TURN_LEFT
         ###fpps.beta_set
-        elev_right, elev_left = corrected_elev(fpp.corr_vec, fpp.fpca.fig8, fpp.fpps.beta_set)
+        elev_right, _ = corrected_elev(fpp.corr_vec, fpp.fpca.fig8, fpp.fpps.beta_set)
         beta_set = elev_right
         # println("TURN_LEFT: ", beta_set)
         publish(fpp.fpca, beta_set)
@@ -121,7 +121,7 @@ function _switch(fpp::FlightPathPlanner, state)
         _publish_fpc_command(fpp, false, attractor = fpp.fpca._p3)
         sys_state = ssKiteReelOut
     elseif state == TURN_RIGHT
-        elev_right, elev_left = corrected_elev(fpp.corr_vec, fpp.fpca.fig8, fpp.fpps.beta_set)
+        _, elev_left = corrected_elev(fpp.corr_vec, fpp.fpca.fig8, fpp.fpps.beta_set)
         beta_set = elev_left
         # println("TURN_RIGHT: ", beta_set)
         publish(fpp.fpca, beta_set)
