@@ -236,7 +236,7 @@ function observe()
     nothing
 end
 
-function train(use_last=true; max_iter=60, norm_tol=1.0)
+function train(use_last=true; max_iter=70, norm_tol=1.0)
     local corr_vec
     if ! use_last
         try
@@ -254,6 +254,9 @@ function train(use_last=true; max_iter=60, norm_tol=1.0)
         end
     end
     initial = FPPSettings(true).corr_vec
+    beta_set = FPPSettings(true).beta_set
+    min_safe_beta = 10.0  # minimum safe target elevation in degrees
+    min_corr = min_safe_beta - beta_set  # floor for any correction element
     if norm(initial) > MAX_NORM
         @warn "Loaded corr_vec has large norm $(norm(initial)), resetting to zeros."
         initial = zeros(length(initial))
@@ -281,26 +284,47 @@ function train(use_last=true; max_iter=60, norm_tol=1.0)
     end
 
     # Apply a scaled update from a residual vector to `initial`, shifting by +1 index.
+    # After updating, clamp corrections [2:end] so beta_set+correction >= min_safe_beta.
+    # initial[1] (LOW_LEFT) is never updated by training — leave it at its loaded value.
     function apply_update!(vec, res_vec, sf, bn)
         sm = step_mult(bn)
         for k = 1:min(length(res_vec), length(vec)-1)
-            vec[k+1] += sf * sm * res_vec[k]
+            vec[k+1] = max(min_corr, vec[k+1] + sf * sm * res_vec[k])
         end
     end
 
-    for i in 1:max_iter
-        # LOW_LEFT (initial[1]) has no observer measurement; keep it in sync with
-        # initial[2] (fig8=0 right correction), which is at a similar elevation.
-        if length(initial) >= 2
-            initial[1] = initial[2]
+    # Effective norm: exclude residuals for elements that are floor-clamped and still
+    # pushing lower — those crossings are physically unreachable and should not block
+    # convergence of the correctable crossings.
+    function eff_norm(res, vec)
+        s = 0.0
+        for k = 1:min(length(res), length(vec)-1)
+            if vec[k+1] <= min_corr + 1e-9 && res[k] < 0
+                # floor-clamped and pushing lower — skip
+            else
+                s += res[k]^2
+            end
         end
+        for k = length(vec):length(res)
+            s += res[k]^2
+        end
+        sqrt(s)
+    end
+
+    for i in 1:max_iter
         res = residual(initial)
-        println("i: $(i), norm: $(norm(res)), corr_vec[1:min(4,end)]=$(round.(initial[1:min(4,end)], digits=2))")
+        en = eff_norm(res, initial)
+        n  = norm(res)
+        if en < n - 1e-6
+            println("i: $(i), norm: $(round(n, digits=4)) (effective: $(round(en, digits=4))), corr_vec[1:min(4,end)]=$(round.(initial[1:min(4,end)], digits=2))")
+        else
+            println("i: $(i), norm: $(round(n, digits=4)), corr_vec[1:min(4,end)]=$(round.(initial[1:min(4,end)], digits=2))")
+        end
         crashed = length(res) > 0 && res[1] == 1000.0
-        if !crashed && norm(res) < norm_tol
+        if !crashed && en < norm_tol
             println("Converged successfully using $i iterations!")
             best_corr_vec = deepcopy(initial)
-            best_norm = norm(res)
+            best_norm = en
             correction_applied = true
             break
         end
@@ -319,15 +343,16 @@ function train(use_last=true; max_iter=60, norm_tol=1.0)
             end
         else
             j_crash = 0
+            en = eff_norm(res, initial)
             # Save best BEFORE updating initial (snapshot of the vector that produced best_norm).
-            if best_norm > norm(res)
-                best_norm = norm(res)
+            if best_norm > en
+                best_norm = en
                 best_corr_vec = deepcopy(initial)
                 best_res = deepcopy(res)   # record residual AT the best point
                 # Ramp step_factor back up gradually (×2, capped at 1.0).
                 step_factor = min(step_factor * 2.0, 1.0)
                 j = 0
-                println("j: $(j), best_norm=$(best_norm), step_factor=$(step_factor)")
+                println("j: $(j), best_norm=$(round(best_norm, digits=4)), step_factor=$(step_factor)")
             else
                 j += 1
                 println("j: $j, step_factor=$(step_factor)")
@@ -355,13 +380,13 @@ function train(use_last=true; max_iter=60, norm_tol=1.0)
         end
     end
     if correction_applied && best_norm >= norm_tol
-        println("Reached max_iter=$(max_iter) without full convergence. Best norm: $(best_norm)")
+        println("Reached max_iter=$(max_iter) without full convergence. Best effective norm: $(round(best_norm, digits=4))")
     end
     last_nonzero = something(findlast(!iszero, best_corr_vec), length(best_corr_vec))
     best_corr_vec = best_corr_vec[1:last_nonzero]
     if best_norm < Inf && correction_applied
         KiteControllers.save_corr(best_corr_vec)
-        println("Saved best corr_vec with norm=$(round(best_norm, digits=4))")
+        println("Saved best corr_vec with norm=$(round(best_norm, digits=4)) (effective)")
     elseif !correction_applied && best_norm == Inf
         @warn "All simulations crashed; no corrections could be applied. Check project settings."
     elseif !correction_applied
