@@ -48,7 +48,8 @@ SimulationError() = SimulationError(NoError, "")
 const tolerance  =   1.1 # allow 10% tolerance for velocity limits
 const min_height =  6.0 # minimum height for simulation to be considered valid
 const max_height = 600.0 # maximum height for simulation to be considered valid
-MAX_NORM = 100.0         # maximum allowed norm for corr_vec
+MAX_NORM = 100.0        # maximum allowed norm for corr_vec
+MAX_ITER = 70           # maximum number of training iterations
 
 using ControlPlots, KiteControllers, LinearAlgebra, NonlinearSolve
 import JLD2
@@ -236,7 +237,7 @@ function observe()
     nothing
 end
 
-function train(use_last=true; max_iter=70, norm_tol=1.0)
+function train(use_last=true; max_iter=MAX_ITER, norm_tol=1.0)
     local corr_vec
     if ! use_last
         try
