@@ -46,7 +46,7 @@ end
 SimulationError() = SimulationError(NoError, "")
 
 const tolerance  =   1.1 # allow 10% tolerance for velocity limits
-const min_height =  10.0 # minimum height for simulation to be considered valid
+const min_height =  6.0 # minimum height for simulation to be considered valid
 const max_height = 600.0 # maximum height for simulation to be considered valid
 MAX_NORM = 100.0         # maximum allowed norm for corr_vec
 
@@ -232,7 +232,7 @@ function observe()
     nothing
 end
 
-function train(use_last=true; max_iter=40, norm_tol=1.0)
+function train(use_last=true; max_iter=60, norm_tol=1.0)
     local corr_vec
     if ! use_last
         try
@@ -255,19 +255,43 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
         initial = zeros(length(initial))
     end
     if norm(initial) < 1e-6
-        @info "Loaded corr_vec is all zeros; using struct defaults as starting point."
-        initial = FPPSettings().corr_vec
+        @info "Loaded corr_vec is all zeros; training will start from zeros."
+        # Do NOT fall back to FPPSettings().corr_vec — those defaults are calibrated
+        # for a reference kite and will mislead training for other configurations.
     end
     best_corr_vec = deepcopy(initial)
+    best_res  = zeros(length(initial))  # residual AT the best point (used for rollback direction)
     best_norm = Inf
     j = 0             # counts consecutive successful-but-no-improvement runs
     j_crash = 0       # counts consecutive crashes (safety limit)
     step_factor = 1.0
-    last_res = zeros(length(initial))  # last non-crashed residual
     correction_applied = false
+
+    # Step multiplier schedule based on best_norm:
+    #   far   (> 10):  0.5   — fast initial convergence
+    #   mid   (5–10):  0.25  — moderate step as we close in
+    #   close (2.5–5): 0.125 — careful near the solution
+    #   fine  (< 2.5): 0.0625
+    function step_mult(bn)
+        bn > 10 ? 0.5 : bn > 5 ? 0.25 : bn > 2.5 ? 0.125 : 0.0625
+    end
+
+    # Apply a scaled update from a residual vector to `initial`, shifting by +1 index.
+    function apply_update!(vec, res_vec, sf, bn)
+        sm = step_mult(bn)
+        for k = 1:min(length(res_vec), length(vec)-1)
+            vec[k+1] += sf * sm * res_vec[k]
+        end
+    end
+
     for i in 1:max_iter
+        # LOW_LEFT (initial[1]) has no observer measurement; keep it in sync with
+        # initial[2] (fig8=0 right correction), which is at a similar elevation.
+        if length(initial) >= 2
+            initial[1] = initial[2]
+        end
         res = residual(initial)
-        println("i: $(i), norm: $(norm(res))")
+        println("i: $(i), norm: $(norm(res)), corr_vec[1:min(4,end)]=$(round.(initial[1:min(4,end)], digits=2))")
         crashed = length(res) > 0 && res[1] == 1000.0
         if !crashed && norm(res) < norm_tol
             println("Converged successfully using $i iterations!")
@@ -277,72 +301,69 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
             break
         end
         if crashed
-            # Roll back to the last known-good vector, halve the step, and apply
-            # the reduced step immediately using the last valid residual.
-            # Crashes do NOT count toward j — they are handled by step reduction.
+            # Roll back to best, halve the step, and re-apply from best_res.
+            # best_res is the residual evaluated AT best_corr_vec, so the direction
+            # is valid from that point regardless of how many stale iterations passed.
             j_crash += 1
             step_factor /= 2.0
-            println("Crash detected: rolling back to best_corr_vec, step_factor= $step_factor (j_crash=$j_crash)")
+            println("Crash detected: rolling back to best, step_factor=$(step_factor) (j_crash=$j_crash)")
             initial = deepcopy(best_corr_vec)
-            common_size = min(length(initial), length(last_res))
-            for k = 1:common_size
-                if best_norm > 5
-                    initial[k] += step_factor * 0.5 * last_res[k]
-                elseif best_norm > 2.5
-                    initial[k] += step_factor * 0.25 * last_res[k]
-                else
-                    initial[k] += step_factor * 0.125 * last_res[k]
-                end
-            end
+            apply_update!(initial, best_res, step_factor, best_norm)
             if j_crash > 8
                 println("Too many consecutive crashes; giving up.")
                 break
             end
         else
             j_crash = 0
-            last_res = res
-            # Save best BEFORE updating initial, so best_corr_vec is the vector
-            # that actually produced best_norm (not the next-step candidate).
+            # Save best BEFORE updating initial (snapshot of the vector that produced best_norm).
             if best_norm > norm(res)
                 best_norm = norm(res)
                 best_corr_vec = deepcopy(initial)
-                # Ramp step_factor back up gradually (×2 per success, capped at 1.0)
-                # rather than jumping straight back to 1.0, to avoid immediate re-crash.
+                best_res = deepcopy(res)   # record residual AT the best point
+                # Ramp step_factor back up gradually (×2, capped at 1.0).
                 step_factor = min(step_factor * 2.0, 1.0)
                 j = 0
-                println("j: $(j), best_norm= $best_norm, step_factor= $step_factor")
+                println("j: $(j), best_norm=$(best_norm), step_factor=$(step_factor)")
             else
                 j += 1
-                println("j: $j")
-            end
-            common_size = min(length(initial), length(res))
-            for k = 1:common_size
-                if best_norm > 5
-                    initial[k] += step_factor * 0.5 * res[k]
-                elseif best_norm > 2.5
-                    initial[k] += step_factor * 0.25 * res[k]
-                else
-                    initial[k] += step_factor * 0.125 * res[k]
+                println("j: $j, step_factor=$(step_factor)")
+                if j > 3
+                    # Persistent non-improvement: roll back to best and halve the step.
+                    # Use best_res (evaluated AT best_corr_vec) as the correction direction.
+                    step_factor /= 2.0
+                    j = 0
+                    println("No improvement: step_factor reduced to $(step_factor); rolling back to best")
+                    if step_factor < 1/32
+                        println("Step factor too small ($(step_factor)); stopping.")
+                        correction_applied = true
+                        break
+                    end
+                    initial = deepcopy(best_corr_vec)
+                    apply_update!(initial, best_res, step_factor, best_norm)
+                    correction_applied = true
+                    continue
                 end
             end
+            # res[k] = error at figure-8 crossing k → corrects initial[k+1].
+            # initial[1] is the LOW_LEFT correction; not trained from crossing observations.
+            apply_update!(initial, res, step_factor, best_norm)
             correction_applied = true
         end
-        if j > 4
-            println("Convergence failed!")
-            println("Best norm: $best_norm")
-            break
-        end
+    end
+    if correction_applied && best_norm >= norm_tol
+        println("Reached max_iter=$(max_iter) without full convergence. Best norm: $(best_norm)")
     end
     last_nonzero = something(findlast(!iszero, best_corr_vec), length(best_corr_vec))
     best_corr_vec = best_corr_vec[1:last_nonzero]
     if best_norm < Inf && correction_applied
         KiteControllers.save_corr(best_corr_vec)
+        println("Saved best corr_vec with norm=$(round(best_norm, digits=4))")
     elseif !correction_applied && best_norm == Inf
         @warn "All simulations crashed; no corrections could be applied. Check project settings."
     elseif !correction_applied
         @info "Already converged before applying any correction; yaml file not updated."
     else
-        @warn "Training produced no valid result. corr_vec.jld2 not updated."
+        @warn "Training produced no valid result. corr_vec not updated."
     end
     best_corr_vec
 end
