@@ -1,8 +1,9 @@
 ## this script provides the main functions 
 ## - residual()
 ## - train()
-## The train() function trains the flight path planner for a specific 
-## wind speed and kite. It creates the file "data/corr_vec.jld2".
+## The train() function trains the flight path planner for a specific
+## wind speed and kite. It saves the learned correction vector by
+## updating the `corr_vec:` entry in the project YAML configuration.
 
 # activate the test environment if needed
 using Pkg
