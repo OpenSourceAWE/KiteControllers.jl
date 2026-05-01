@@ -276,7 +276,7 @@ function train(use_last=true; max_iter=MAX_ITER, norm_tol=1.0)
     #   close (2.5–5): 0.125 — careful near the solution
     #   fine  (< 2.5): 0.0625
     function step_mult(bn)
-        bn > 10 ? 0.5 : bn > 5 ? 0.25 : bn > 2.5 ? 0.125 : 0.0625
+        bn > 10 ? 0.5 : bn > 5 ? 0.25 : bn > 2.5 ? 0.125 : 0.125
     end
 
     # Apply a scaled update from a residual vector to `initial`, shifting by +1 index.
@@ -357,7 +357,7 @@ function train(use_last=true; max_iter=MAX_ITER, norm_tol=1.0)
             else
                 j += 1
                 println("j: $j, step_factor=$(step_factor)")
-                if j > 3
+                if j > 6
                     # Persistent non-improvement: roll back to best and halve the step.
                     # Use best_res (evaluated AT best_corr_vec) as the correction direction.
                     step_factor /= 2.0
