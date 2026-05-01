@@ -74,8 +74,8 @@ function residual(corr_vec=nothing; full_sim=false)
         l_in=length(corr_vec)
     end
     set = deepcopy(load_settings(PROJECT))
-    use_turbulence = get_use_turbulence(PROJECT)
-    isnothing(use_turbulence) || (set.use_turbulence = use_turbulence)
+    use_turbulence = 0.0
+    set.use_turbulence = use_turbulence
     sim_time = set.sim_time
     kcu   = KiteModels.KCU(set)
     kps4 = KiteModels.KPS4(kcu)
