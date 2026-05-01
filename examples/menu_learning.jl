@@ -1,16 +1,17 @@
 # provides a terminal menu with the options:
 # - "select_project": calls select_project() to select a project from the data directory
 # - "clear_corrections": clears all corrections from the current project
-# - "learn_corrections": calls learn_corrections.jl to learn corrections for the current project
+# - "train()": runs the training loop from learn_corrections.jl
 # - "quit": exits the menu
 
 using REPL.TerminalMenus
 
 include("select_project.jl")
+include("learn_corrections.jl")
 
 options = ["select_project()",
            "clear_corrections = include(\"clear_corrections.jl\")",
-           "learn_corrections = include(\"learn_corrections.jl\")",
+           "train()",
            "quit"]
 
 function learning_menu()

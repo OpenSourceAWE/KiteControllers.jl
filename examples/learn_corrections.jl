@@ -254,39 +254,78 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
         @warn "Loaded corr_vec has large norm $(norm(initial)), resetting to zeros."
         initial = zeros(length(initial))
     end
+    if norm(initial) < 1e-6
+        @info "Loaded corr_vec is all zeros; using struct defaults as starting point."
+        initial = FPPSettings().corr_vec
+    end
     best_corr_vec = deepcopy(initial)
     best_norm = Inf
-    j = 0
+    j = 0             # counts consecutive successful-but-no-improvement runs
+    j_crash = 0       # counts consecutive crashes (safety limit)
+    step_factor = 1.0
+    last_res = zeros(length(initial))  # last non-crashed residual
     correction_applied = false
     for i in 1:max_iter
         res = residual(initial)
         println("i: $(i), norm: $(norm(res))")
         crashed = length(res) > 0 && res[1] == 1000.0
-        if norm(res) < norm_tol
+        if !crashed && norm(res) < norm_tol
             println("Converged successfully using $i iterations!")
+            best_corr_vec = deepcopy(initial)
+            best_norm = norm(res)
+            correction_applied = true
             break
         end
-        if ! crashed
-            common_size=min(length(initial), length(res))
-            for i = 1:common_size
+        if crashed
+            # Roll back to the last known-good vector, halve the step, and apply
+            # the reduced step immediately using the last valid residual.
+            # Crashes do NOT count toward j — they are handled by step reduction.
+            j_crash += 1
+            step_factor /= 2.0
+            println("Crash detected: rolling back to best_corr_vec, step_factor= $step_factor (j_crash=$j_crash)")
+            initial = deepcopy(best_corr_vec)
+            common_size = min(length(initial), length(last_res))
+            for k = 1:common_size
                 if best_norm > 5
-                    initial[i] += 0.5 * res[i]
+                    initial[k] += step_factor * 0.5 * last_res[k]
                 elseif best_norm > 2.5
-                    initial[i] += 0.25*res[i]
+                    initial[k] += step_factor * 0.25 * last_res[k]
                 else
-                    initial[i] += 0.125*res[i]
+                    initial[k] += step_factor * 0.125 * last_res[k]
+                end
+            end
+            if j_crash > 8
+                println("Too many consecutive crashes; giving up.")
+                break
+            end
+        else
+            j_crash = 0
+            last_res = res
+            # Save best BEFORE updating initial, so best_corr_vec is the vector
+            # that actually produced best_norm (not the next-step candidate).
+            if best_norm > norm(res)
+                best_norm = norm(res)
+                best_corr_vec = deepcopy(initial)
+                # Ramp step_factor back up gradually (×2 per success, capped at 1.0)
+                # rather than jumping straight back to 1.0, to avoid immediate re-crash.
+                step_factor = min(step_factor * 2.0, 1.0)
+                j = 0
+                println("j: $(j), best_norm= $best_norm, step_factor= $step_factor")
+            else
+                j += 1
+                println("j: $j")
+            end
+            common_size = min(length(initial), length(res))
+            for k = 1:common_size
+                if best_norm > 5
+                    initial[k] += step_factor * 0.5 * res[k]
+                elseif best_norm > 2.5
+                    initial[k] += step_factor * 0.25 * res[k]
+                else
+                    initial[k] += step_factor * 0.125 * res[k]
                 end
             end
             correction_applied = true
-        end
-        if best_norm > norm(res) && ! crashed
-            best_norm = norm(res)
-            best_corr_vec = deepcopy(initial)
-            j = 0
-            println("j: $(j), best_norm= $best_norm")
-        else
-            j+=1
-            println("j: $j")
         end
         if j > 4
             println("Convergence failed!")
@@ -298,6 +337,8 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
     best_corr_vec = best_corr_vec[1:last_nonzero]
     if best_norm < Inf && correction_applied
         KiteControllers.save_corr(best_corr_vec)
+    elseif !correction_applied && best_norm == Inf
+        @warn "All simulations crashed; no corrections could be applied. Check project settings."
     elseif !correction_applied
         @info "Already converged before applying any correction; yaml file not updated."
     else
