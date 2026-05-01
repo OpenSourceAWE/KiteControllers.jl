@@ -12,7 +12,9 @@ include("learn_corrections.jl")
 options = ["select_project()",
            "clear_corrections = include(\"clear_corrections.jl\")",
            "train()",
-           "plot()",
+            "plot()",
+           "residual(full_sim=true)",
+           "plot(full_sim=true)",
            "quit"]
 
 function learning_menu()

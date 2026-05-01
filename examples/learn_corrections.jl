@@ -66,8 +66,8 @@ function test_ob(lg, plot=true)
 end
 
 # run a simulation using a correction vector, return a log object
-function residual(corr_vec=nothing)
-    global ssc
+# If full_sim=true, run for the full set.sim_time (no early exit after cycle 3).
+function residual(corr_vec=nothing; full_sim=false)
     l_in = 0
     if ! isnothing(corr_vec) 
         l_in=length(corr_vec)
@@ -167,7 +167,7 @@ function residual(corr_vec=nothing)
             if i*dt > sim_time
                 break 
             end
-            if ssc.fpp.fpca.cycle >= 3
+            if !full_sim && ssc.fpp.fpca.cycle >= 3
                 break
             end
         end
@@ -182,8 +182,8 @@ function residual(corr_vec=nothing)
         @warn "Simulation ended with error: $(sim_error.message). Skipping result."
         return l_in > 0 ? fill(1000.0, l_in) : Float64[]
     end
-    KiteControllers.save_log(logger, "tmp"; path="output")
-    lg = KiteControllers.load_log("tmp"; path="output")
+    KiteControllers.save_log(logger, full_sim ? "last_sim_log" : "tmp"; path="output")
+    lg = KiteControllers.load_log(full_sim ? "last_sim_log" : "tmp"; path="output")
     ob = test_ob(lg, false)
     test_ob(lg, true)
     println("\n --> norm: ", norm(ob.corr_vec), "\n")
@@ -204,8 +204,8 @@ function residual(corr_vec=nothing)
     ob.corr_vec
 end
 
-function plot(last_sim=false)
-    if last_sim
+function plot(;full_sim=false)
+    if full_sim
         lg = KiteControllers.load_log("last_sim_log"; path="output")
         @info "Plotting last simulation log from output/last_sim_log.arrow"
     else
@@ -213,7 +213,7 @@ function plot(last_sim=false)
         @info "Plotting current simulation log from output/tmp.arrow"
     end
     sl = lg.syslog
-    fig_name = last_sim ? "azimuth_elevation_last" : "azimuth_elevation"
+    fig_name = full_sim ? "azimuth_elevation_last" : "azimuth_elevation"
     display(ControlPlots.plotx(sl.time, rad2deg.(sl.azimuth), rad2deg.(sl.elevation);
             ylabels=["azimuth [°]", "elevation [°]"],
             xlabel="time [s]",
