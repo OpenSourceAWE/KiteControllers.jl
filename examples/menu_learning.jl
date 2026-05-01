@@ -15,7 +15,7 @@ options = ["select_project()",
            "plot()",
            "residual(full_sim=true)",
            "plot(full_sim=true)",
-           "autopilot = include(\"autopilot.jl\")",
+           "include(\"autopilot.jl\")",
            "quit"]
 
 function learning_menu()
