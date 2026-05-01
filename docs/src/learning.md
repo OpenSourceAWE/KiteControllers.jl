@@ -30,3 +30,13 @@ How it works:
 - you can run the autopilot GUI with the new settings for further investigation of the result
 - you can open this html documentation
 - and finally quit the menu
+
+
+### Flight path without correction
+
+![Azimuth elevation without correction](azimuth_elevation_without_correction.png)
+
+### Flight path with correction
+
+![Azimuth elevation with correction](azimuth_elevation_corrected.png)
+
