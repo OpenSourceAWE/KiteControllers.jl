@@ -14,7 +14,13 @@ on_stop
 on_winchcontrol
 on_new_systate(::SystemStateControl, ::Any)
 calc_v_set(::SystemStateControl)
-get_depower
+get_depower(::SystemStateControl)
+```
+
+## Configuration
+
+```@docs
+read_project()
 ```
 
 ## FlightPathPlanner

@@ -13,6 +13,7 @@ makedocs(
         "Types"     => "types.md",
         "Functions" => "functions.md",
         "Examples"  => "examples.md",
+        "Learning"  => "learning.md",
     ],
     checkdocs = :exports,
     warnonly  = true,
