@@ -1,12 +1,14 @@
 # provides a terminal menu with the options:
-# - "select_project": calls select_project.jl to select a project from the data directory
+# - "select_project": calls select_project() to select a project from the data directory
 # - "clear_corrections": clears all corrections from the current project
 # - "learn_corrections": calls learn_corrections.jl to learn corrections for the current project
 # - "quit": exits the menu
 
 using REPL.TerminalMenus
 
-options = ["select_project  = include(\"select_project.jl\")",
+include("select_project.jl")
+
+options = ["select_project()",
            "clear_corrections = include(\"clear_corrections.jl\")",
            "learn_corrections = include(\"learn_corrections.jl\")",
            "quit"]

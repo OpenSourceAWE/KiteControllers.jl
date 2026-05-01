@@ -3,20 +3,26 @@
 
 using REPL.TerminalMenus
 
-include("yaml_utils.jl")
+if ! @isdefined yaml_utils_loaded
+    include("yaml_utils.jl")
+    const yaml_utils_loaded = true
+end
 
-data_dir = joinpath(@__DIR__, "..", "data")
-gui_yaml = joinpath(data_dir, "gui.yaml")
+function select_project()
+    data_dir = joinpath(@__DIR__, "..", "data")
+    gui_yaml = joinpath(data_dir, "gui.yaml")
 
-# Collect all *.yml project files from the data directory
-projects = sort(filter(f -> endswith(f, ".yml"), readdir(data_dir)))
+    # Collect all *.yml project files from the data directory
+    projects = sort(filter(f -> endswith(f, ".yml"), readdir(data_dir)))
 
-if isempty(projects)
-    println("No *.yml project files found in $data_dir")
-else
+    if isempty(projects)
+        println("No *.yml project files found in $data_dir")
+        return
+    end
+
     # Read current project from gui.yaml
     gui_lines = readfile(gui_yaml)
-    local current = ""
+    current = ""
     for line in gui_lines
         m = match(r"^\s*project:\s*(\S+)", line)
         if !isnothing(m)
