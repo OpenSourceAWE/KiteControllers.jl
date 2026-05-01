@@ -6,6 +6,7 @@ if ! ("ControlPlots" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
 end
 using KiteControllers, YAML
+using KiteControllers: read_project
 
 PROJECT = read_project()
 KiteUtils.PROJECT = PROJECT
