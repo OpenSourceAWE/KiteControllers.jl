@@ -8,4 +8,4 @@ using Pkg
 if !("LiveServer" ∈ keys(Pkg.project().dependencies))
     Pkg.activate("docs")
 end
-using LiveServer; servedocs()
+using LiveServer; servedocs(launch_browser=true)
