@@ -27,10 +27,10 @@ elevation measurements and correction values for the flight path planner.
 function observe!(ob::KiteObserver, log::SysLog, elev_nom=26)
     sl  = log.syslog
 
-    # Collect indices of valid entries (cycle 2, sys_state in (6, 8))
+    # Collect indices of valid entries (cycle 3, sys_state in (6, 8))
     valid_indices = Int[]
     for i in 1:length(sl.azimuth)
-        if sl.cycle[i] == 2 && sl.sys_state[i] in (6, 8)
+        if sl.cycle[i] == 3 && sl.sys_state[i] in (6, 8)
             push!(valid_indices, i)
         end
     end

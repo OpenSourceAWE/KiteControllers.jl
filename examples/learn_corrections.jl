@@ -169,7 +169,7 @@ function residual(corr_vec=nothing; full_sim=false)
             if i*dt > sim_time
                 break 
             end
-            if !full_sim && ssc.fpp.fpca.cycle >= 3
+            if !full_sim && ssc.fpp.fpca.cycle >= 4
                 break
             end
         end
