@@ -86,10 +86,21 @@ end
 
 function save_corr(corr_vec::Vector{Float64})
     config_file = joinpath(get_data_path(), fpp_settings())
+    if Sys.iswindows()
+        config_file = replace(config_file, "/" => "\\")
+    end
+    if !isfile(config_file)
+        @error "save_corr: config file not found: $config_file"
+        return
+    end
     lines = KiteUtils.readfile(config_file)
-    last_nonzero = something(findlast(!iszero, corr_vec), 1)
-    trimmed = corr_vec[1:last_nonzero]
-    vec_str = "[" * join(round.(trimmed, digits=2), ", ") * "]"
+    if isempty(corr_vec)
+        vec_str = "[]"
+    else
+        last_nonzero = something(findlast(!iszero, corr_vec), length(corr_vec))
+        trimmed = corr_vec[1:last_nonzero]
+        vec_str = "[" * join(round.(trimmed, digits=2), ", ") * "]"
+    end
     result = String[]
     for line in lines
         if startswith(lstrip(line), "corr_vec")

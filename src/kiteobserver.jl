@@ -66,8 +66,8 @@ function observe!(ob::KiteObserver, log::SysLog, elev_nom=26)
         prev_cp  = k > 1                          ? crossing_positions[k-1] : 1
         next_cp  = k < length(crossing_positions) ? crossing_positions[k+1] : n_valid
 
-        last_max = maximum(elevs[prev_cp:cp])
-        next_min = minimum(elevs[cp:next_cp])
+        last_max = @views maximum(elevs[prev_cp:cp])
+        next_min = @views minimum(elevs[cp:next_cp])
 
         i = valid_indices[cp]
         push!(ob.time,      Float64(sl.time[i]))

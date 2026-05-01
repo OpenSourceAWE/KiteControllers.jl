@@ -32,7 +32,7 @@ by running a state machine whose transitions are evaluated on every call to
 @with_kw mutable struct FlightPathPlanner @deftype Float64
     fpps::FPPSettings
     fpca::FlightPathCalculator
-    corr_vec::Vector{Float64} = Float64[]
+    corr_vec::Vector{Float64} = fpps.corr_vec
     _state::FPPS = INITIAL
     delta_depower = 0    # this value must be increased, if the power is too high
     const_dd      = 0.7  # greek delta_depower

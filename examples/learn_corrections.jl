@@ -243,7 +243,11 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
         catch
             corr_vec=residual()
         end
-        KiteControllers.save_corr(corr_vec)
+        if isempty(corr_vec)
+            @warn "residual() returned an empty vector; skipping initial save_corr."
+        else
+            KiteControllers.save_corr(corr_vec)
+        end
     end
     initial = FPPSettings(true).corr_vec
     if norm(initial) > MAX_NORM
@@ -290,7 +294,7 @@ function train(use_last=true; max_iter=40, norm_tol=1.0)
             break
         end
     end
-    last_nonzero = something(findlast(!iszero, best_corr_vec), 0)
+    last_nonzero = something(findlast(!iszero, best_corr_vec), length(best_corr_vec))
     best_corr_vec = best_corr_vec[1:last_nonzero]
     if best_norm < Inf && correction_applied
         KiteControllers.save_corr(best_corr_vec)
