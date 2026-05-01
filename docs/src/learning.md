@@ -36,7 +36,11 @@ How it works:
 
 ![Azimuth elevation without correction](azimuth_elevation_without_correction.png)
 
+The minimal elevation angle is now 12.5 °. This is lower than intended. Intended is an elevation angle of 26 ° $\pm$ 5 ° for optimal power harvesting and safety.
+
 ### Flight path with correction
 
 ![Azimuth elevation with correction](azimuth_elevation_corrected.png)
+
+The minimal elevation angle is now 19.6 °. This increases the safety and also - a little bit - the power output, because a kite that flies too low harvests less wind energy.
 
