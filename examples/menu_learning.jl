@@ -10,7 +10,7 @@ include("select_project.jl")
 include("learn_corrections.jl")
 
 options = ["select_project()",
-           "clear_corrections = include(\"clear_corrections.jl\")",
+           "include(\"clear_corrections.jl\")",
            "train()",
            "plot()",
            "residual(full_sim=true)",
