@@ -32,7 +32,7 @@ function build_test_log(entries; n_steps=length(entries))
     KiteUtils.sys_log(logger)
 end
 
-@testset "KiteObserver – empty log (no cycle-2 data)" begin
+@testset "KiteObserver – empty log (no cycle-3 data)" begin
     # All entries have cycle=0 → observe! should find nothing
     entries = [Dict(:cycle => 0, :sys_state => 6, :azimuth => 0.1f0, :elevation => deg2rad(26.0)) for _ in 1:10]
     flight_log = build_test_log(entries)
@@ -43,8 +43,8 @@ end
     @test isempty(ob.elevation)
 end
 
-@testset "KiteObserver – cycle-2 data with known elevations" begin
-    # Simulate a sequence of cycle-2 entries where azimuth changes sign.
+@testset "KiteObserver – cycle-3 data with known elevations" begin
+    # Simulate a sequence of cycle-3 entries where azimuth changes sign.
     # The observer records elevation at each sign change.
     # We arrange two sign changes (right-to-left, left-to-right) at known elevations.
     elev_nom = 26.0                       # nominal elevation [deg]
@@ -59,15 +59,15 @@ end
     entries = [
         # negative azimuth block – no sign change from initial last_sign=-1
         # elevation = elev_right_rad so last_max at crossing 1 = elev_right_rad
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.3, :elevation => elev_right_rad, :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.2, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 8, :azimuth => -0.3, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 8, :azimuth => -0.2, :elevation => elev_right_rad, :fig8 => 0),
         # sign change to positive azimuth → crossing 1 (FLY_RIGHT, fig8=0)
-        Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.1, :elevation => elev_right_rad, :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.2, :elevation => elev_right_rad, :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 6, :azimuth =>  0.3, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 6, :azimuth =>  0.1, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 6, :azimuth =>  0.2, :elevation => elev_right_rad, :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 6, :azimuth =>  0.3, :elevation => elev_right_rad, :fig8 => 0),
         # sign change to negative azimuth → crossing 2 (FLY_LEFT, fig8=0)
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.1, :elevation => elev_left_rad,  :fig8 => 0),
-        Dict(:cycle => 2, :sys_state => 8, :azimuth => -0.2, :elevation => elev_left_rad,  :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 8, :azimuth => -0.1, :elevation => elev_left_rad,  :fig8 => 0),
+        Dict(:cycle => 3, :sys_state => 8, :azimuth => -0.2, :elevation => elev_left_rad,  :fig8 => 0),
     ]
     flight_log = build_test_log(entries)
     ob = KiteObserver()
