@@ -284,12 +284,17 @@ function train(use_last=true; max_iter=70, norm_tol=1.0)
     end
 
     # Apply a scaled update from a residual vector to `initial`, shifting by +1 index.
-    # After updating, clamp corrections [2:end] so beta_set+correction >= min_safe_beta.
-    # initial[1] (LOW_LEFT) is never updated by training — leave it at its loaded value.
+    # Also syncs initial[1] (LOW_LEFT) to max(0, initial[2]) after each update:
+    # crossing 1 elevation is controlled by LOW_LEFT, not just fig8-0-right, so both must
+    # track together. The max(0,...) floor prevents negative LOW_LEFT (hydra20_426 case where
+    # initial[2] = min_corr < 0 would otherwise crash the kite in the LOW phase).
     function apply_update!(vec, res_vec, sf, bn)
         sm = step_mult(bn)
         for k = 1:min(length(res_vec), length(vec)-1)
             vec[k+1] = max(min_corr, vec[k+1] + sf * sm * res_vec[k])
+        end
+        if length(vec) >= 2
+            vec[1] = max(0.0, vec[2])
         end
     end
 
