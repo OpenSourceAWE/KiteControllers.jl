@@ -50,6 +50,13 @@ using KiteControllers, KiteModels
 on_parking(ssc, tether_length=200.0)
 ```
 
+## [parking\_wind\_dir.jl](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/parking_wind_dir.jl) — Parking with Changing Wind Direction
+
+Demonstrates parking control while the upwind direction changes over time.
+The script applies a gradual wind-direction shift during the simulation,
+uses the parking controller to maintain stable flight, and plots azimuth,
+heading, upwind direction, and steering for analysis.
+
 ## [minipilot.jl](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/minipilot.jl) — Minimal Autopilot
 
 A stripped-down autopilot without 2D plots for understanding how to build a GUI
@@ -132,6 +139,7 @@ automatically or half-automatically by the `WinchController`.  Useful for learni
 | [`autopilot.jl`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/autopilot.jl) | Full autopilot — start running this as first step |
 | [`minipilot.jl`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/minipilot.jl) | Minimal autopilot without 2D plotting, good for understanding the code |
 | [`parking_4p.jl`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/parking_4p.jl) | Parking of the 4 point kite with disturbance |
+| [`parking_wind_dir.jl`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/parking_wind_dir.jl) | Parking simulation with gradually changing upwind direction |
 | [`batch_pilot.jl`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/batch_pilot.jl) | Batch simulations of projects |
 | [`batch_plot`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/batch_plot.jl) | Post-processing and interactive plotting of batch logs |
 | [`tune_4p.jl`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/tune_4p.jl) | Gain tuning of the parking controller |
