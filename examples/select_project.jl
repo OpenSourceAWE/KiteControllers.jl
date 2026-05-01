@@ -14,13 +14,25 @@ projects = sort(filter(f -> endswith(f, ".yml"), readdir(data_dir)))
 if isempty(projects)
     println("No *.yml project files found in $data_dir")
 else
-    menu = RadioMenu(projects, pagesize=8)
-    choice = request("\nSelect a project: ", menu)
+    # Read current project from gui.yaml
+    gui_lines = readfile(gui_yaml)
+    local current = ""
+    for line in gui_lines
+        m = match(r"^\s*project:\s*(\S+)", line)
+        if !isnothing(m)
+            current = m.captures[1]
+            break
+        end
+    end
+    prompt = isempty(current) ? "\nSelect a project: " : "\nSelect a project (current: $current): "
 
-    if choice != -1
-        selected = projects[choice]
-        lines = readfile(gui_yaml)
-        lines = change_value(lines, "project:", selected)
+    options = [projects; "quit"]
+    menu = RadioMenu(options, pagesize=8)
+    choice = request(prompt, menu)
+
+    if choice != -1 && choice != length(options)
+        selected = options[choice]
+        lines = change_value(gui_lines, "project:", selected)
         writefile(lines, gui_yaml)
         println("Project set to: $selected")
     else
