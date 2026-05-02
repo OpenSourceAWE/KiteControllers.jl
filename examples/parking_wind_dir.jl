@@ -14,6 +14,7 @@ set::Settings = if haskey(ENV, "USE_V9")
 else
     deepcopy(load_settings("system.yaml"))
 end
+set.use_turbulence = get_default_turbulence()
 set.abs_tol=0.00006
 set.rel_tol=0.0001
 set.sample_freq = 20
@@ -85,7 +86,6 @@ STEERING::Vector{Float64}      = zeros(Int64(MAX_TIME/dt))
 
 function sim_parking(integrator)
     upwind_dir=UPWIND_DIR
-    av_upwind_dir = upwind_dir
     start_time_ns = time_ns()
     clear_viewer(viewer)
     i=1; j=0; k=0
@@ -173,7 +173,9 @@ function sim_parking(integrator)
 end
 
 function play_parking()
+    set.use_turbulence = 0
     integrator = KiteModels.init!(kps4; delta=0.001, stiffness_factor=0.01)
+    set.use_turbulence = get_default_turbulence()
     toc()
     try
         sim_parking(integrator)
