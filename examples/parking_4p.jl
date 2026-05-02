@@ -17,11 +17,16 @@ using KitePodModels: KCU
 using KiteModels
 using KiteModels: KPS4
 using KiteModels: reactivate_host_app
+using KiteControllers: get_default_turbulence
 
 set::Settings = deepcopy(load_settings("system.yaml"))
 set.abs_tol=0.00006
 set.rel_tol=0.0001
 set.v_wind = 10 # v_min1 6-25; v_min2 5.3-30
+default_turbulence = get_default_turbulence()
+if default_turbulence !== nothing
+    set.use_turbulence = default_turbulence
+end
 
 include("parking_controller.jl")
 import .ParkingControllers as pcm
