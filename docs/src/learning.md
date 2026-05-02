@@ -8,7 +8,7 @@ The function `menu_learning()` can be used to access the following menu:
 ```text
 Project: hydra20_600.yml  — Choose function to execute or `q` to quit: 
  > select_project()
-   include("clear_corrections.jl")
+   clear_corrections()
    train()
    plot()
    residual(full_sim=true)
