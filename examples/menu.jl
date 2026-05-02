@@ -1,6 +1,13 @@
 using REPL.TerminalMenus
 
-options = ["autopilot_4p = include(\"autopilot.jl\")",
+if ! @isdefined yaml_utils_loaded
+    include("yaml_utils.jl")
+    const yaml_utils_loaded = true
+end
+include("set_default_turbulence.jl")
+
+options = ["set_turbulence = set_default_turbulence()",
+           "autopilot_4p = include(\"autopilot.jl\")",
            "batch_pilot = include(\"batch_pilot.jl\")",
            "batch_plot = include(\"batch_plot.jl\")",
            "create_wind_fields = include(\"create_wind_fields.jl\")",
