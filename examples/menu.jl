@@ -1,4 +1,5 @@
 using REPL.TerminalMenus
+using KiteControllers
 
 options = ["set_turbulence = KiteControllers.set_default_turbulence()",
            "autopilot_4p = include(\"autopilot.jl\")",
