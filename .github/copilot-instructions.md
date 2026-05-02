@@ -61,6 +61,12 @@ include("test/runtests.jl")
 ```
 Tests include Aqua.jl quality checks.
 
+## Documentation
+To test if building the docs works locally, use:
+```
+using Pkg; Pkg.activate("docs"); include("docs/make.jl"); Pkg.activate(".")
+```
+
 ## System Image
 A precompiled system image can be built with:
 ```bash
