@@ -9,6 +9,13 @@ using REPL.TerminalMenus
 include("select_project.jl")
 include("learn_corrections.jl")
 
+function clear_corrections()
+    project = read_project()
+    KiteUtils.PROJECT = project
+    KiteControllers.save_corr([0.0])
+    println("Correction vector cleared (set to [0.0]) in $(KiteControllers.fpp_settings()).")
+end
+
 function open_documentation()
     println("\nOpening documentation in browser...")
     doc_url = "https://opensourceawe.github.io/KiteControllers.jl/dev/"
@@ -33,7 +40,7 @@ end
 
 
 options = ["select_project()",
-           "include(\"clear_corrections.jl\")",
+           "clear_corrections()",
            "train()",
            "plot()",
            "residual(full_sim=true)",
