@@ -22,7 +22,12 @@ using KiteModels: reactivate_host_app
 using ControlPlots, KiteModels, Rotations
 using KiteControllers
 using KiteControllers: FPCSettings, FPPSettings, SystemStateControl, WCSettings,
-                       on_parking, on_stop, on_winchcontrol
+                       on_parking, on_stop, on_winchcontrol, get_default_turbulence
+
+default_turbulence = get_default_turbulence()
+if default_turbulence !== nothing
+    set.use_turbulence = default_turbulence
+end
 
 kcu::KCU = KCU(set)
 kps::KPS3 = KPS3(kcu)
