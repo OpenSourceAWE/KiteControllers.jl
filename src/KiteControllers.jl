@@ -29,7 +29,7 @@ export get_depower, on_winchcontrol                                   # methods 
 export is_active, on_new_data, start                                  # methods of FlightPathPlanner
 export ssManualOperation, ssParking, ssPowerProduction, ssReelIn
 export observe!, update
-export read_project
+export get_default_turbulence, read_project, set_default_turbulence
 
 abstract type AbstractForceController end
 const AFC = AbstractForceController
@@ -145,6 +145,123 @@ function install_examples(add_packages=true)
         Pkg.add("Timers")
     end
     mkpath("output")
+end
+
+function update_yaml_scalar(lines::Vector{String}, key::AbstractString, value)
+    value_str = repr(value)
+    result = String[]
+    updated = false
+    pattern = Regex("^(\\s*" * escape_string(key) * "\\s*)([^#]*?)(\\s*(?:#.*)?)\$")
+    for line in lines
+        stripped = lstrip(line)
+        if !updated && startswith(stripped, key)
+            matched = match(pattern, line)
+            if isnothing(matched)
+                push!(result, key * " " * value_str)
+            else
+                prefix, _, suffix = matched.captures
+                push!(result, prefix * value_str * suffix)
+            end
+            updated = true
+        else
+            push!(result, line)
+        end
+    end
+    return result, updated
+end
+
+"""
+    get_default_turbulence() -> Union{Float64, Nothing}
+
+Read the configured `default_turbulence` from `data/gui.yaml`. If the file does
+not exist it is created from `gui.yaml.default`.
+"""
+function get_default_turbulence()
+    gui_yaml = joinpath(get_data_path(), "gui.yaml")
+    gui_yaml_default = gui_yaml * ".default"
+
+    if !isfile(gui_yaml)
+        if isfile(gui_yaml_default)
+            cp(gui_yaml_default, gui_yaml)
+        else
+            println("Missing $gui_yaml and fallback $gui_yaml_default")
+            return nothing
+        end
+    end
+
+    dict = YAML.load_file(gui_yaml)
+    if !haskey(dict, "gui") || !haskey(dict["gui"], "default_turbulence")
+        println("Could not read current default_turbulence in $gui_yaml")
+        return nothing
+    end
+
+    try
+        return Float64(dict["gui"]["default_turbulence"])
+    catch
+        println("Could not read current default_turbulence in $gui_yaml")
+        return nothing
+    end
+end
+
+"""
+    set_default_turbulence([value])
+
+Read or prompt for the `default_turbulence` setting in `data/gui.yaml` and
+persist the new value. If `gui.yaml` does not exist, it is created from
+`gui.yaml.default`.
+"""
+function set_default_turbulence(value::Union{Nothing, Real}=nothing)
+    gui_yaml = joinpath(get_data_path(), "gui.yaml")
+    gui_yaml_default = gui_yaml * ".default"
+
+    if !isfile(gui_yaml)
+        if isfile(gui_yaml_default)
+            cp(gui_yaml_default, gui_yaml)
+        else
+            println("Missing $gui_yaml and fallback $gui_yaml_default")
+            return nothing
+        end
+    end
+
+    current = get_default_turbulence()
+
+    if isnothing(current)
+        return nothing
+    end
+
+    lines = KiteUtils.readfile(gui_yaml)
+
+    if isnothing(value)
+        println("Current default_turbulence: $current")
+        print("Enter new default_turbulence [0.0..1.0] (blank to cancel): ")
+        input = strip(readline())
+        if isempty(input)
+            println("Cancelled.")
+            return nothing
+        end
+        value = try
+            parse(Float64, input)
+        catch
+            println("Invalid number: $input")
+            return nothing
+        end
+    end
+
+    new_value = Float64(value)
+    if new_value < 0.0 || new_value > 1.0
+        println("Value out of range. Please use a value between 0.0 and 1.0")
+        return nothing
+    end
+
+    new_lines, updated = update_yaml_scalar(lines, "default_turbulence:", new_value)
+    if !updated
+        println("Could not update default_turbulence in $gui_yaml")
+        return nothing
+    end
+
+    KiteUtils.writefile(new_lines, gui_yaml)
+    println("default_turbulence set to: $new_value")
+    return new_value
 end
 
 
