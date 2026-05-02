@@ -12,6 +12,13 @@ function write_gui_default(path::AbstractString; turbulence=0.0)
     end
 end
 
+function write_gui_without_turbulence(path::AbstractString)
+    open(path, "w") do io
+        println(io, "gui:")
+        println(io, "    project: hydra20_600.yml")
+    end
+end
+
 function write_project_config(path::AbstractString; use_turbulence=nothing)
     open(path, "w") do io
         println(io, "name: test")
@@ -47,9 +54,18 @@ try
             @test Float64(updated["gui"]["default_turbulence"]) ≈ 0.35
             @test KiteControllers.get_default_turbulence() ≈ 0.35
 
+            rm(gui_yaml)
+            write_gui_without_turbulence(gui_yaml)
+            @test KiteControllers.set_default_turbulence(0.45) ≈ 0.45
+
+            inserted = YAML.load_file(gui_yaml)
+            @test inserted["gui"]["project"] == "hydra20_600.yml"
+            @test Float64(inserted["gui"]["default_turbulence"]) ≈ 0.45
+            @test KiteControllers.get_default_turbulence() ≈ 0.45
+
             project_without_overwrite = joinpath(tmpdir, "project_without_overwrite.yml")
             write_project_config(project_without_overwrite)
-            @test KiteControllers.get_use_turbulence("project_without_overwrite.yml") ≈ 0.35
+            @test KiteControllers.get_use_turbulence("project_without_overwrite.yml") ≈ 0.45
 
             project_with_overwrite = joinpath(tmpdir, "project_with_overwrite.yml")
             write_project_config(project_with_overwrite; use_turbulence=0.6)

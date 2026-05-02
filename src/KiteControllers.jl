@@ -170,6 +170,47 @@ function update_yaml_scalar(lines::Vector{String}, key::AbstractString, value)
     return result, updated
 end
 
+function insert_yaml_scalar_in_section(lines::Vector{String}, section::AbstractString, key::AbstractString, value)
+    value_str = repr(value)
+    result = String[]
+    in_section = false
+    inserted = false
+    section_indent = 0
+    child_indent = "    "
+
+    for line in lines
+        stripped = lstrip(line)
+        indent = firstindex(stripped) - firstindex(line)
+
+        if !inserted && in_section && !isempty(stripped)
+            if indent <= section_indent
+                push!(result, child_indent * key * " " * value_str)
+                inserted = true
+                in_section = false
+            elseif indent > section_indent
+                child_indent = line[begin:prevind(line, firstindex(stripped))]
+            end
+        end
+
+        push!(result, line)
+
+        if !inserted && startswith(stripped, section)
+            in_section = true
+            section_indent = indent
+            child_indent = line[begin:firstindex(stripped)-1] * "    "
+        elseif in_section && indent <= section_indent && !isempty(stripped)
+            in_section = false
+        end
+    end
+
+    if !inserted && in_section
+        push!(result, child_indent * key * " " * value_str)
+        inserted = true
+    end
+
+    return result, inserted
+end
+
 """
     get_default_turbulence() -> Union{Float64, Nothing}
 
@@ -239,16 +280,24 @@ function set_default_turbulence(value::Union{Nothing, Real}=nothing)
         end
     end
 
-    current = get_default_turbulence()
-
-    if isnothing(current)
-        return nothing
+    lines = KiteUtils.readfile(gui_yaml)
+    dict = YAML.load_file(gui_yaml)
+    current = get(get(dict, "gui", Dict{Any, Any}()), "default_turbulence", nothing)
+    if !isnothing(current)
+        current = try
+            Float64(current)
+        catch
+            println("Could not read current default_turbulence in $gui_yaml")
+            return nothing
+        end
     end
 
-    lines = KiteUtils.readfile(gui_yaml)
-
     if isnothing(value)
-        println("Current default_turbulence: $current")
+        if isnothing(current)
+            println("Current default_turbulence is not set.")
+        else
+            println("Current default_turbulence: $current")
+        end
         print("Enter new default_turbulence [0.0..1.0] (blank to cancel): ")
         input = strip(readline())
         if isempty(input)
@@ -271,8 +320,11 @@ function set_default_turbulence(value::Union{Nothing, Real}=nothing)
 
     new_lines, updated = update_yaml_scalar(lines, "default_turbulence:", new_value)
     if !updated
-        println("Could not update default_turbulence in $gui_yaml")
-        return nothing
+        new_lines, updated = insert_yaml_scalar_in_section(lines, "gui:", "default_turbulence:", new_value)
+        if !updated
+            println("Could not update default_turbulence in $gui_yaml")
+            return nothing
+        end
     end
 
     KiteUtils.writefile(new_lines, gui_yaml)
