@@ -30,7 +30,7 @@ function init_globals(kcu, wcs, fcs, fpps)
     fpps = FPPSettings(true)
     u_d0 = 0.01 * set.depower_offset
     u_d  = 0.01 * set.depowers[1]
-    ssc::SystemStateControl = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind=set.v_wind)
+    ssc = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind=set.v_wind)
 end
 
 # the following values can be changed to match your interest
