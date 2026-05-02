@@ -1,5 +1,18 @@
 # Changelog
 
+## KiteControllers v0.2.24 - 2026-05-02
+### Added
+- the function `menu_learning()` and the script `menu_learning.jl`
+- the page `Learning Control` to the documentation
+- the script `mwe_06.jl` for listing the exported symbols
+- the script `select_project` to provide an interactive way to select the active project
+
+### Changed
+- the file `kiteobserver.jl`. It uses now a different method to determine the average elevation of a figure of eight.
+- the script learning.jl was renamed to learn_corrections.jl
+- the script now stores the corrections directly in the yaml file of the flight path planner
+- it has better error handling and is much more robust
+
 ## KiteControllers v0.2.23 - 2026-04-27
 ### Fixed
 - updated TagBot.yml
