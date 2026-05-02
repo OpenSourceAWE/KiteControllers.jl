@@ -29,7 +29,7 @@ export get_depower, on_winchcontrol                                   # methods 
 export is_active, on_new_data, start                                  # methods of FlightPathPlanner
 export ssManualOperation, ssParking, ssPowerProduction, ssReelIn
 export observe!, update
-export get_default_turbulence, read_project, set_default_turbulence
+export get_default_turbulence, get_use_turbulence, read_project, set_default_turbulence
 
 abstract type AbstractForceController end
 const AFC = AbstractForceController
@@ -201,6 +201,22 @@ function get_default_turbulence()
         println("Could not read current default_turbulence in $gui_yaml")
         return nothing
     end
+end
+
+"""
+    get_use_turbulence(project::String) -> Union{Float64, Nothing}
+
+Read `use_turbulence` from `<data_path>/<project>`.
+If no `overwrite` block is present, return [`get_default_turbulence`](@ref).
+"""
+function get_use_turbulence(project::String)
+    config_file = joinpath(get_data_path(), project)
+    dict = YAML.load_file(config_file)
+    overwrite = get(dict, "overwrite", nothing)
+    isnothing(overwrite) && return get_default_turbulence()
+    result = get(overwrite, "use_turbulence", nothing)
+    isnothing(result) && return nothing
+    return Float64(result)
 end
 
 """
