@@ -324,9 +324,9 @@ function train(use_last=true; max_iter=MAX_ITER, norm_tol=1.0)
         en = effective_norm(res, initial, min_corr)
         n  = norm(res)
         if en < n - 1e-6
-            println("i: $(i), norm: $(round(n, digits=4)) (effective: $(round(en, digits=4))), corr_vec[1:min(4,end)]=$(round.(initial[1:min(4,end)], digits=2))")
+            println("i: $(i), norm: $(round(n, digits=4)) (effective: $(round(en, digits=4))), corr_vec[1:min(8, end)]=$(round.(initial[1:min(8, end)], digits=2))")
         else
-            println("i: $(i), norm: $(round(n, digits=4)), corr_vec[1:min(4,end)]=$(round.(initial[1:min(4,end)], digits=2))")
+            println("i: $(i), norm: $(round(n, digits=4)), corr_vec[1:min(8, end)]=$(round.(initial[1:min(8, end)], digits=2))")
         end
         crashed = length(res) > 0 && res[1] == 1000.0
         if !crashed && en < norm_tol
