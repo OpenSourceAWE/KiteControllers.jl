@@ -14,7 +14,10 @@ set::Settings = if haskey(ENV, "USE_V9")
 else
     deepcopy(load_settings("system.yaml"))
 end
-set.use_turbulence = get_default_turbulence()
+default_turbulence = get_default_turbulence()
+if default_turbulence !== nothing
+    set.use_turbulence = default_turbulence
+end
 set.abs_tol=0.00006
 set.rel_tol=0.0001
 set.sample_freq = 20
