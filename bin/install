@@ -74,6 +74,22 @@ juliaup default "${_desired_julia}"
 echo "Julia ${_desired_julia} is now the default."
 echo
 
+echo "Checking whether Revise is installed in the global Julia environment..."
+julia -e '
+using Pkg
+
+shared_env = Base.load_path_expand("@v#.#")
+Pkg.activate(shared_env; io=devnull)
+
+if haskey(Pkg.project().dependencies, "Revise")
+    println("Revise is already installed in $(shared_env).")
+else
+    println("Installing Revise in $(shared_env)...")
+    Pkg.add("Revise")
+end
+'
+echo
+
 # Detect Julia version
 julia_version=$(julia --version | awk '{print($3)}')
 julia_major=${julia_version:0:3}
