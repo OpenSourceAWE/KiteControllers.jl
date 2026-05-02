@@ -1,7 +1,10 @@
 using REPL.TerminalMenus
 using KiteControllers
 
-options = ["set_turbulence = KiteControllers.set_default_turbulence()",
+include("select_project.jl")
+
+options = ["select_project()",
+           "set_turbulence = set_default_turbulence()",
            "autopilot_4p = include(\"autopilot.jl\")",
            "batch_pilot = include(\"batch_pilot.jl\")",
            "batch_plot = include(\"batch_plot.jl\")",
