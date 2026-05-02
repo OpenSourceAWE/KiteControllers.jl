@@ -176,9 +176,11 @@ function sim_parking(integrator)
 end
 
 function play_parking()
+    saved_use_turbulence = set.use_turbulence
     set.use_turbulence = 0
     integrator = KiteModels.init!(kps4; delta=0.001, stiffness_factor=0.01)
-    set.use_turbulence = get_default_turbulence()
+    default_turbulence = get_default_turbulence()
+    set.use_turbulence = isnothing(default_turbulence) ? saved_use_turbulence : default_turbulence
     toc()
     try
         sim_parking(integrator)
