@@ -44,6 +44,12 @@ u_d = 0.01 * set.depowers[1]
 ssc::SystemStateControl = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind = set.v_wind)
 dt::Float64 = wcs.dt
 
+max_turn_rate_cmd = let raw = get(ENV, "MAX_TURN_RATE_CMD", "0.50")
+    parsed = tryparse(Float64, raw)
+    isnothing(parsed) ? 0.50 : parsed
+end
+@info "MAX_TURN_RATE_CMD=$(max_turn_rate_cmd)"
+
 
 MIN_DEPOWER = if KiteUtils.PROJECT == "system.yaml"
     # result of tuning
@@ -51,10 +57,10 @@ MIN_DEPOWER = if KiteUtils.PROJECT == "system.yaml"
     pcs.ki_tr=0.0008
     pcs.kp = 6.0
     pcs.ki = 0.1
-    pcs.c1 = 0.048
+    pcs.c1 = 0.024
     pcs.c2 = 0 # has no big effect, can also be set to zero
-    pcs.max_turn_rate_set = 0.35
-    pcs.max_turn_rate_cmd = 0.50
+    pcs.max_turn_rate_set = 1.0
+    pcs.max_turn_rate_cmd = max_turn_rate_cmd
     pcs.max_steering = 0.45
     pcs.max_steering_rate = 1.0
     0.22
@@ -65,10 +71,10 @@ else
     pcs.ki_tr=0.0015
     pcs.kp = 8.0
     pcs.ki = 0.2
-    pcs.c1 = 0.048
+    pcs.c1 = 0.024
     pcs.c2 = 0    # has no big effect, can also be set to zero
-    pcs.max_turn_rate_set = 0.35
-    pcs.max_turn_rate_cmd = 0.50
+    pcs.max_turn_rate_set = 1.0
+    pcs.max_turn_rate_cmd = max_turn_rate_cmd
     pcs.max_steering = 0.45
     pcs.max_steering_rate = 1.0
     0.4
@@ -214,6 +220,7 @@ stop(viewer)
 p=plotx(T, rad2deg.(AZIMUTH), rad2deg.(AZIMUTH_EAST),[rad2deg.(UPWIND_DIR_), rad2deg.(AV_UPWIND_DIR)],
          rad2deg.(HEADING), [100*(SET_STEERING), 100*(STEERING)], V_WIND_KITE, FORCE; 
          xlabel="Time [s]", 
+         ysize=10,
          ylabels=["Azimuth [°]", "azimuth_east [°]", "upwind_dir [°]", "Heading [°]", "Steering [%]", "v_wind_kite [m/s]", "force [N]"],
          labels=["azimuth", "azimuth_east", ["upwind_dir", "filtered_upwind_dir"], "heading", ["set_steering", "steering"], "v_wind_kite", "force"])
 display(p)

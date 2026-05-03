@@ -36,6 +36,10 @@ kcu::KCU = KCU(set)
 kps4::KPS4 = KPS4(kcu)
 @assert set.sample_freq == 20
 dt::Float64 = 1/set.sample_freq
+max_turn_rate_cmd = let raw = get(ENV, "MAX_TURN_RATE_CMD", "0.50")
+    parsed = tryparse(Float64, raw)
+    isnothing(parsed) ? 0.50 : parsed
+end
 
 MIN_DEPOWER, DISTURBANCE = if KiteUtils.PROJECT == "system.yaml"
     # result of tuning
@@ -46,7 +50,7 @@ MIN_DEPOWER, DISTURBANCE = if KiteUtils.PROJECT == "system.yaml"
     pcs.c1 = 0.048
     pcs.c2 = 0 # has no big effect, can also be set to zero
     pcs.max_turn_rate_set = 0.35
-    pcs.max_turn_rate_cmd = 0.50
+    pcs.max_turn_rate_cmd = max_turn_rate_cmd
     pcs.max_steering = 0.45
     pcs.max_steering_rate = 1.0
     0.22, 0.1
@@ -60,12 +64,12 @@ else
     pcs.c1 = 0.048
     pcs.c2 = 0    # has no big effect, can also be set to zero
     pcs.max_turn_rate_set = 0.35
-    pcs.max_turn_rate_cmd = 0.50
+    pcs.max_turn_rate_cmd = max_turn_rate_cmd
     pcs.max_steering = 0.45
     pcs.max_steering_rate = 1.0
     0.4, 0.4
 end
-@info "pcs.kp_tr=$(pcs.kp_tr), pcs.ki_tr=$(pcs.ki_tr), pcs.kp=$(pcs.kp), pcs.ki=$(pcs.ki), MIN_DEPOWER=$(MIN_DEPOWER)"
+@info "pcs.kp_tr=$(pcs.kp_tr), pcs.ki_tr=$(pcs.ki_tr), pcs.kp=$(pcs.kp), pcs.ki=$(pcs.ki), pcs.max_turn_rate_cmd=$(pcs.max_turn_rate_cmd), MIN_DEPOWER=$(MIN_DEPOWER)"
 pc = pcm.ParkingController(pcs)
 
 # the following values can be changed to match your interest
