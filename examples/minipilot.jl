@@ -10,6 +10,11 @@ using KiteControllers, KiteModels, KiteViewers, Statistics
 using KiteUtils: Settings, load_settings
 
 set::Settings = deepcopy(load_settings("system.yaml"))
+default_turbulence = get_default_turbulence()
+if default_turbulence !== nothing
+    set.use_turbulence = default_turbulence
+end
+
 kcu::KCU   = KCU(set)
 kps4::KPS4 = KPS4(kcu)
 
