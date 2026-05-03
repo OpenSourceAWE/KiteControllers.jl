@@ -9,7 +9,12 @@
 
 # The data is stored in /var/lib/docker/volumes/qdrant_data/_data/collections
 
-docker volume create qdrant_data 
+if docker volume inspect qdrant_data &>/dev/null; then
+  echo "Volume 'qdrant_data' already exists, skipping setup."
+  exit 0
+fi
+
+docker volume create qdrant_data
 
 docker run -d \
   --name qdrant \
