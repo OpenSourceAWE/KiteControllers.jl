@@ -56,7 +56,7 @@ MIN_DEPOWER = if KiteUtils.PROJECT == "system.yaml"
     pcs.kp_tr=0.04
     pcs.ki_tr=0.0008
     pcs.kp = 6.0
-    pcs.ki = 0.1
+    pcs.ki = 0.005
     pcs.c1 = 0.024
     pcs.c2 = 0 # has no big effect, can also be set to zero
     pcs.max_turn_rate_set = 1.0
