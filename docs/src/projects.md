@@ -69,10 +69,14 @@ The relative turbulence (`use_turbulence`) can be specified at three locations:
 2. as `default_turbulence` in the file `gui.yaml`
 3. in one of the `settings_*.yaml` files in the section `environment`
 
-The first entry has the highest priority. If you want to use the `default_turbulence`, make sure to select a project that does not specify an `overwrite` value.
+The first entry has the highest priority. If you want to use the `default_turbulence`, make sure
+to select a project that does not specify an `overwrite` value.
 
 The value from the `settings_*.yaml` files is mainly used for batch operation using `batch_pilot.jl`, but
 only for projects that do not define an `overwrite` value.
+
+For further details on the mathematical model, used to create the turbulent wind field,
+look at [AtmosphericModels.jl](https://opensourceawe.github.io/AtmosphericModels.jl/dev/).
 
 The example "parking_wind_dir.jl" produces the following output:
 
