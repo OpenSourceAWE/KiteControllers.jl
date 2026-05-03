@@ -78,7 +78,7 @@ only for projects that do not define an `overwrite` value.
 For further details on the mathematical model, used to create the turbulent wind field,
 look at [AtmosphericModels.jl](https://opensourceawe.github.io/AtmosphericModels.jl/dev/).
 
-The example "parking_wind_dir.jl" produces the following output:
+The example "parking\_wind\_dir.jl" produces the following output:
 
 ### Without turbulence
 
