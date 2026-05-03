@@ -86,6 +86,6 @@ The example "parking_wind_dir.jl" produces the following output:
 
 ### With turbulence (7.1% turbulence intensity)
 
-![Output of parking_wind_dir.jl without turbulence](parking_wind_dir_T1.png)
+![Output of parking_wind_dir.jl with turbulence](parking_wind_dir_T1.png)
 
 The turbulence intensity at the height of the kite is calculated and printed when running the example.
