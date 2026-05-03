@@ -4,7 +4,6 @@ if ! ("ControlPlots" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
 end
 using Timers; tic()
-using LinearAlgebra
 using LinearAlgebra: norm
 
 using ControlPlots, KiteControllers, KiteModels, KiteViewers, Rotations, Statistics
