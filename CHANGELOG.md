@@ -1,14 +1,22 @@
 # Changelog
 
-## Unreleased
+## KiteControllers v0.2.25 - 2026-05-03
 ### Added
-- the functions set_default_turbulence and get_default_turbulence
-- the menu entry set_turbulence
-- run_julia uses `Revise` now by default; Revise must be installed globally
+- the functions `set_default_turbulence` and `get_default_turbulence`
+- the menu entry `set_turbulence`
+- the script `bin/install_kaimon_database`
+- the documentation page `projects.md`
+- the test `test-default_turbulence.jl`
+- `run_julia` uses `Revise` now by default; Revise must be installed globally
 
 ### Changed
-- the example parking_wind_dir is using the default turbulence now
+- the example `parking_wind_dir` and all other relevant examples now use the default turbulence
 - the install script now installs Revise globally
+- added `default_turbulence` to `gui.yaml`
+
+### Fixed
+- fixed a typo in `docs/src/projects.md`
+- fixed a warning in `examples/parking_wind_dir.jl`
 
 ## KiteControllers v0.2.24 - 2026-05-02
 ### Added
