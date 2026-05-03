@@ -4,6 +4,7 @@
 Projects are files with the ending `.yml` in the `data` folder.
 
 As example, the file `hydra20_600_TI0.yml`:
+
 ```yaml
 system:
     sim_settings: "settings_hydra20_600.yaml" # model and simulator settings
@@ -13,9 +14,11 @@ system:
 overwrite:
     use_turbulence: 0.0                       # turbulence intensity relative to Cabauw, NL
 ```
+
 The turbulence intensity is not specified in percent, but relative to a one year average at the location Cabauw, The Netherlands.
 
 The file naming follows the convention:
+
 ```text
 <kite name><projected kite area>_<ground wind speed in 1/100 m/s>_TI<use_turbulence>.yml
 ```
@@ -23,6 +26,7 @@ The file naming follows the convention:
 ## The file `gui.yaml`
 
 Example:
+
 ```yaml
 gui:
     project: hydra20_600.yml             # or hydra20_600.yml
@@ -37,6 +41,7 @@ The file `gui.yaml` stores the active project and the default turbulence. Both c
 - batch\_plot.jl
 
 ## The main menu
+
 ```text
 Choose function to execute or `q` to quit: 
  > select_project()
@@ -53,6 +58,7 @@ Choose function to execute or `q` to quit:
    parking_wind_dir = include("parking_wind_dir.jl")
  > quit
 ```
+
 The first two menu entries can be used to select a project and the default turbulence.
 
 ## Turbulence
@@ -67,3 +73,13 @@ The first entry has the highest priority. If you want to use the `default_turbul
 
 The value from the `settings_*.yaml` files is mainly used for batch operation using `batch_pilot.jl`, but
 only for projects that do not define an `overwrite` value.
+
+The example "parking_wind_dir.jl" produces the following output:
+
+### Without turbulence
+
+![Output of parking_wind_dir.jl without turbulence](parking_wind_dir_T0.png)
+
+### With turbulence
+
+![Output of parking_wind_dir.jl without turbulence](parking_wind_dir_T1.png)
