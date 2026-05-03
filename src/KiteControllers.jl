@@ -180,7 +180,7 @@ function insert_yaml_scalar_in_section(lines::Vector{String}, section::AbstractS
 
     for line in lines
         stripped = lstrip(line)
-        indent = firstindex(stripped) - firstindex(line)
+        indent = length(line) - length(stripped)
 
         if !inserted && in_section && !isempty(stripped)
             if indent <= section_indent
@@ -188,7 +188,7 @@ function insert_yaml_scalar_in_section(lines::Vector{String}, section::AbstractS
                 inserted = true
                 in_section = false
             elseif indent > section_indent
-                child_indent = line[begin:prevind(line, firstindex(stripped))]
+                child_indent = line[begin:indent]
             end
         end
 
@@ -197,7 +197,7 @@ function insert_yaml_scalar_in_section(lines::Vector{String}, section::AbstractS
         if !inserted && startswith(stripped, section)
             in_section = true
             section_indent = indent
-            child_indent = line[begin:firstindex(stripped)-1] * "    "
+            child_indent = line[begin:indent] * "    "
         elseif in_section && indent <= section_indent && !isempty(stripped)
             in_section = false
         end
