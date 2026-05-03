@@ -29,7 +29,12 @@ gui:
     default_turbulence: 1.0              # default turbulence level for simulations, between 0.0 and 1.0
 ```
 
-The file `gui.yaml` stores the active project and the default turbulence. Both can be changed using a menu entry.
+The file `gui.yaml` stores the active project and the default turbulence. Both can be changed using a menu entry. Only the following examples are using the active project:
+
+- autopilot.jl
+- learn\_corrections.jl
+- create\_wind\_fields.jl
+- batch\_plot.jl
 
 ## The main menu
 ```text
