@@ -74,6 +74,15 @@ bin/create_sys_image
 ```
 Launch Julia with it via `bin/run_julia`.
 
+## Git Commits
+
+**NEVER add Co-Authored-By or any attribution lines to git commits.**
+
+When committing code:
+- Use clear, descriptive commit messages
+- Follow the project's commit message style
+- Do NOT add `Co-Authored-By: Copilot` or similar attribution
+
 ## Tool routing
 
 Prefer MCP tools over ad-hoc shell commands whenever a matching tool exists.
