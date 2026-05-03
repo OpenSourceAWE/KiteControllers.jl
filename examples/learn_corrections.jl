@@ -10,18 +10,8 @@ using Pkg
 if ! ("ControlPlots" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
 end
-using KiteControllers, KiteModels, YAML
+using KiteControllers, KiteModels
 using KiteUtils: load_settings
-
-function get_use_turbulence(project::String)
-    config_file = joinpath(get_data_path(), project)
-    dict = YAML.load_file(config_file)
-    overwrite = get(dict, "overwrite", nothing)
-    isnothing(overwrite) && return nothing
-    result = get(overwrite, "use_turbulence", nothing)
-    isnothing(result) && return nothing
-    return Float64(result)
-end
 
 PROJECT=read_project()
 

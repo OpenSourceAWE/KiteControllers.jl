@@ -21,6 +21,9 @@ get_depower(::SystemStateControl)
 
 ```@docs
 read_project()
+get_default_turbulence()
+get_use_turbulence
+set_default_turbulence
 ```
 
 ## FlightPathPlanner

@@ -11,6 +11,11 @@ using KiteControllers, KiteModels, KiteViewers, Statistics
 using KiteUtils: Settings, load_settings
 
 set::Settings = deepcopy(load_settings("system.yaml"))
+default_turbulence = get_default_turbulence()
+if default_turbulence !== nothing
+    set.use_turbulence = default_turbulence
+end
+
 set.segments = 12
 kcu::KCU   = KCU(set)
 kps4::KPS4 = KPS4(kcu)
@@ -32,7 +37,7 @@ function init_globals(kcu, wcs, fcs, fpps)
     fpps = FPPSettings(true)
     u_d0 = 0.01 * set.depower_offset
     u_d  = 0.01 * set.depowers[1]
-    ssc::SystemStateControl = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind=set.v_wind)
+    ssc = SystemStateControl(wcs, fcs, fpps; u_d0, u_d, v_wind=set.v_wind)
 end
 
 # the following values can be changed to match your interest

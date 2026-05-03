@@ -59,22 +59,6 @@ function read_project(index::Int = 1)
     return PROJECTS[index]  
 end
 
-"""
-    get_use_turbulence(project::String) -> Union{Float64, Nothing}
-
-Return the `use_turbulence` overwrite value defined in the project yaml file,
-or `nothing` if no overwrite is defined.
-"""
-function get_use_turbulence(project::String)
-    config_file = joinpath(get_data_path(), project)
-    dict = KiteControllers.YAML.load_file(config_file)
-    overwrite = get(dict, "overwrite", nothing)
-    isnothing(overwrite) && return nothing
-    result = get(overwrite, "use_turbulence", nothing)
-    isnothing(result) && return nothing
-    return Float64(result)
-end
-
 # ensure KiteUtils uses this project's data/ directory, regardless of cwd
 set_data_path(joinpath(dirname(@__DIR__), "data"))
 

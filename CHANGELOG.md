@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+### Added
+- the functions set_default_turbulence and get_default_turbulence
+- the menu entry set_turbulence
+- run_julia uses `Revise` now by default; Revise must be installed globally
+
+### Changed
+- the example parking_wind_dir is using the default turbulence now
+- the install script now installs Revise globally
+
 ## KiteControllers v0.2.24 - 2026-05-02
 ### Added
 - the function `menu_learning()` and the script `menu_learning.jl`

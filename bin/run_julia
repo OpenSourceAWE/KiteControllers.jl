@@ -7,6 +7,17 @@ fi
 export NO_AT_BRIDGE=1
 export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
 
+USE_KAIMON=false
+if command -v ss &> /dev/null; then
+    if ss -ltn '( sport = :2828 )' | grep -q ':2828'; then
+        USE_KAIMON=true
+    fi
+elif command -v lsof &> /dev/null; then
+    if lsof -nP -iTCP:2828 -sTCP:LISTEN &> /dev/null; then
+        USE_KAIMON=true
+    fi
+fi
+
 if [[ "$(uname -s)" == "Darwin" ]]; then
     # Avoid Tk backend issues on macOS (e.g. non-responsive close button in PyPlot windows).
     # Keep user override if MPLBACKEND is already set.
@@ -46,11 +57,6 @@ fi
 if [[ $HOSTNAME == "ufryzen" || $HOSTNAME == "framework" ]]; then
     export NO_MTK=true
 fi
-if [ -d ".git" ]; then
-    branch=$(git rev-parse --abbrev-ref HEAD)
-else
-    branch=""
-fi
 
 script_file=""
 if [[ $# -gt 0 ]]; then
@@ -62,18 +68,24 @@ if [[ $# -gt 0 ]]; then
     fi
 fi
 
+julia_init='using Revise; '
+if [[ "$USE_KAIMON" == "true" ]]; then
+    julia_init+='using Kaimon; Gate.serve(); '
+fi
+julia_init+='using KiteControllers; test_menu() = Base.include(Main, joinpath(pkgdir(KiteControllers), "test", "test_menu.jl")); menu_learning() = Base.include(Main, joinpath(pkgdir(KiteControllers), "examples", "menu_learning.jl"))'
+
 if test -f "bin/kps-image-${julia_major}.so"; then
     echo "Found system image!"
     if [[ -n "$script_file" ]]; then
         PLOT=1 julia -J bin/kps-image-${julia_major}.so -t 1 $GCT --project "$script_file" "$@"
     else
-        PLOT=1 julia -J bin/kps-image-${julia_major}.so -t 1 $GCT --project -i -e 'using KiteControllers; test_menu() = Base.include(Main, joinpath(pkgdir(KiteControllers), "test", "test_menu.jl")); menu_learning() = Base.include(Main, joinpath(pkgdir(KiteControllers), "examples", "menu_learning.jl"))'
+        PLOT=1 julia -J bin/kps-image-${julia_major}.so -t 1 $GCT --project -i -e "$julia_init"
     fi
 else
     if [[ -n "$script_file" ]]; then
         PLOT=1 julia --project -t 1 $GCT "$script_file" "$@"
     else
-        PLOT=1 julia --project -t 1 $GCT -i -e 'using KiteControllers; test_menu() = Base.include(Main, joinpath(pkgdir(KiteControllers), "test", "test_menu.jl")); menu_learning() = Base.include(Main, joinpath(pkgdir(KiteControllers), "examples", "menu_learning.jl"))'
+        PLOT=1 julia --project -t 1 $GCT -i -e "$julia_init"
     fi
     # julia --project
 fi

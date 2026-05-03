@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# This script starts the Qdrant vector database in a Docker container. It creates a Docker 
+# volume named "qdrant_data" to persist the data and runs the container with the appropriate 
+# port mapping and restart policy.
+
+# It needs to be executed only once. After that, the Qdrant container will automatically 
+# restart on system reboot or if it crashes.
+
+# The data is stored in /var/lib/docker/volumes/qdrant_data/_data/collections
+
+if docker volume inspect qdrant_data &>/dev/null; then
+  echo "Volume 'qdrant_data' already exists, skipping setup."
+  exit 0
+fi
+
+docker volume create qdrant_data
+
+docker run -d \
+  --name qdrant \
+  --restart unless-stopped \
+  -p 6333:6333 \
+  -v qdrant_data:/qdrant/storage \
+  qdrant/qdrant
