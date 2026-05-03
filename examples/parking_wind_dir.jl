@@ -101,6 +101,7 @@ UPWIND_DIR_::Vector{Float64}   = zeros(Int64(MAX_TIME/dt))
 AV_UPWIND_DIR::Vector{Float64} = zeros(Int64(MAX_TIME/dt))
 V_WIND_KITE::Vector{Float64}   = zeros(Int64(MAX_TIME/dt))
 FORCE::Vector{Float64}         = zeros(Int64(MAX_TIME/dt))
+ELEVATION::Vector{Float64}      = zeros(Int64(MAX_TIME/dt))
 HEADING::Vector{Float64}       = zeros(Int64(MAX_TIME/dt))
 SET_STEERING::Vector{Float64}  = zeros(Int64(MAX_TIME/dt))
 STEERING::Vector{Float64}      = zeros(Int64(MAX_TIME/dt))
@@ -156,6 +157,7 @@ function sim_parking(integrator)
         T[i] = dt * i
         AZIMUTH[i] = sys_state.azimuth
         AZIMUTH_EAST[i] = calc_azimuth_east(kps4)
+        ELEVATION[i] = sys_state.elevation
         FORCE[i] = sys_state.winch_force[1]
         HEADING[i] = wrap2pi(sys_state.heading)
         on_new_systate(ssc, sys_state)
@@ -218,11 +220,11 @@ end
 play_parking()
 stop(viewer)
 p=plotx(T, rad2deg.(AZIMUTH), rad2deg.(AZIMUTH_EAST),[rad2deg.(UPWIND_DIR_), rad2deg.(AV_UPWIND_DIR)],
-         rad2deg.(HEADING), [100*(SET_STEERING), 100*(STEERING)], V_WIND_KITE, FORCE; 
+         rad2deg.(ELEVATION), rad2deg.(HEADING), [100*(SET_STEERING), 100*(STEERING)], V_WIND_KITE, FORCE; 
          xlabel="Time [s]", 
          ysize=10,
-         ylabels=["Azimuth [°]", "azimuth_east [°]", "upwind_dir [°]", "Heading [°]", "Steering [%]", "v_wind_kite [m/s]", "force [N]"],
-         labels=["azimuth", "azimuth_east", ["upwind_dir", "filtered_upwind_dir"], "heading", ["set_steering", "steering"], "v_wind_kite", "force"])
+         ylabels=["Azimuth [°]", "azimuth_east [°]", "upwind_dir [°]", "Elevation [°]", "Heading [°]", "Steering [%]", "v_wind_kite [m/s]", "force [N]"],
+         labels=["azimuth", "azimuth_east", ["upwind_dir", "filtered_upwind_dir"], "elevation", "heading", ["set_steering", "steering"], "v_wind_kite", "force"])
 display(p)
 reactivate_host_app()
 
