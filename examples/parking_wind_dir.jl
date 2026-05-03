@@ -47,22 +47,30 @@ dt::Float64 = wcs.dt
 
 MIN_DEPOWER = if KiteUtils.PROJECT == "system.yaml"
     # result of tuning
-    pcs.kp_tr=0.06
-    pcs.ki_tr=0.0012
-    pcs.kp = 15
-    pcs.ki = 0.5
+    pcs.kp_tr=0.04
+    pcs.ki_tr=0.0008
+    pcs.kp = 8.0
+    pcs.ki = 0.2
     pcs.c1 = 0.048
     pcs.c2 = 0 # has no big effect, can also be set to zero
+    pcs.max_turn_rate_set = 0.45
+    pcs.max_turn_rate_cmd = 0.75
+    pcs.max_steering = 0.45
+    pcs.max_steering_rate = 1.0
     0.22
 else
     # result of tuning
     println("not system.yaml")
-    pcs.kp_tr=0.05
-    pcs.ki_tr=0.0024
-    pcs.kp = 30
-    pcs.ki = 1.0
+    pcs.kp_tr=0.035
+    pcs.ki_tr=0.0015
+    pcs.kp = 10.0
+    pcs.ki = 0.3
     pcs.c1 = 0.048
     pcs.c2 = 0    # has no big effect, can also be set to zero
+    pcs.max_turn_rate_set = 0.45
+    pcs.max_turn_rate_cmd = 0.75
+    pcs.max_steering = 0.45
+    pcs.max_steering_rate = 1.0
     0.4
 end
 pc = pcm.ParkingController(pcs)
@@ -201,10 +209,10 @@ end
 play_parking()
 stop(viewer)
 p=plotx(T, rad2deg.(AZIMUTH), rad2deg.(AZIMUTH_EAST),[rad2deg.(UPWIND_DIR_), rad2deg.(AV_UPWIND_DIR)],
-         rad2deg.(HEADING), [100*(SET_STEERING), 100*(STEERING)]; 
+         rad2deg.(HEADING), [100*(SET_STEERING), 100*(STEERING)], V_WIND_KITE; 
          xlabel="Time [s]", 
-         ylabels=["Azimuth [°]", "azimuth_east [°]", "upwind_dir [°]", "Heading [°]", "Steering [%]"],
-         labels=["azimuth", "azimuth_east", ["upwind_dir", "filtered_upwind_dir"], "heading", ["set_steering", "steering"]])
+         ylabels=["Azimuth [°]", "azimuth_east [°]", "upwind_dir [°]", "Heading [°]", "Steering [%]", "v_wind_kite [m/s]"],
+         labels=["azimuth", "azimuth_east", ["upwind_dir", "filtered_upwind_dir"], "heading", ["set_steering", "steering"], "v_wind_kite"])
 display(p)
 reactivate_host_app()
 
