@@ -14,6 +14,7 @@ import KiteUtils: wrap2pi
     kp=15
     ki=0.5
     kd=0.0             # derivative time [s] for the outer heading loop, 0 disables
+    kd_N=10.0          # derivative filter coefficient (lower = more filtering)
     # NDI block settings
     va_min = 5.0   # minimum apparent wind speed
     va_max = 100.0 # maximum apparent wind speed
@@ -40,7 +41,9 @@ end
 function ParkingController(pcs::ParkingControllerSettings; last_heading = 0.0)
     Ts = pcs.dt
     pid_tr    = DiscretePID(;K=pcs.kp_tr, Ti=pcs.kp_tr/ pcs.ki_tr, Ts)
-    pid_outer = DiscretePID(;K=pcs.kp,    Ti=pcs.kp/ pcs.ki, Td=pcs.kd, Ts)
+    umax = pcs.max_turn_rate_set
+    pid_outer = DiscretePID(;K=pcs.kp, Ti=pcs.kp/ pcs.ki, Td=pcs.kd, N=pcs.kd_N,
+                             umin=-umax, umax=umax, Ts)
     return ParkingController(pcs, pid_tr, pid_outer, last_heading, 0.0, 0.0, 0.0)
 end
 
