@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+### Added
+- added `FFMPEG` to `examples/Project.toml`
+- `parking_wind_dir.jl` creates now a video and stores it in the **output** folder
+
+### Changed
+- further parameter tuning in `parking_4p.jl`, `parking_controller.jl`, and `parking_wind_dir.jl`
+- updated documentation in `docs/src/projects.md`
+- added updated documentation images `parking_wind_dir_T0.png` and `parking_wind_dir_T1.png`
+- updated `.gitignore`
+
 ## KiteControllers v0.2.26 - 2026-05-04
 ### Changed
 - improved `bin/install` script
