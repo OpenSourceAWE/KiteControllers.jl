@@ -10,6 +10,8 @@ using ControlPlots, KiteControllers, KiteModels, KiteViewers, Rotations, Statist
 using KiteUtils: Settings, load_settings
 using KiteModels: reactivate_host_app
 
+CREATE_VIDEO = true
+
 set::Settings = if haskey(ENV, "USE_V9")
     deepcopy(load_settings("system_v9.yaml"))
 else
@@ -174,6 +176,9 @@ function sim_parking(integrator)
                 KiteViewers.update_system(viewer, sys_state; scale = 0.08*0.5, kite_scale=3)
             end
             set_status(viewer, String(Symbol(ssc.state)))
+            if CREATE_VIDEO
+                save_png(viewer, index=div(i, TIME_LAPSE_RATIO))
+            end
             wait_until(start_time_ns + 1e9*dt, always_sleep=true) 
             mtime = 0
             if i > 10/dt 
@@ -225,6 +230,13 @@ end
 
 play_parking()
 stop(viewer)
+if CREATE_VIDEO
+    using FFMPEG_jll
+    FFMPEG_jll.ffmpeg() do exe
+        run(`$exe -y -r:v 20 -i video/video%06d.png -codec:v libx264 -preset veryslow -pix_fmt yuv420p -crf 10 -an output/parking_wind_dir.mp4`)
+    end
+    println("Video saved as output/parking_wind_dir.mp4")
+end
 p=plotx(T, rad2deg.(AZIMUTH), rad2deg.(AZIMUTH_EAST),[rad2deg.(UPWIND_DIR_), rad2deg.(AV_UPWIND_DIR)],
          rad2deg.(ELEVATION), rad2deg.(HEADING), [100*(SET_STEERING), 100*(STEERING)], V_WIND_KITE, FORCE; 
          xlabel="Time [s]", 
