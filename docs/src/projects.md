@@ -84,7 +84,7 @@ The example "parking\_wind\_dir.jl" produces the following output:
 
 ![Output of parking_wind_dir.jl without turbulence](parking_wind_dir_T0.png)
 
-### With turbulence (7.1% turbulence intensity)
+### With turbulence (8.9% turbulence intensity)
 
 ![Output of parking_wind_dir.jl with turbulence](parking_wind_dir_T1.png)
 
