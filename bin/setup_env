@@ -78,7 +78,13 @@ if [[ "$(uname -s)" == "Linux" ]]; then
         if [[ -f "$_julia_bundled_crypto" ]]; then
             _jpreloads+=("$(realpath "$_julia_bundled_crypto")")
         else
-            _jf=$(_jfind_artifact libcrypto.so.3)   && _jpreloads+=("$_jf")
+            # Prefer a libcrypto that provides OPENSSL_3.3.0 (needed by OpenSSL_jll >=3.3)
+            # so that preloading an older 3.0.x artifact does not conflict with a newer
+            # libssl.so that requires OPENSSL_3.3.0 symbols.  Fall back to any available
+            # libcrypto only when no 3.3.0-capable artifact is present.
+            _jf=$(_jfind_artifact libcrypto.so.3 OPENSSL_3.3.0) \
+                || _jf=$(_jfind_artifact libcrypto.so.3)
+            [[ -n "$_jf" ]] && _jpreloads+=("$_jf")
         fi
 
         # libiconv + libintl + libffi: add dirs to LD_LIBRARY_PATH
