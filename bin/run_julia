@@ -45,6 +45,11 @@ else
     GCT=""
 fi
 
+# Kaimon requires Julia 1.12+
+if [[ "$julia_major" == "1.11" ]]; then
+    USE_KAIMON=false
+fi
+
 # Check that the current Julia version matches the one used during install
 if [[ -f "install_version_${julia_major}.txt" ]]; then
     install_version=$(cat "install_version_${julia_major}.txt")
