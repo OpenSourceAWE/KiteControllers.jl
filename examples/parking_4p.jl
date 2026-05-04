@@ -43,30 +43,34 @@ end
 
 MIN_DEPOWER, DISTURBANCE = if KiteUtils.PROJECT == "system.yaml"
     # result of tuning
-    pcs.kp_tr=0.04
-    pcs.ki_tr=0.0008
-    pcs.kp = 6.0
-    pcs.ki = 0.1
+    pcs.kp_tr=0.15
+    pcs.ki_tr=0.003
+    pcs.kp = 1.0
+    pcs.ki = 0.025
+    pcs.kd = 2.5
     pcs.c1 = 0.048
     pcs.c2 = 0 # has no big effect, can also be set to zero
-    pcs.max_turn_rate_set = 0.35
+    pcs.max_turn_rate_set = 0.20
     pcs.max_turn_rate_cmd = max_turn_rate_cmd
     pcs.max_steering = 0.45
     pcs.max_steering_rate = 1.0
+    pcs.heading_deadband = deg2rad(2.0)
     0.22, 0.1
 else
     # result of tuning
     println("not system.yaml")
     pcs.kp_tr=0.035
     pcs.ki_tr=0.0015
-    pcs.kp = 8.0
-    pcs.ki = 0.2
+    pcs.kp = 1.0
+    pcs.ki = 0.025
+    pcs.kd = 2.5
     pcs.c1 = 0.048
     pcs.c2 = 0    # has no big effect, can also be set to zero
-    pcs.max_turn_rate_set = 0.35
+    pcs.max_turn_rate_set = 0.20
     pcs.max_turn_rate_cmd = max_turn_rate_cmd
     pcs.max_steering = 0.45
     pcs.max_steering_rate = 1.0
+    pcs.heading_deadband = deg2rad(2.0)
     0.4, 0.4
 end
 @info "pcs.kp_tr=$(pcs.kp_tr), pcs.ki_tr=$(pcs.ki_tr), pcs.kp=$(pcs.kp), pcs.ki=$(pcs.ki), pcs.max_turn_rate_cmd=$(pcs.max_turn_rate_cmd), MIN_DEPOWER=$(MIN_DEPOWER)"
