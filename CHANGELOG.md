@@ -1,5 +1,16 @@
 # Changelog
 
+## KiteControllers v0.2.26 - 2026-05-04
+### Changed
+- improved `bin/install` script
+- parking examples (`parking_4p.jl`, `parking_wind_dir.jl`) now work with 9% wind turbulence
+- added elevation and force plots to `parking_wind_dir.jl`
+- updated default manifests
+
+### Fixed
+- fixed OpenSSL issue in `bin/setup_env`
+- fixed `bin/run_julia` for Julia 1.11
+
 ## KiteControllers v0.2.25 - 2026-05-03
 ### Added
 - the functions `set_default_turbulence` and `get_default_turbulence`
