@@ -43,3 +43,4 @@ bin/kps-image-1.12.so
 examples/LocalPreferences.toml
 bin/kps-image-1.12.so.bak
 video/
+output/parking_wind_dir.mp4
