@@ -21,7 +21,7 @@ let
         p = plotx(sl.time, heading_deg, [heading_rate_deg body_rate_deg];
                               xlabel="time [s]",
                               ylabels=["heading [°]", "rate [°/s]"],
-                              labels=["heading", ["heading_rate", "body_rate"]],
+                              labels=["heading", ["heading_rate", "heading_turn_rate"]],
                               fig="rates")
         display(p)
         println("Plotted heading, heading_rate and body_rate from: $log_path")
