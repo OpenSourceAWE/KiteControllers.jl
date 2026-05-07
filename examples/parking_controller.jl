@@ -25,26 +25,24 @@ import KiteUtils: wrap2pi
     max_turn_rate_cmd::Float64 = 100.0 # clamp inner-loop commanded turn-rate [rad/s]
     max_steering::Float64 = 100.0      # clamp final steering command to physical range
     max_steering_rate::Float64 = 0.0   # optional rate limit [1/s], 0 disables limiting
-    heading_deadband::Float64 = 0.0    # heading error deadband [rad], 0 disables deadband
 end
 
-mutable struct ParkingController
+mutable struct ParkingController{T}
     pcs::ParkingControllerSettings
-    pid_tr::DiscretePID
-    pid_outer::DiscretePID
-    last_heading::Float64
+    pid_tr::T
+    pid_outer::T
     last_steering::Float64
     chi_set::Float64
     last_ndi_gain::Float64
 end
 
-function ParkingController(pcs::ParkingControllerSettings; last_heading = 0.0)
+function ParkingController(pcs::ParkingControllerSettings)
     Ts = pcs.dt
     pid_tr    = DiscretePID(;K=pcs.kp_tr, Ti=pcs.kp_tr/ pcs.ki_tr, Ts)
     umax = pcs.max_turn_rate_set
     pid_outer = DiscretePID(;K=pcs.kp, Ti=pcs.kp/ pcs.ki, Td=pcs.kd, N=pcs.kd_N,
                              umin=-umax, umax=umax, Ts)
-    return ParkingController(pcs, pid_tr, pid_outer, last_heading, 0.0, 0.0, 0.0)
+    return ParkingController(pcs, pid_tr, pid_outer, 0.0, 0.0, 0.0)
 end
 
 """
@@ -98,37 +96,27 @@ function navigate(pc::ParkingController, azimuth, elevation; limit=50.0)
 end
 
 """
-    calc_steering(pc::ParkingController, heading; elevation=0.0, v_app=10.0, ud_prime=0.0)
+    calc_steering(pc::ParkingController, heading, heading_rate, chi_set; elevation=0.0, v_app=10.0, ud_prime=0.0)
 
 Calculate rel_steering and ndi_gain from the actual heading, elevation, and apparent wind speed.
 
 Parameters:
 - pc: parking controller
 - heading: actual heading in radians
+- heading_rate: measured heading rate in rad/s
+- chi_set: desired heading in radians
 - elevation: elevation angle in radians
 - v_app: apparent wind speed in m/s
 - ud_prime: depower setting in the range of 0 to 1, 0 means fully powered, 1 means fully depowered
 
 """
-function calc_steering(pc::ParkingController, heading, chi_set; elevation=0.0, v_app=10.0, ud_prime=0.0)
+function calc_steering(pc::ParkingController, heading, heading_rate, chi_set; elevation=0.0, v_app=10.0, ud_prime=0.0)
     # calculate the desired turn rate
     heading = wrap2pi(heading) # a different wrap2pi function is needed that avoids any jumps
-    chi_wrapped = wrap2pi(chi_set)
-    dchi = atan(sin(chi_wrapped - heading), cos(chi_wrapped - heading))
-    if pc.pcs.heading_deadband > 0.0
-        if abs(dchi) <= pc.pcs.heading_deadband
-            dchi = 0.0
-        else
-            dchi = sign(dchi) * (abs(dchi) - pc.pcs.heading_deadband)
-        end
-    end
-    chi_pid = wrap2pi(heading + dchi)
+    chi_pid = wrap2pi(chi_set)
     psi_dot_set = pc.pid_outer(chi_pid, heading)
     psi_dot_set = clamp(psi_dot_set, -pc.pcs.max_turn_rate_set, pc.pcs.max_turn_rate_set)
-    # Use shortest-angle difference to avoid artificial spikes at wrap boundaries.
-    dpsi = atan(sin(heading - pc.last_heading), cos(heading - pc.last_heading))
-    psi_dot = dpsi / pc.pcs.dt
-    pc.last_heading = heading
+    psi_dot = heading_rate
     psi_dot_in = pc.pid_tr(psi_dot_set, psi_dot)
     psi_dot_in = clamp(psi_dot_in, -pc.pcs.max_turn_rate_cmd, pc.pcs.max_turn_rate_cmd)
     # linearize the NDI block
@@ -178,9 +166,10 @@ function test_calc_steering()
         pc = ParkingController(pcs)
         # set the heading
         heading = deg2rad(1.0)
+        heading_rate = 0.0
         elevation = deg2rad(70.0)
         chi_set = deg2rad(34.0)
-        u_s, ndi_gain, psi_dot, psi_dot_set = calc_steering(pc, heading, chi_set; elevation)
+        u_s, ndi_gain, psi_dot, psi_dot_set = calc_steering(pc, heading, heading_rate, chi_set; elevation)
         @test u_s ≈ 18.135061759003584
         @test ndi_gain ≈ 2.0833333333333335
         @test psi_dot ≈ 0.3490658503988659

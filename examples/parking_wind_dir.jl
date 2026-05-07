@@ -10,7 +10,7 @@ using ControlPlots, KiteControllers, KiteModels, KiteViewers, Rotations, Statist
 using KiteUtils: Settings, load_settings
 using KiteModels: reactivate_host_app
 
-CREATE_VIDEO = true
+CREATE_VIDEO = false
 
 set::Settings = if haskey(ENV, "USE_V9")
     deepcopy(load_settings("system_v9.yaml"))
@@ -67,7 +67,6 @@ MIN_DEPOWER = if KiteUtils.PROJECT == "system.yaml"
     pcs.max_turn_rate_cmd = max_turn_rate_cmd
     pcs.max_steering = 0.45
     pcs.max_steering_rate = 1.0
-    pcs.heading_deadband = deg2rad(0.5)
     0.22
 else
     # result of tuning
@@ -84,7 +83,6 @@ else
     pcs.max_turn_rate_cmd = max_turn_rate_cmd
     pcs.max_steering = 0.45
     pcs.max_steering_rate = 1.0
-    pcs.heading_deadband = deg2rad(0.5)
     0.4
 end
 
@@ -128,12 +126,9 @@ function sim_parking(integrator)
         time = i * dt 
         steering = 0.0
         if i > 100
-            if i == 100
-                pc.last_heading = sys_state.heading
-            end
             elevation = sys_state.elevation
             chi_set = pcm.navigate(pc, sys_state.azimuth, elevation)
-            steering, _, _, _ = pcm.calc_steering(pc, sys_state.heading, chi_set; 
+            steering, _, _, _ = pcm.calc_steering(pc, sys_state.heading, sys_state.heading_rate, chi_set; 
                                                                          elevation, v_app = sys_state.v_app)
             set_depower_steering(kps4.kcu, MIN_DEPOWER, steering)
         end  
