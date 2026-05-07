@@ -11,7 +11,7 @@ using KiteUtils: Settings, load_settings
 using KiteModels: reactivate_host_app
 
 CREATE_VIDEO = false
-PLOT_RATES = false
+PLOT_RATES = true
 
 set::Settings = if haskey(ENV, "USE_V9")
     deepcopy(load_settings("system_v9.yaml"))
@@ -158,8 +158,7 @@ function sim_parking(integrator)
         if t_sim < 0.3*dt
             t_gc_tot += @elapsed GC.gc(false)
         end
-        sys_state = SysState(kps4)
-        sys_state.orient .= calc_orient_quat(kps4)
+        KiteModels.update_sys_state!(sys_state, kps4)
         T[i] = dt * i
         AZIMUTH[i] = sys_state.azimuth
         AZIMUTH_EAST[i] = calc_azimuth_east(kps4)
