@@ -11,7 +11,7 @@ using KiteUtils: Settings, load_settings
 using KiteModels: reactivate_host_app
 
 CREATE_VIDEO = false
-PLOT_RATES = true
+PLOT_RATES = false
 
 set::Settings = if haskey(ENV, "USE_V9")
     deepcopy(load_settings("system_v9.yaml"))
