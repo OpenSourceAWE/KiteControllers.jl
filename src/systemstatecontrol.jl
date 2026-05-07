@@ -124,11 +124,11 @@ function calc_v_set(ssc::SystemStateControl)
     v_set
 end
 
-function calc_steering(ssc::SystemStateControl, manual_steering = 0.0; heading = nothing)
+function calc_steering(ssc::SystemStateControl, manual_steering = 0.0; heading = nothing, azimuth = nothing)
     if isnothing(ssc.sys_state)
         return 0.0
     end
-    phi  = ssc.sys_state.azimuth
+    phi  = isnothing(azimuth) ? ssc.sys_state.azimuth : azimuth
     beta = ssc.sys_state.elevation
     if isnothing(heading)
         psi = ssc.sys_state.heading
