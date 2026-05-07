@@ -1,15 +1,27 @@
 # Changelog
 
-## Unreleased
+## KiteControllers v0.2.27 - 2026-05-07
 ### Added
 - added `FFMPEG` to `examples/Project.toml`
 - `parking_wind_dir.jl` creates now a video and stores it in the **output** folder
+- `PLOT_RATES` option to `parking_wind_dir.jl`
+- `analyse.jl` script to plot heading_rate and heading_turn_rate
+- optional `azimuth` keyword argument to `calc_steering`
 
 ### Changed
 - further parameter tuning in `parking_4p.jl`, `parking_controller.jl`, and `parking_wind_dir.jl`
 - updated documentation in `docs/src/projects.md`
 - added updated documentation images `parking_wind_dir_T0.png` and `parking_wind_dir_T1.png`
-- updated `.gitignore`
+- bump KiteModels to 0.11.11
+- improved parking controller, updated from KiteModels.jl
+- moved plot from `autopilot.jl` to `analyse.jl`
+- removed `get_default_turbulence` and `set_default_turbulence` (moved to KiteModels)
+- updated default manifests
+
+### Fixed
+- fixed calculation of heading_rate in `systemstatecontrol.jl` and `autopilot.jl`
+- fixed `autopilot.jl`
+- fixed `parking_wind_dir.jl` to use `update_sys_state!`
 
 ## KiteControllers v0.2.26 - 2026-05-04
 ### Changed
