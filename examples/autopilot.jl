@@ -196,8 +196,7 @@ function simulate(integrator, stopped=true)
             v_ro = calc_v_set(app.ssc::SystemStateControl)
             #
             t_sim = @elapsed KiteModels.next_step!(app.kps4::KPS4, integrator; set_speed=v_ro, dt=app.dt)
-            sys_state.orient .= calc_orient_quat(app.kps4::KPS4)
-            sys_state=SysState(app.kps4::KPS4)
+            KiteModels.update_sys_state!(sys_state, app.kps4::KPS4)
             acc = ((app.kps4::KPS4).vel_kite - last_vel)/app.dt
             last_vel = deepcopy((app.kps4::KPS4).vel_kite)
 
@@ -577,6 +576,25 @@ if @isdefined __PRECOMPILE__
 end
 stop_()
 KiteViewers.GLMakie.closeall()
+
+# Plot heading_rate and body_rate from the last recorded log file
+let
+    log_path = joinpath(OUTPUT_DIR, "last_sim_log")
+    if isfile(log_path * ".arrow")
+        log = load_log(basename(log_path); path=dirname(log_path))
+        sl = log.syslog
+        heading_rate_deg = rad2deg.(sl.heading_rate)
+        body_rate_deg = rad2deg.([tr[3] for tr in sl.turn_rates])
+        p = ControlPlots.plot(sl.time, [heading_rate_deg, body_rate_deg];
+                              xlabel="time [s]", ylabel="rate [°/s]",
+                              labels=["heading_rate", "body_rate"],
+                              fig="rates")
+        display(p)
+        println("Plotted heading_rate and body_rate from: $log_path")
+    else
+        println("No log file found at: $(log_path).arrow")
+    end
+end
 
 GC.enable(true)
 nothing
