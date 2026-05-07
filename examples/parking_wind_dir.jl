@@ -11,6 +11,7 @@ using KiteUtils: Settings, load_settings
 using KiteModels: reactivate_host_app
 
 CREATE_VIDEO = false
+PLOT_RATES = false
 
 set::Settings = if haskey(ENV, "USE_V9")
     deepcopy(load_settings("system_v9.yaml"))
@@ -109,6 +110,8 @@ V_WIND_KITE::Vector{Float64}   = zeros(Int64(MAX_TIME/dt))
 FORCE::Vector{Float64}         = zeros(Int64(MAX_TIME/dt))
 ELEVATION::Vector{Float64}      = zeros(Int64(MAX_TIME/dt))
 HEADING::Vector{Float64}       = zeros(Int64(MAX_TIME/dt))
+HEADING_RATE::Vector{Float64}  = zeros(Int64(MAX_TIME/dt))
+BODY_RATE::Vector{Float64}     = zeros(Int64(MAX_TIME/dt))
 SET_STEERING::Vector{Float64}  = zeros(Int64(MAX_TIME/dt))
 STEERING::Vector{Float64}      = zeros(Int64(MAX_TIME/dt))
 
@@ -163,6 +166,8 @@ function sim_parking(integrator)
         ELEVATION[i] = sys_state.elevation
         FORCE[i] = sys_state.winch_force[1]
         HEADING[i] = wrap2pi(sys_state.heading)
+        HEADING_RATE[i] = sys_state.heading_rate
+        BODY_RATE[i] = sys_state.turn_rates[3]
         on_new_systate(ssc, sys_state)
         if mod(i, TIME_LAPSE_RATIO) == 0
             if KiteUtils.PROJECT == "system.yaml"
@@ -232,16 +237,22 @@ if CREATE_VIDEO
     end
     println("Video saved as output/parking_wind_dir.mp4")
 end
-p=plotx(T, rad2deg.(AZIMUTH), rad2deg.(AZIMUTH_EAST),[rad2deg.(UPWIND_DIR_), rad2deg.(AV_UPWIND_DIR)],
-         rad2deg.(ELEVATION), rad2deg.(HEADING), [100*(SET_STEERING), 100*(STEERING)], V_WIND_KITE, FORCE; 
-         xlabel="Time [s]", 
-         ysize=10,
-         ylabels=["Azimuth [°]", "azimuth_east [°]", "upwind_dir [°]", "Elevation [°]", "Heading [°]", "Steering [%]", "v_wind_kite [m/s]", "force [N]"],
-         labels=["azimuth", "azimuth_east", ["upwind_dir", "filtered_upwind_dir"], "elevation", "heading", ["set_steering", "steering"], "v_wind_kite", "force"])
-display(p)
-reactivate_host_app()
-
 let v = filter(!=(0.0), V_WIND_KITE)
     ti = std(v) / mean(v) * 100
     println("Turbulence intensity (wind speed magnitude): $(round(ti, digits=2)) %")
+    global p=plotx(T, rad2deg.(AZIMUTH), rad2deg.(AZIMUTH_EAST),[rad2deg.(UPWIND_DIR_), rad2deg.(AV_UPWIND_DIR)],
+             rad2deg.(ELEVATION), rad2deg.(HEADING), [100*(SET_STEERING), 100*(STEERING)], V_WIND_KITE, FORCE; 
+             xlabel="Time [s]", 
+             ysize=10,
+             ylabels=["Azimuth [°]", "azimuth_east [°]", "upwind_dir [°]", "Elevation [°]", "Heading [°]", "Steering [%]", "v_wind_kite [m/s]", "force [N]"],
+             labels=["azimuth", "azimuth_east", ["upwind_dir", "filtered_upwind_dir"], "elevation", "heading", ["set_steering", "steering"], "v_wind_kite", "force"],
+             fig="Parking with changing wind direction, TI: $(round(ti, digits=2)) %")
 end
+display(p)
+if PLOT_RATES
+    p2 = plot(T, [rad2deg.(HEADING_RATE), rad2deg.(BODY_RATE)];
+               xlabel = "time [s]", ylabel = "rate [°/s]",
+               labels = ["heading_rate", "body_rate"], fig = "rates")
+    display(p2)
+end
+reactivate_host_app()
