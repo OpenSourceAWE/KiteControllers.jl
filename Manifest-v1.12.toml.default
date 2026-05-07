@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "2570ea6c570cd584bea42256f3a96b25d787089f"
+project_hash = "2da2acaea82beb59a5c594037d81671590457ae9"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -433,9 +433,9 @@ version = "0.6.3"
 
 [[deps.ControlPlots]]
 deps = ["JLD2", "LaTeXStrings", "Pkg", "Printf", "PyPlot", "StaticArraysCore"]
-git-tree-sha1 = "e2df85353a8457a0a18d9248a50a13bef3287389"
+git-tree-sha1 = "fb1cf8d1213c9f2908f8682f58f7ec252f6cc171"
 uuid = "23c2ee80-7a9e-4350-b264-8e670f12517c"
-version = "0.2.14"
+version = "0.2.15"
 
     [deps.ControlPlots.extensions]
     ControlPlotsExt = "ControlSystemsBase"
@@ -1292,15 +1292,15 @@ version = "0.6.11"
 deps = ["DiscretePIDs", "JLD2", "KiteUtils", "NLSolversBase", "NLsolve", "Observables", "Parameters", "Pkg", "Printf", "Reexport", "Rotations", "StaticArrays", "StatsBase", "StructTypes", "Timers", "WinchControllers", "WinchModels", "YAML"]
 path = "."
 uuid = "b19fd437-5b3a-4cca-b199-c3ded0f20ded"
-version = "0.2.25"
+version = "0.2.26"
 
 [[deps.KiteModels]]
 deps = ["AtmosphericModels", "Dierckx", "DiffEqBase", "DiscretePIDs", "DocStringExtensions", "Interpolations", "KitePodModels", "KiteUtils", "LinearAlgebra", "LinearSolve", "Logging", "NLSolversBase", "NLsolve", "NonlinearSolve", "OrdinaryDiffEqBDF", "OrdinaryDiffEqCore", "OrdinaryDiffEqNonlinearSolve", "Parameters", "Pkg", "PrecompileTools", "REPL", "Reexport", "Rotations", "StaticArrays", "Statistics", "Sundials", "Suppressor", "WinchModels"]
-git-tree-sha1 = "342420c3607d7cc84e4305ee1093f1bf98838fdb"
+git-tree-sha1 = "f1658b0f743540764dfe7ace4434b2ebe7d2be92"
 repo-rev = "main"
 repo-url = "https://github.com/OpenSourceAWE/KiteModels.jl.git"
 uuid = "b94af626-7959-4878-9336-2adc27959007"
-version = "0.11.10"
+version = "0.11.11"
 
 [[deps.KitePodModels]]
 deps = ["DocStringExtensions", "KiteUtils", "Reexport"]
@@ -1310,9 +1310,9 @@ version = "0.4.0"
 
 [[deps.KiteUtils]]
 deps = ["Arrow", "CSV", "DocStringExtensions", "LinearAlgebra", "OrderedCollections", "Parameters", "Parsers", "Pkg", "PrecompileTools", "RecursiveArrayTools", "ReferenceFrameRotations", "Rotations", "StaticArrays", "StructArrays", "StructTypes", "YAML"]
-git-tree-sha1 = "0d4160c6f845b7e19f754f4b9179d4e51b96f43f"
+git-tree-sha1 = "edd32b16440b162db774dc42604f7faa921541e6"
 uuid = "90980105-b163-44e5-ba9f-8b1c83bb0533"
-version = "0.11.7"
+version = "0.11.8"
 
 [[deps.KiteViewers]]
 deps = ["FileIO", "GLMakie", "GeometryBasics", "Joysticks", "KiteUtils", "LinearAlgebra", "Parameters", "Pkg", "PrecompileTools", "Printf", "Reexport", "Rotations", "StaticArrays", "StructArrays", "Timers"]
@@ -1809,10 +1809,10 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.3.0"
 
 [[deps.NonlinearSolve]]
-deps = ["ADTypes", "ArrayInterface", "BracketingNonlinearSolve", "CommonSolve", "ConcreteStructs", "DifferentiationInterface", "FastClosures", "FiniteDiff", "ForwardDiff", "LineSearch", "LinearAlgebra", "LinearSolve", "NonlinearSolveBase", "NonlinearSolveFirstOrder", "NonlinearSolveQuasiNewton", "NonlinearSolveSpectralMethods", "PrecompileTools", "Preferences", "Reexport", "SciMLBase", "SciMLLogging", "SimpleNonlinearSolve", "StaticArraysCore", "SymbolicIndexingInterface"]
-git-tree-sha1 = "d27bcf0cebf8786edcc2eaa4455c959e680334e7"
+deps = ["ADTypes", "ArrayInterface", "BracketingNonlinearSolve", "CommonSolve", "ConcreteStructs", "DifferentiationInterface", "FastClosures", "FiniteDiff", "ForwardDiff", "LineSearch", "LinearAlgebra", "LinearSolve", "NonlinearSolveBase", "NonlinearSolveFirstOrder", "NonlinearSolveQuasiNewton", "NonlinearSolveSpectralMethods", "PrecompileTools", "Preferences", "Reexport", "SciMLBase", "SciMLLogging", "Setfield", "SimpleNonlinearSolve", "StaticArraysCore", "SymbolicIndexingInterface"]
+git-tree-sha1 = "ae0b0f875e4dfda538ab6977ec7939126ee9a1fe"
 uuid = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
-version = "4.16.0"
+version = "4.19.0"
 
     [deps.NonlinearSolve.extensions]
     NonlinearSolveFastLevenbergMarquardtExt = "FastLevenbergMarquardt"
@@ -2455,9 +2455,9 @@ version = "1.9.1"
 
 [[deps.SciMLOperators]]
 deps = ["Accessors", "ArrayInterface", "DocStringExtensions", "LinearAlgebra"]
-git-tree-sha1 = "0e34162268883db01c04f988895a80d0659071bb"
+git-tree-sha1 = "4a3bd21622633a70fde04bc6d072f59e482ff66f"
 uuid = "c0aeaf25-5076-4817-a8d5-81caf7dfa961"
-version = "1.17.0"
+version = "1.18.0"
 weakdeps = ["SparseArrays", "StaticArraysCore"]
 
     [deps.SciMLOperators.extensions]
@@ -2783,9 +2783,9 @@ version = "0.2.8"
 
 [[deps.SymbolicIndexingInterface]]
 deps = ["Accessors", "ArrayInterface", "RuntimeGeneratedFunctions", "StaticArraysCore"]
-git-tree-sha1 = "94c58884e013efff548002e8dc2fdd1cb74dfce5"
+git-tree-sha1 = "173ecfe5f7c5a36043b5f2b8cecaa30a4fc958ef"
 uuid = "2efcf032-c050-4f8e-a9bb-153293bab1f5"
-version = "0.3.46"
+version = "0.3.47"
 
     [deps.SymbolicIndexingInterface.extensions]
     SymbolicIndexingInterfacePrettyTablesExt = "PrettyTables"
