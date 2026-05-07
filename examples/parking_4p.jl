@@ -17,7 +17,6 @@ using KitePodModels: KCU
 using KiteModels
 using KiteModels: KPS4
 using KiteModels: reactivate_host_app
-using KiteControllers: get_default_turbulence
 
 set::Settings = deepcopy(load_settings("system.yaml"))
 set.abs_tol=0.00006

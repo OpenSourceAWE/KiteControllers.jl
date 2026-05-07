@@ -2,7 +2,7 @@ using Pkg
 if !("Test" ∈ keys(Pkg.project().dependencies))
     Pkg.activate(@__DIR__)
 end
-using Test, KiteControllers, YAML
+using Test, KiteControllers, KiteModels, YAML
 
 function write_gui_default(path::AbstractString; turbulence=0.0)
     open(path, "w") do io
@@ -40,28 +40,28 @@ try
             write_gui_default(gui_yaml_default; turbulence=0.15)
 
             @test !isfile(gui_yaml)
-            @test KiteControllers.get_default_turbulence() ≈ 0.15
+            @test KiteModels.get_default_turbulence() ≈ 0.15
             @test isfile(gui_yaml)
 
             dict = YAML.load_file(gui_yaml)
             @test dict["gui"]["project"] == "hydra20_600.yml"
             @test Float64(dict["gui"]["default_turbulence"]) ≈ 0.15
 
-            @test KiteControllers.set_default_turbulence(0.35) ≈ 0.35
+            @test KiteModels.set_default_turbulence(0.35) ≈ 0.35
 
             updated = YAML.load_file(gui_yaml)
             @test updated["gui"]["project"] == "hydra20_600.yml"
             @test Float64(updated["gui"]["default_turbulence"]) ≈ 0.35
-            @test KiteControllers.get_default_turbulence() ≈ 0.35
+            @test KiteModels.get_default_turbulence() ≈ 0.35
 
             rm(gui_yaml)
             write_gui_without_turbulence(gui_yaml)
-            @test KiteControllers.set_default_turbulence(0.45) ≈ 0.45
+            @test KiteModels.set_default_turbulence(0.45) ≈ 0.45
 
             inserted = YAML.load_file(gui_yaml)
             @test inserted["gui"]["project"] == "hydra20_600.yml"
             @test Float64(inserted["gui"]["default_turbulence"]) ≈ 0.45
-            @test KiteControllers.get_default_turbulence() ≈ 0.45
+            @test KiteModels.get_default_turbulence() ≈ 0.45
 
             project_without_overwrite = joinpath(tmpdir, "project_without_overwrite.yml")
             write_project_config(project_without_overwrite)
