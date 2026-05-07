@@ -1,4 +1,11 @@
+using Pkg
+if ! ("ControlPlots" ∈ keys(Pkg.project().dependencies))
+    Pkg.activate(@__DIR__)
+end
+
 using KiteControllers
+using KiteUtils: load_log
+using ControlPlots
 
 OUTPUT_DIR::String = "output"
 
@@ -8,14 +15,16 @@ let
     if isfile(log_path * ".arrow")
         log = load_log(basename(log_path); path=dirname(log_path))
         sl = log.syslog
+        heading_deg = rad2deg.(sl.heading)
         heading_rate_deg = rad2deg.(sl.heading_rate)
         body_rate_deg = rad2deg.([tr[3] for tr in sl.turn_rates])
-        p = ControlPlots.plot(sl.time, [heading_rate_deg, body_rate_deg];
-                              xlabel="time [s]", ylabel="rate [°/s]",
-                              labels=["heading_rate", "body_rate"],
+        p = plotx(sl.time, heading_deg, [heading_rate_deg body_rate_deg];
+                              xlabel="time [s]",
+                              ylabels=["heading [°]", "rate [°/s]"],
+                              labels=["heading", ["heading_rate", "body_rate"]],
                               fig="rates")
         display(p)
-        println("Plotted heading_rate and body_rate from: $log_path")
+        println("Plotted heading, heading_rate and body_rate from: $log_path")
     else
         println("No log file found at: $(log_path).arrow")
     end
