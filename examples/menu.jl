@@ -1,3 +1,8 @@
+using Pkg
+if ! ("KiteModels" ∈ keys(Pkg.project().dependencies))
+    Pkg.activate(@__DIR__)
+end
+
 using REPL.TerminalMenus
 using KiteControllers, KiteModels
 

@@ -1297,8 +1297,6 @@ version = "0.2.27"
 [[deps.KiteModels]]
 deps = ["AtmosphericModels", "Dierckx", "DiffEqBase", "DiscretePIDs", "DocStringExtensions", "Interpolations", "KitePodModels", "KiteUtils", "LinearAlgebra", "LinearSolve", "Logging", "NLSolversBase", "NLsolve", "NonlinearSolve", "OrdinaryDiffEqBDF", "OrdinaryDiffEqCore", "OrdinaryDiffEqNonlinearSolve", "Parameters", "Pkg", "PrecompileTools", "REPL", "Reexport", "Rotations", "StaticArrays", "Statistics", "Sundials", "Suppressor", "WinchModels"]
 git-tree-sha1 = "3075d89a27db5013873b12d29402397d88a03ea9"
-repo-rev = "main"
-repo-url = "https://github.com/OpenSourceAWE/KiteModels.jl.git"
 uuid = "b94af626-7959-4878-9336-2adc27959007"
 version = "0.11.12"
 
