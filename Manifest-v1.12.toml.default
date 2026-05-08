@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "2da2acaea82beb59a5c594037d81671590457ae9"
+project_hash = "94a559add8da4311426f23e9eace949dcb3f048f"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -270,9 +270,9 @@ version = "0.10.16"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "d0efe2c6fdcdaa1c161d206aa8b933788397ec71"
+git-tree-sha1 = "1fa950ebc3e37eccd51c6a8fe1f92f7d86263522"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
-version = "1.18.6+0"
+version = "1.18.7+0"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
@@ -1292,15 +1292,15 @@ version = "0.6.11"
 deps = ["DiscretePIDs", "JLD2", "KiteUtils", "NLSolversBase", "NLsolve", "Observables", "Parameters", "Pkg", "Printf", "Reexport", "Rotations", "StaticArrays", "StatsBase", "StructTypes", "Timers", "WinchControllers", "WinchModels", "YAML"]
 path = "."
 uuid = "b19fd437-5b3a-4cca-b199-c3ded0f20ded"
-version = "0.2.26"
+version = "0.2.27"
 
 [[deps.KiteModels]]
 deps = ["AtmosphericModels", "Dierckx", "DiffEqBase", "DiscretePIDs", "DocStringExtensions", "Interpolations", "KitePodModels", "KiteUtils", "LinearAlgebra", "LinearSolve", "Logging", "NLSolversBase", "NLsolve", "NonlinearSolve", "OrdinaryDiffEqBDF", "OrdinaryDiffEqCore", "OrdinaryDiffEqNonlinearSolve", "Parameters", "Pkg", "PrecompileTools", "REPL", "Reexport", "Rotations", "StaticArrays", "Statistics", "Sundials", "Suppressor", "WinchModels"]
-git-tree-sha1 = "f1658b0f743540764dfe7ace4434b2ebe7d2be92"
+git-tree-sha1 = "3075d89a27db5013873b12d29402397d88a03ea9"
 repo-rev = "main"
 repo-url = "https://github.com/OpenSourceAWE/KiteModels.jl.git"
 uuid = "b94af626-7959-4878-9336-2adc27959007"
-version = "0.11.11"
+version = "0.11.12"
 
 [[deps.KitePodModels]]
 deps = ["DocStringExtensions", "KiteUtils", "Reexport"]
@@ -2088,9 +2088,9 @@ version = "2.8.4"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LLVMOpenMP_jll", "Libdl"]
-git-tree-sha1 = "db76b1ecd5e9715f3d043cec13b2ec93ce015d53"
+git-tree-sha1 = "e4a6721aa89e62e5d4217c0b21bd714263779dda"
 uuid = "30392449-352a-5448-841d-b1acce4e97dc"
-version = "0.44.2+0"
+version = "0.46.4+0"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -3145,9 +3145,9 @@ version = "2.38.0+0"
 
 [[deps.at_spi2_core_jll]]
 deps = ["Artifacts", "Dbus_jll", "Glib_jll", "JLLWrappers", "Libdl", "Xorg_libXtst_jll"]
-git-tree-sha1 = "df050402e2db17f534c97032be5a907bfc8fbf7d"
+git-tree-sha1 = "75a09aa217cbd6e81a8c337462a335ab78556bd7"
 uuid = "0fc3237b-ac94-5853-b45c-d43d59a06200"
-version = "2.58.2+0"
+version = "2.60.3+0"
 
 [[deps.gdk_pixbuf_jll]]
 deps = ["Artifacts", "Glib_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Xorg_libX11_jll", "libpng_jll"]
