@@ -1,5 +1,5 @@
 using REPL.TerminalMenus
-using KiteControllers
+using KiteControllers, KiteModels
 
 include("select_project.jl")
 
