@@ -268,9 +268,12 @@ function calc_stats(logger::Logger)
     end
     start_idx = clamp(Int64(round(5 / dt)), 1, length(force_))
     cycles = last_full_cycle - 1
+    v_wind_kite_norm = norm.(sl.v_wind_kite)
+    v = filter(!=(0.0f0), v_wind_kite_norm)
+    ti = std(v) / mean(v) * 100
     return Stats(sl[end].e_mech, av_power, peak_power, minimum(force_[start_idx:end]), maximum(force_), 
                  minimum(lg.z), maximum(lg.z), minimum(rad2deg.(sl.elevation)), maximum(rad2deg.(elev_ro)),
-                 minimum(rad2deg.(az_ro)), maximum(rad2deg.(az_ro)), cycles)
+                 minimum(rad2deg.(az_ro)), maximum(rad2deg.(az_ro)), cycles, ti)
 end
 
 function extract_log(logger::Logger)

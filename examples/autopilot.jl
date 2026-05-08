@@ -402,7 +402,7 @@ include("stats.jl")
 include("yaml_utils.jl")
 
 function show_stats(stats::Stats)
-    HEIGHT = 380
+    HEIGHT = 440
     UPPER_BORDER = 20
     fig  = GLMakie.Figure(size = (400, HEIGHT))
     font = if Sys.islinux()
@@ -428,7 +428,8 @@ function show_stats(stats::Stats)
     line = print("max elev_ro:  ", @sprintf("%5.1f  °", stats.max_elev_ro); line)
     line = print("min az_ro:    ", @sprintf("%5.1f  °", stats.min_az_ro); line)
     line = print("max az_ro:    ", @sprintf("%5.1f  °", stats.max_az_ro); line)
-    print("cycles:       ", @sprintf("%5d   ", stats.cycles); line)
+    line = print("cycles:       ", @sprintf("%5d   ", stats.cycles); line)
+    print("turb. int.:   ", @sprintf("%5.1f  %%", stats.ti); line)
 
     display(GLMakie.Screen(), fig)
     nothing
@@ -462,9 +463,12 @@ function print_stats()
         end
     end
     av_power /= n
+    v_wind_kite_norm = norm.(sl.v_wind_kite)
+    v = filter(!=(0.0f0), v_wind_kite_norm)
+    ti = std(v) / mean(v) * 100
     stats = Stats(sl[end].e_mech, av_power, peak_power, minimum(force_[Int64(round(5/app.dt)):end]), maximum(force_), 
                   minimum(lg.z), maximum(lg.z), minimum(rad2deg.(sl.elevation)), maximum(rad2deg.(elev_ro)),
-                  minimum(rad2deg.(az_ro)), maximum(rad2deg.(az_ro)), last_full_cycle)
+                  minimum(rad2deg.(az_ro)), maximum(rad2deg.(az_ro)), last_full_cycle, ti)
     show_stats(stats)
 end
 

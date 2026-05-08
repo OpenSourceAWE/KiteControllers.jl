@@ -11,4 +11,5 @@ struct Stats
     min_az_ro::Float64
     max_az_ro::Float64
     cycles::Int64
+    ti::Float64
 end
