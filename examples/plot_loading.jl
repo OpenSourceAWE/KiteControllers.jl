@@ -16,12 +16,19 @@ let
         log = load_log(basename(log_path); path=dirname(log_path))
         sl = log.syslog
         force = hcat(sl.winch_force...)[1,:]
-        p = ControlPlots.plot(sl.time, force;
+        v_ro = hcat(sl.v_reelout...)[1,:]
+        power = force .* v_ro
+        p1 = ControlPlots.plot(sl.time, force;
                   xlabel="time [s]",
                   ylabel="force [N]",
                   fig="loading")
-        display(p)
-        println("Plotted force vs time from: $log_path")
+        display(p1)
+        p2 = ControlPlots.plot(sl.time, power;
+                  xlabel="time [s]",
+                  ylabel="power [W]",
+                  fig="power")
+        display(p2)
+        println("Plotted force and power vs time from: $log_path")
     else
         println("No log file found at: $(log_path).arrow")
     end
