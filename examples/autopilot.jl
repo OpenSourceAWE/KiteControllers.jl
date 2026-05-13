@@ -10,7 +10,8 @@ if !@isdefined __PRECOMPILE__
 end
 
 LOG_LIFT_DRAG::Bool = false
-DRAG_CORR::Float64 = 0.93 
+DRAG_CORR::Float64 = 0.93
+CREATE_VIDEO::Bool = false
 
 using KiteViewers
 using ControlPlots, KiteControllers, KiteModels, LaTeXStrings, NativeFileDialog, Statistics
@@ -25,6 +26,12 @@ OUTPUT_DIR::String = "output"
 mkpath(OUTPUT_DIR)
 @assert isdir(OUTPUT_DIR)
 DEFAULT_LOG::String = joinpath(OUTPUT_DIR, "last_sim_log")
+
+VIDEO_DIR::String = "video"
+if CREATE_VIDEO
+    mkpath(VIDEO_DIR)
+    @assert isdir(VIDEO_DIR)
+end
 
 function test_observer(plot=true)
     log = load_log("uncorrected")
@@ -148,6 +155,8 @@ function simulate(integrator, stopped=true)
     end
     i=1
     j=0; k=0
+    video_frame = 0
+    SAVE_INTERVAL = Int(round(0.05 / app.dt)) # save a PNG every 50 ms
     GC.enable(true)
     GC.gc()
     mem_start=Sys.total_memory()/1e9 
@@ -249,6 +258,10 @@ function simulate(integrator, stopped=true)
             if mod(i, Int64(app.set.time_lapse)/ratio) == 0 
                 KiteViewers.update_system(app.viewer::Viewer3D, sys_state; scale = 0.04/1.1, kite_scale=app.set.kite_scale)
                 set_status(app.viewer::Viewer3D, String(Symbol(app.ssc.state)))
+                if CREATE_VIDEO && mod(i, SAVE_INTERVAL) == 0
+                    video_frame += 1
+                    save_png(app.viewer::Viewer3D, index=video_frame)
+                end
                 # re-enable garbage collector when we are short of memory
                 if Sys.free_memory()/1e9 < 4.0
                     GC.enable(true)
@@ -580,6 +593,14 @@ stop_()
 KiteViewers.GLMakie.closeall()
 
 GC.enable(true)
+if CREATE_VIDEO
+    video_fps = 60
+    using FFMPEG_jll
+    FFMPEG_jll.ffmpeg() do exe
+        run(`$exe -y -r:v $video_fps -i video/video%06d.png -codec:v libx264 -preset veryslow -pix_fmt yuv420p -crf 10 -an output/full_simulation.mp4`)
+    end
+    println("Video saved as output/full_simulation.mp4 (fps=$video_fps)")
+end
 nothing
 
 # GC disabled, Ryzen 7950X, 4x realtime, GMRES
