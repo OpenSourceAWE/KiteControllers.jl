@@ -310,6 +310,7 @@ let
             output_name = "batch-$(first(splitext(project)))"
         end
         output_path = joinpath(dirname(@__DIR__), "output")
+        mkpath(output_path)
 
         steps, error = simulate(app)
         sim_time = steps * app.dt
