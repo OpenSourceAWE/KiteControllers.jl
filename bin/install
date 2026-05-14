@@ -392,7 +392,11 @@ if [[ $julia_major == "1.11" ]]; then
         else
             echo "ControlPlots is not working. Running install_controlplots..."
             if [[ -x "bin/install_controlplots" ]]; then
-                bash bin/install_controlplots
+                if [[ $_yes_to_all == true ]]; then
+                    bash bin/install_controlplots --yes
+                else
+                    bash bin/install_controlplots
+                fi
             else
                 echo "Warning: bin/install_controlplots not found. Please run it manually."
             fi
@@ -438,7 +442,11 @@ else
         else
             echo "ControlPlots is not working. Running install_controlplots..."
             if [[ -x "bin/install_controlplots" ]]; then
-                bash bin/install_controlplots
+                if [[ $_yes_to_all == true ]]; then
+                    bash bin/install_controlplots --yes
+                else
+                    bash bin/install_controlplots
+                fi
             else
                 echo "Warning: bin/install_controlplots not found. Please run it manually."
             fi
