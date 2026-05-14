@@ -1,87 +1,71 @@
 #!/bin/bash -eu
+# SPDX-FileCopyrightText: 2025 Uwe Fechner
+# SPDX-License-Identifier: MIT
 
-if [[ $(basename "$(pwd)") == "bin" ]]; then
+if [[ $(basename $(pwd)) == "bin" ]]; then
     cd ..
 fi
 
-julia_major=$(julia --startup-file=no -e 'print("$(VERSION.major).$(VERSION.minor)")')
-manifest_name="Manifest-v${julia_major}.toml"
-default_manifest="${manifest_name}.default"
-projects=("." "examples" "test")
-manifest_projects=("." "examples" "test")
-
-if [[ $julia_major == "1.12" ]]; then
-    manifest_projects=(".")
+# Ask which Julia version to use
+# Default to 1.12 if it is already installed and is the current default, otherwise 1.11
+if juliaup status 2>/dev/null | grep '^\s*\*' | grep -q '1\.12'; then
+    _default_choice=2
+    _default_julia="1.12"
+else
+    _default_choice=1
+    _default_julia="1.11"
 fi
 
-delete_manifests() {
-    local project_dir=$1
-    rm -f "$project_dir/$manifest_name" "$project_dir/Manifest.toml"
-}
+echo "Which Julia version do you want to update the manifest for?"
+echo "  1) Julia 1.11"
+echo "  2) Julia 1.12"
+read -rp "Enter 1 or 2 [default: ${_default_choice}]: " _julia_choice
 
-rename_manifest() {
-    local project_dir=$1
-    if [[ -f "$project_dir/Manifest.toml" ]]; then
-        mv "$project_dir/Manifest.toml" "$project_dir/$manifest_name"
-    fi
-}
-
-copy_default_manifest() {
-    local project_dir=$1
-    if [[ -f "$project_dir/$manifest_name" ]]; then
-        cp "$project_dir/$manifest_name" "$project_dir/$default_manifest"
-    fi
-}
-
-require_manifest() {
-    local project_dir=$1
-    if [[ ! -f "$project_dir/$manifest_name" ]]; then
-        echo "Expected $project_dir/$manifest_name to exist, but it was not created."
+case "${_julia_choice}" in
+    1)
+        _desired_julia="1.11"
+        ;;
+    2)
+        _desired_julia="1.12"
+        ;;
+    "")
+        _desired_julia="${_default_julia}"
+        ;;
+    *)
+        echo "Invalid choice: '${_julia_choice}'. Please enter 1 or 2."
         exit 1
-    fi
-}
+        ;;
+esac
+echo "Using Julia version: ${_desired_julia}"
 
-for project_dir in "${projects[@]}"; do
-    delete_manifests "$project_dir"
-done
+# Temporarily switch to the chosen Julia version
+juliaup default "${_desired_julia}"
+echo "Switched to Julia ${_desired_julia}."
+echo
 
-if [[ $julia_major == "1.12" ]]; then
-    julia --startup-file=no --project -e '
-        using Pkg
-        Pkg.Registry.update()
-        for project in [".", "examples", "test"]
-            Pkg.activate(project)
-            Pkg.update(; update_registry=false)
-        end
-    '
+cd bin
+./install --update -y
+
+julia_version=$(julia --version | awk '{print($3)}')
+julia_major=${julia_version:0:3}
+if [[ $julia_major == "1.1" ]]; then
+    julia_major=${julia_version:0:4} 
+fi
+
+cd ..
+if [[ $julia_major == "1.10" ]]; then
+    cp examples/Manifest-v1.10.toml Manifest-v1.10.toml.default
+    rm -rf ~/.julia/compiled/v1.10/KiteControllers/
+    echo "Updated Manifest-v1.10.toml.default !"
+    echo "Make sure to run the tests before committing the new version!"
+elif [[ $julia_major == "1.11" ]]; then
+    cp examples/Manifest-v1.11.toml Manifest-v1.11.toml.default
+    rm -rf ~/.julia/compiled/v1.11/KiteControllers/
+    echo "Updated Manifest-v1.11.toml.default !"
+    echo "Make sure to run the tests before committing the new version!"
 else
-    julia --startup-file=no --project -e 'using Pkg; Pkg.instantiate()'
-    julia --startup-file=no --project=examples -e 'using Pkg; Pkg.instantiate()'
-    julia --startup-file=no --project=test -e 'using Pkg; Pkg.instantiate()'
+    cp Manifest-v1.12.toml Manifest-v1.12.toml.default
+    rm -rf ~/.julia/compiled/v1.12/KiteControllers/
+    echo "Updated Manifest-v1.12.toml.default !"
+    echo "Make sure to run the tests before committing the new version!"
 fi
-
-for project_dir in "${manifest_projects[@]}"; do
-    rename_manifest "$project_dir"
-    require_manifest "$project_dir"
-    if [[ "$project_dir" == "." ]]; then
-        copy_default_manifest "$project_dir"
-    fi
-done
-
-if [[ $julia_major == "1.12" ]]; then
-    # Keep sub-projects manifest-free for Julia 1.12 workspace-based resolution.
-    rm -f "examples/$manifest_name" "examples/Manifest.toml" "examples/$default_manifest"
-    rm -f "test/$manifest_name" "test/Manifest.toml" "test/$default_manifest"
-fi
-
-# TODO run tests
-
-rm -rf ~/.julia/compiled/v${julia_major}/KiteControllers/
-if [[ $julia_major == "1.12" ]]; then
-    echo "Updated ${manifest_name} in root only for Julia ${julia_major}."
-    echo "No manifest files are kept in examples/ and test/ for Julia ${julia_major}."
-else
-    echo "Updated ${manifest_name} files for Julia ${julia_major} in root, examples, and test!"
-fi
-echo "Updated ${default_manifest} in root only."
-echo "Make sure to run install before committing the new version!"

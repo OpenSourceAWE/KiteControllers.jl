@@ -10,6 +10,25 @@
 export LD_PRELOAD="${LD_PRELOAD:-}"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
 
+# Suppress verbose CondaPkg logs
+export JULIA_CONDAPKG_VERBOSITY="0"
+export JULIA_CONDAPKG_LOG="warn"
+
+# Point PythonCall to the single shared Python environment (examples/.CondaPkg).
+# This ensures a consistent Python is used regardless of which --project is active,
+# including when a sysimage compiled with ControlPlots is loaded.
+_setup_env_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+_pythoncall_exe="$_setup_env_root/examples/.CondaPkg/.pixi/envs/default/bin/python"
+if [[ -x "$_pythoncall_exe" ]]; then
+    export JULIA_PYTHONCALL_EXE="$_pythoncall_exe"
+fi
+unset _setup_env_root _pythoncall_exe
+
+# Avoid OpenMP duplicate-runtime conflict on Windows (libiomp5md.dll vs libomp.dll)
+case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*) export KMP_DUPLICATE_LIB_OK=TRUE ;;
+esac
+
 if [[ "$(uname -s)" == "Linux" ]]; then
     export FONTCONFIG_FILE=/etc/fonts/fonts.conf
 
@@ -22,24 +41,40 @@ if [[ "$(uname -s)" == "Linux" ]]; then
     #  (c) libglib preloads are placed FIRST so they win the SONAME race.
     #
     # Libraries handled:
-    #  - libcrypto.so.3:     override stale system OpenSSL via LD_PRELOAD
+    #  - libcrypto.so.3,
+    #    libssl.so.3:        add artifact dirs to LD_LIBRARY_PATH so OpenSSL_jll
+    #                        resolves a matched pair (do not force-preload libcrypto)
     #  - libiconv.so.2,
     #    libintl.so.8,
     #    libffi.so.6:        absent/wrong version on Ubuntu 22.04+; added to LD_LIBRARY_PATH
     #  - libfontconfig.so.1: override version missing FcConfigSetDefaultSubstitute via LD_PRELOAD
     #  - libglib-2.0.so.0:   override version missing g_string_copy via LD_PRELOAD (placed first)
+    #  - libexpat.so.1:      CondaPkg/pixi env copy used when it provides
+    #                        XML_SetAllocTrackerActivationThreshold (Python 3.13+/pyexpat)
     #
     # All Julia invocations are handled by forwarding every argument to `command julia`,
     # so both `julia +1.11 ...` and `$JULIA_CMD` with `JULIA_CMD="julia +1.11"` work.
     julia() {
         local _jpreloads=() _jlibdirs=()
         local _jdepots=()
+        local _jbase_preload="" _jp
         IFS=':' read -ra _jdepots <<< "${JULIA_DEPOT_PATH:-$HOME/.julia}"
+
+        # Drop externally preloaded OpenSSL libs to avoid mixing system/conda and JLL variants.
+        IFS=':' read -ra _jpre_parts <<< "${LD_PRELOAD:-}"
+        for _jp in "${_jpre_parts[@]}"; do
+            [[ -z "$_jp" ]] && continue
+            case "$_jp" in
+                *libcrypto.so.3*|*libssl.so.3*) continue ;;
+            esac
+            _jbase_preload+="${_jbase_preload:+:}$_jp"
+        done
 
         # Find the first artifact matching NAME (optionally requiring SYMBOL via nm -D).
         _jfind_artifact() {
             local name="$1" sym="${2:-}" _d _f
             for _d in "${_jdepots[@]}"; do
+                [[ -d "$_d/artifacts" ]] || continue
                 while IFS= read -r _f; do
                     if [[ -z "$sym" ]] || nm -D "$_f" 2>/dev/null | grep -q "$sym"; then
                         echo "$_f"; return 0
@@ -52,40 +87,18 @@ if [[ "$(uname -s)" == "Linux" ]]; then
         # Add dirname of a path to _jlibdirs (deduped).
         _jadd_libdir() {
             local _d; _d=$(dirname "$1")
-            [[ ":${_jlibdirs[*]}:" != *":$_d:"* ]] && _jlibdirs+=("$_d")
+            if [[ ":${_jlibdirs[*]}:" != *":$_d:"* ]]; then
+                _jlibdirs+=("$_d")
+            fi
         }
 
         local _jf
 
-        # libcrypto: prefer Julia's own bundled libcrypto (guaranteed compatible with its
-        # own libssl). Julia 1.12+ ships libcrypto in lib/julia/; older versions don't,
-        # so fall back to the artifact for those.
-        # Use type -P to bypass the julia shell function and find the real binary in PATH.
-        # (command -v julia returns the function name when julia is a shell function.)
-        _julia_real=$(type -P julia 2>/dev/null || command -v julia)
-        [[ -L "$_julia_real" ]] && _julia_real=$(readlink -f "$_julia_real")
-        # juliaup installs a launcher shim (julialauncher) rather than a real julia
-        # binary, so dirname-relative paths are wrong.  Find the actual julia install
-        # directory by querying `juliaup status` for the active version.
-        if [[ "$(basename "$_julia_real")" == "julialauncher" ]] && command -v juliaup &>/dev/null; then
-            _jver=$(juliaup status 2>/dev/null | awk '$1 == "*" {print $3}' | head -1)
-            if [[ -n "$_jver" ]]; then
-                _jdepot=$(printf '%s' "${JULIA_DEPOT_PATH:-$HOME/.julia}" | cut -d: -f1)
-                _julia_real="$_jdepot/juliaup/julia-${_jver}/bin/julia"
-            fi
-        fi
-        _julia_bundled_crypto="$(dirname "$_julia_real")/../lib/julia/libcrypto.so.3"
-        if [[ -f "$_julia_bundled_crypto" ]]; then
-            _jpreloads+=("$(realpath "$_julia_bundled_crypto")")
-        else
-            # Prefer a libcrypto that provides OPENSSL_3.3.0 (needed by OpenSSL_jll >=3.3)
-            # so that preloading an older 3.0.x artifact does not conflict with a newer
-            # libssl.so that requires OPENSSL_3.3.0 symbols.  Fall back to any available
-            # libcrypto only when no 3.3.0-capable artifact is present.
-            _jf=$(_jfind_artifact libcrypto.so.3 OPENSSL_3.3.0) \
-                || _jf=$(_jfind_artifact libcrypto.so.3)
-            [[ -n "$_jf" ]] && _jpreloads+=("$_jf")
-        fi
+        # OpenSSL: add both libssl and libcrypto artifact dirs to LD_LIBRARY_PATH.
+        # Keep them out of LD_PRELOAD so OpenSSL_jll can load a matched pair naturally.
+        for _jlib in libcrypto.so.3 libssl.so.3; do
+            _jf=$(_jfind_artifact "$_jlib")         && _jadd_libdir "$_jf"
+        done
 
         # libiconv + libintl + libffi: add dirs to LD_LIBRARY_PATH
         # (libffi.so.6 is needed by Glib_jll on modern distros that only ship libffi.so.8)
@@ -98,26 +111,41 @@ if [[ "$(uname -s)" == "Linux" ]]; then
             _jadd_libdir "$_jf"; _jpreloads+=("$_jf")
         }
 
+        # CondaPkg pixi env: add libexpat dir when it provides symbols newer than
+        # the system copy (e.g. XML_SetAllocTrackerActivationThreshold, needed by
+        # Python 3.13+ via pyexpat).
+        for _jcondapkg_lib in \
+            "$PWD/examples/.CondaPkg/.pixi/envs/default/lib" \
+            "$PWD/.CondaPkg/.pixi/envs/default/lib"; do
+            if [[ -f "$_jcondapkg_lib/libexpat.so.1" ]] && \
+               nm -D "$_jcondapkg_lib/libexpat.so.1" 2>/dev/null | grep -q "XML_SetAllocTrackerActivationThreshold"; then
+                _jadd_libdir "$_jcondapkg_lib/libexpat.so.1"
+                break
+            fi
+        done
+
         # libglib: needs g_string_copy; placed FIRST in LD_PRELOAD to win the SONAME race
         local _jglib _jglib_dir _jfinal_preload="" _jfinal_libpath=""
-        _jglib=$(_jfind_artifact libglib-2.0.so.0 g_string_copy)
+        _jglib=$(_jfind_artifact libglib-2.0.so.0 g_string_copy || true)
         if [[ -n "$_jglib" ]]; then
             _jglib_dir=$(dirname "$_jglib")
             # libintl co-located with libglib takes precedence (needed by libglib itself)
             [[ -f "$_jglib_dir/libintl.so.8" ]] && _jfinal_preload="$_jglib_dir/libintl.so.8:"
             _jfinal_preload+="$_jglib"
             [[ ${#_jpreloads[@]} -gt 0 ]] && _jfinal_preload+=":$(IFS=:; echo "${_jpreloads[*]}")"
-            [[ -n "${LD_PRELOAD:-}" ]] && _jfinal_preload+=":$LD_PRELOAD"
+            [[ -n "$_jbase_preload" ]] && _jfinal_preload+=":$_jbase_preload"
             # Add glib dir first in LD_LIBRARY_PATH
-            [[ ":${_jlibdirs[*]}:" != *":$_jglib_dir:"* ]] && _jlibdirs=("$_jglib_dir" "${_jlibdirs[@]}")
+            if [[ ":${_jlibdirs[*]}:" != *":$_jglib_dir:"* ]]; then
+                _jlibdirs=("$_jglib_dir" "${_jlibdirs[@]}")
+            fi
         elif [[ ${#_jpreloads[@]} -gt 0 ]]; then
-            _jfinal_preload="$(IFS=:; echo "${_jpreloads[*]}")${LD_PRELOAD:+:$LD_PRELOAD}"
+            _jfinal_preload="$(IFS=:; echo "${_jpreloads[*]}")${_jbase_preload:+:$_jbase_preload}"
         fi
 
         [[ ${#_jlibdirs[@]} -gt 0 ]] && \
             _jfinal_libpath="$(IFS=:; echo "${_jlibdirs[*]}")${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-        LD_PRELOAD="${_jfinal_preload:-${LD_PRELOAD:-}}" \
+        LD_PRELOAD="${_jfinal_preload:-${_jbase_preload:-}}" \
         LD_LIBRARY_PATH="${_jfinal_libpath:-${LD_LIBRARY_PATH:-}}" \
         command julia "$@"
     }
