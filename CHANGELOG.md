@@ -8,7 +8,7 @@
 - CondaPkg directories to `.gitignore`
 
 ### Changed
-- switched from PyCall/PyPlot to PythonCall/CondaPkg for ControlPlots (bump ControlPlots to 0.3)
+- switched from PyCall/PyPlot to PythonCall/CondaPkg for ControlPlots (bump ControlPlots to 0.3). Main advantage: The plotting library is now thread-safe.
 - `bin/install_controlplots` now uses CondaPkg instead of Conda/PyCall; default backend changed to CondaPkg
 - `bin/install`: added `--update` mode that removes manifests and runs `Pkg.update()`
 - `bin/install`: improved error handling with automatic retry on resolve failures
