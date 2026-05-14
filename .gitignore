@@ -47,3 +47,5 @@ output/parking_wind_dir.mp4
 output/full_simulation.mp4
 examples/.CondaPkg/
 test/.CondaPkg/
+.CondaPkg/
+
