@@ -119,8 +119,8 @@ $JULIA_CMD --project -J bin/kps-image-${julia_major}.so -e "using Pkg; Pkg.insta
 $JULIA_CMD --project=examples -J bin/kps-image-${julia_major}.so -e "using NOMAD, KiteViewers, Pkg; Pkg.instantiate(); Pkg.precompile()"
 
 # Precompile Revise in the global environment (used by run_julia for hot-reloading)
-echo "Precompiling Revise in the global environment..."
-$JULIA_CMD -e 'using Pkg; Pkg.precompile(["Revise"])'
+echo "Precompiling Revise with sysimage..."
+$JULIA_CMD --project -J bin/kps-image-${julia_major}.so -e 'using Pkg; Pkg.precompile(["Revise"])'
 
 # On Linux, suppress known-harmless Julia extension loading warnings (e.g. DistributionsTestExt).
 # The error spans multiple lines (┌ Error: ... │ ... └ @ Base), so use sed range deletion.
