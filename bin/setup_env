@@ -14,6 +14,16 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
 export JULIA_CONDAPKG_VERBOSITY="0"
 export JULIA_CONDAPKG_LOG="warn"
 
+# Point PythonCall to the single shared Python environment (examples/.CondaPkg).
+# This ensures a consistent Python is used regardless of which --project is active,
+# including when a sysimage compiled with ControlPlots is loaded.
+_setup_env_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+_pythoncall_exe="$_setup_env_root/examples/.CondaPkg/.pixi/envs/default/bin/python"
+if [[ -x "$_pythoncall_exe" ]]; then
+    export JULIA_PYTHONCALL_EXE="$_pythoncall_exe"
+fi
+unset _setup_env_root _pythoncall_exe
+
 # Avoid OpenMP duplicate-runtime conflict on Windows (libiomp5md.dll vs libomp.dll)
 case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*) export KMP_DUPLICATE_LIB_OK=TRUE ;;
