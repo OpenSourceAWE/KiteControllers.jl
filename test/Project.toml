@@ -30,7 +30,7 @@ KiteControllers = {path = ".."}
 [compat]
 Aqua = "0.8.11"
 BenchmarkTools = "1.6"
-ControlPlots = "0.2.14"
+ControlPlots = "0.3"
 Joysticks = "0.1.4"
 KiteModels = "0.11.8"
 KitePodModels = "0.4.0"
