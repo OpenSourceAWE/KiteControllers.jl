@@ -2,6 +2,43 @@
 # SPDX-FileCopyrightText: 2025 Uwe Fechner
 # SPDX-License-Identifier: MIT
 
+_yes_to_all=false
+update=false
+
+print_usage() {
+    echo "Usage:"
+    echo "./install"
+    echo "./install --update"
+    echo "./install -y"
+    echo "./install --yes"
+    echo "./install --update -y"
+    echo "./install -h"
+    echo "./install --help"
+}
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            print_usage
+            exit 0
+            ;;
+        --update)
+            update=true
+            shift
+            ;;
+        -y|--yes)
+            _yes_to_all=true
+            shift
+            ;;
+        *)
+            echo "Invalid parameter! Use:"
+            print_usage
+            exit 1
+            ;;
+    esac
+done
+
 if [[ $(basename $(pwd)) == "bin" ]]; then
     cd ..
 fi
@@ -104,7 +141,7 @@ export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
 . ./bin/setup_env
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
-    # Avoid Tk backend issues on macOS (e.g. non-responsive close button in PyPlot windows).
+    # Avoid Tk backend issues on macOS (e.g. non-responsive close button in ControlPlots windows).
     # Keep user override if MPLBACKEND is already set.
     if [[ -z "${MPLBACKEND:-}" ]]; then
         export MPLBACKEND=qtagg
@@ -134,24 +171,30 @@ if [[ $julia_major != "1.11" ]] && [[ $julia_major != "1.12" ]]; then
     exit 1
 fi
 
-# Copy the appropriate default manifest
-if [[ $julia_major == "1.11" ]]; then
-    if [ -f "Manifest-v1.11.toml.default" ]; then
-        cp Manifest-v1.11.toml.default Manifest-v1.11.toml
-        echo "Copied Manifest-v1.11.toml.default to Manifest-v1.11.toml"
+# Copy the appropriate default manifest (skip in --update mode: start clean)
+if [[ $update == false ]]; then
+    if [[ $julia_major == "1.11" ]]; then
+        if [ -f "Manifest-v1.11.toml.default" ]; then
+            cp Manifest-v1.11.toml.default Manifest-v1.11.toml
+            echo "Copied Manifest-v1.11.toml.default to Manifest-v1.11.toml"
+        else
+            echo "Warning: Manifest-v1.11.toml.default not found"
+            exit 1
+        fi
     else
-        echo "Warning: Manifest-v1.11.toml.default not found"
-        exit 1
+        # Default to 1.12 for newer versions
+        if [ -f "Manifest-v1.12.toml.default" ]; then
+            cp Manifest-v1.12.toml.default Manifest-v1.12.toml
+            echo "Copied Manifest-v1.12.toml.default to Manifest-v1.12.toml"
+        else
+            echo "Warning: Manifest-v1.12.toml.default not found"
+            exit 1
+        fi
     fi
 else
-    # Default to 1.12 for newer versions
-    if [ -f "Manifest-v1.12.toml.default" ]; then
-        cp Manifest-v1.12.toml.default Manifest-v1.12.toml
-        echo "Copied Manifest-v1.12.toml.default to Manifest-v1.12.toml"
-    else
-        echo "Warning: Manifest-v1.12.toml.default not found"
-        exit 1
-    fi
+    # Update mode: start from a clean state without a manifest and let Pkg.update() generate it.
+    rm -f Manifest.toml "Manifest-v${julia_major}.toml"
+    echo "--update selected: removed existing manifests for Julia ${julia_major}"
 fi
 
 # Remove any existing Manifest.toml symlink (left by a previous install run) so Julia
@@ -264,8 +307,60 @@ normalize_manifest_name() {
 # Instantiate the project
 FAILED_RESOLVES=()
 RETRIED_RESOLVES=()
-echo "Instantiating project..."
-_ec=0; run_resolve_with_retry "" 1 || _ec=$?
+if [[ $update == true ]]; then
+    echo "Updating main project..."
+else
+    echo "Instantiating project..."
+fi
+_ec=0; KITECONTROLLERS_INSTALL_UPDATE="$update" julia --project -e '
+using Pkg
+
+const UPDATE_MODE = get(ENV, "KITECONTROLLERS_INSTALL_UPDATE", "false") == "true"
+
+function ensure_general_registry()
+    regs = try
+        Pkg.Registry.reachable_registries()
+    catch
+        Pkg.Registry.update()
+        Pkg.Registry.reachable_registries()
+    end
+    if !any(r -> r.name == "General", regs)
+        Pkg.Registry.add("General")
+    else
+        Pkg.Registry.update()
+    end
+end
+
+function clean_active_manifest!(proj_dir)
+    active_manifest = "Manifest-v$(VERSION.major).$(VERSION.minor).toml"
+    for f in readdir(proj_dir)
+        if f == "Manifest.toml" || f == active_manifest
+            rm(joinpath(proj_dir, f), force=true)
+        end
+    end
+end
+
+try
+    ensure_general_registry()
+    if UPDATE_MODE
+        Pkg.update()
+    else
+        Pkg.resolve()
+    end
+    Pkg.instantiate()
+catch e
+    @warn "Main project package operation failed, attempting clean retry..." exception=e
+    clean_active_manifest!(dirname(Base.active_project()))
+    ensure_general_registry()
+    if UPDATE_MODE
+        Pkg.update()
+    else
+        Pkg.resolve()
+    end
+    Pkg.instantiate()
+    exit(2)
+end
+' || _ec=$?
 if [[ $_ec -eq 2 ]]; then RETRIED_RESOLVES+=("main project")
 elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("main project"); fi
 # If Pkg.resolve() created a plain Manifest.toml (Julia 1.12 behavior), rename it
@@ -369,31 +464,52 @@ fi
 julia --project=examples -e 'using KiteControllers, KiteViewers, ControlPlots, NOMAD'
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
-    echo
-    echo "Installing QtAgg dependencies for PyPlot on macOS..."
-    julia -e '
+    if julia --project=examples -e '
+try
+    using PythonCall
+    pyimport("matplotlib")
+    pyimport("matplotlib.backends.backend_qtagg")
+catch
+    exit(1)
+end
+'; then
+        echo
+        echo "QtAgg already installed; skipping QtAgg dependency installation."
+    else
+        _install_matplotlib_condapkg_macos() {
+            julia --project=examples -e '
 using Pkg
-
-for pkg in ["PyCall", "PyPlot", "Conda"]
+for pkg in ["PythonCall", "CondaPkg"]
     if Base.find_package(pkg) === nothing
         Pkg.add(pkg)
     end
 end
-
-if get(ENV, "PYTHON", nothing) != ""
-    ENV["PYTHON"] = ""
-    Pkg.build("PyCall")
-end
-
-using Conda
-Conda.add("matplotlib")
-Conda.add("pyqt")
-
-Pkg.build("PyPlot")
-
-println("Installed matplotlib + pyqt in Conda.jl environment.")
-println("QtAgg should now be available for matplotlib/PyPlot.jl.")
+using CondaPkg
+CondaPkg.add("matplotlib")
+CondaPkg.add("pyqt")
+CondaPkg.resolve()
+println("Installed matplotlib + pyqt in CondaPkg environment.")
+println("QtAgg should now be available for matplotlib/PythonCall.")
 '
+        }
+        if [[ $_yes_to_all == true ]]; then
+            echo
+            echo "Installing QtAgg dependencies for ControlPlots on macOS..."
+            _install_matplotlib_condapkg_macos
+        else
+            echo
+            echo "Installing QtAgg dependencies for ControlPlots on macOS..."
+            read -rp "Do you want to install matplotlib and pyqt? (y/n) [default: y]: " _install_choice
+            case "${_install_choice}" in
+                n|N)
+                    echo "Skipping QtAgg dependency installation."
+                    ;;
+                *)
+                    _install_matplotlib_condapkg_macos
+                    ;;
+            esac
+        fi
+    fi
 fi
 
 echo
