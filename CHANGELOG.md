@@ -1,27 +1,27 @@
 # Changelog
 
-## KiteControllers v0.2.27 - 2026-05-07
+## KiteControllers v0.2.28 - 2026-05-14
 ### Added
-- added `FFMPEG` to `examples/Project.toml`
-- `parking_wind_dir.jl` creates now a video and stores it in the **output** folder
-- `PLOT_RATES` option to `parking_wind_dir.jl`
-- `analyse.jl` script to plot heading_rate and heading_turn_rate
-- optional `azimuth` keyword argument to `calc_steering`
+- `--update`, `--yes`, `--help` command-line options to `bin/install`
+- `CondaPkg.toml` for managing matplotlib and pyqt via CondaPkg/pixi
+- `JULIA_PYTHONCALL_EXE` environment variable in `setup_env` pointing to CondaPkg Python
+- CondaPkg directories to `.gitignore`
 
 ### Changed
-- further parameter tuning in `parking_4p.jl`, `parking_controller.jl`, and `parking_wind_dir.jl`
-- updated documentation in `docs/src/projects.md`
-- added updated documentation images `parking_wind_dir_T0.png` and `parking_wind_dir_T1.png`
-- bump KiteModels to 0.11.11
-- improved parking controller, updated from KiteModels.jl
-- moved plot from `autopilot.jl` to `analyse.jl`
-- removed `get_default_turbulence` and `set_default_turbulence` (moved to KiteModels)
+- switched from PyCall/PyPlot to PythonCall/CondaPkg for ControlPlots (bump ControlPlots to 0.3)
+- `bin/install_controlplots` now uses CondaPkg instead of Conda/PyCall; default backend changed to CondaPkg
+- `bin/install`: added `--update` mode that removes manifests and runs `Pkg.update()`
+- `bin/install`: improved error handling with automatic retry on resolve failures
+- `bin/install`: passes `--yes` flag to `install_controlplots` in non-interactive mode
+- `bin/setup_env`: improved OpenSSL handling (use LD_LIBRARY_PATH instead of force-preloading libcrypto)
+- `bin/setup_env`: added libexpat handling for CondaPkg/pixi Python 3.13+
+- `bin/setup_env`: suppress verbose CondaPkg logs by default
+- `bin/run_julia`: use `-t auto` instead of `-t 1` to utilize all CPU threads
+- `bin/create_sys_image`: removed Python/matplotlib detection (no longer needed with CondaPkg)
 - updated default manifests
 
 ### Fixed
-- fixed calculation of heading_rate in `systemstatecontrol.jl` and `autopilot.jl`
-- fixed `autopilot.jl`
-- fixed `parking_wind_dir.jl` to use `update_sys_state!`
+- fixed OpenSSL symbol mismatch by not force-preloading libcrypto in launcher wrappers
 
 ## KiteControllers v0.2.26 - 2026-05-04
 ### Changed
