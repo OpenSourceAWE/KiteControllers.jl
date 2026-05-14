@@ -25,7 +25,7 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 KiteControllers = {path = ".."}
 
 [compat]
-ControlPlots = "0.3"
+ControlPlots = "0.3.0"
 Joysticks = "0.1.4"
 KiteModels = "0.11.12"
 KitePodModels = "0.4.0"
