@@ -206,6 +206,14 @@ if [[ "$_backend" == "system" ]]; then
     fi
     echo "Found system Python: $_syspython"
 
+    # Remove the CondaPkg-managed environment so that setup_env does not set
+    # JULIA_PYTHONCALL_EXE to the conda Python, which would override the system
+    # Python configured below.
+    if [[ -d "examples/.CondaPkg" ]]; then
+        echo "Removing examples/.CondaPkg (switching from CondaPkg to system Python)..."
+        rm -rf "examples/.CondaPkg"
+    fi
+
     echo ""
     echo "Saving python_exe=$_syspython to examples/LocalPreferences.toml..."
     # Write (or update) LocalPreferences.toml in the examples directory so that
