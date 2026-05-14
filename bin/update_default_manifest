@@ -57,15 +57,14 @@ if [[ $julia_major == "1.10" ]]; then
     cp examples/Manifest-v1.10.toml Manifest-v1.10.toml.default
     rm -rf ~/.julia/compiled/v1.10/KiteControllers/
     echo "Updated Manifest-v1.10.toml.default !"
-    echo "Make sure to run the tests before committing the new version!"
+    echo "Please run ./install again to check if all resolve calls succeed on the first attempt."
 elif [[ $julia_major == "1.11" ]]; then
     cp examples/Manifest-v1.11.toml Manifest-v1.11.toml.default
     rm -rf ~/.julia/compiled/v1.11/KiteControllers/
     echo "Updated Manifest-v1.11.toml.default !"
-    echo "Make sure to run the tests before committing the new version!"
+    echo "Please run ./install again to check if all resolve calls succeed on the first attempt."
 else
     cp Manifest-v1.12.toml Manifest-v1.12.toml.default
     rm -rf ~/.julia/compiled/v1.12/KiteControllers/
     echo "Updated Manifest-v1.12.toml.default !"
-    echo "Make sure to run the tests before committing the new version!"
 fi
