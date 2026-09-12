@@ -10,10 +10,14 @@
 - `bin/install` no longer instantiates the `docs` project (removed the `docs` resolve/precompile/instantiate steps)
 - `bin/run_julia` now launches Julia with `--project=examples` by default instead of the top-level project
 - Updated default manifest for Julia 1.12
+- CI tests Julia 1.12 and 1.13 instead of 1.11 and 1.12, and `bin/install`, `bin/create_sys_image` and `bin/update_default_manifest` offer and accept the same pair
+- `bin/install` and `bin/update_default_manifest` select the chosen Julia for their own run instead of changing the machine-wide `juliaup default`
+- `julia` compat reads `"1.11, 1.12, 1.13"`; the range is unchanged, 1.13 is now named
 
 ### Removed
 - Kaimon gate integration from `bin/run_julia`
 - `CondaPkg` dependency from `examples/Project.toml`
+- Julia 1.11 from the `bin/` scripts, together with the tracked `Manifest-v1.11.toml.default`
 
 ## KiteControllers v0.2.30 - 2026-06-21
 ### Fixed

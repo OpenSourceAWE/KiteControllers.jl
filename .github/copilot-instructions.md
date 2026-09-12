@@ -4,7 +4,7 @@
 This is **KiteControllers.jl**, a Julia package providing discrete controllers for kite power systems. It is part of the [Julia Kite Power Tools](https://github.com/aenarete/KiteSimulators.jl) ecosystem.
 
 ## Language & Runtime
-- All source code is **Julia** (v1.11 or v1.12)
+- All source code is **Julia** (v1.12 or v1.13)
 - Package manager is **Pkg.jl** with a workspace layout (`Project.toml`, `examples/`, `test/`)
 - The workspace root is the repo root; sub-projects live in `examples/` and `test/`
 
@@ -45,7 +45,7 @@ bin/                  # Helper scripts (create_sys_image, run_julia, etc.)
 - Configuration is loaded from YAML files in `data/`
 
 ## Dependency Management
-- The workspace uses **version-specific manifests**: `Manifest-v1.11.toml` and `Manifest-v1.12.toml`
+- The workspace uses **version-specific manifests**: `Manifest-v1.12.toml` and `Manifest-v1.13.toml`
 - Compat bounds in `Project.toml` use the form `"major.minor.patch"` — only bump them when the required version is actually registered in the General registry
 - When resolving `ERROR: empty intersection between Package@X and project compatibility Y`, check whether version Y is registered: `julia -e 'using Pkg; Pkg.Registry.update()'`, then inspect registry versions and delete the manifest if it is stale/conflicting (`rm Manifest-v1.12.toml; Pkg.resolve()`)
 - If the manifest is stale/conflicting, deleting `Manifest-v1.12.toml` and running `Pkg.resolve()` forces a clean resolution

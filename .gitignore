@@ -28,6 +28,7 @@ bin/kps-image-1.10-main.so.bak
 Manifest-v1.10.toml.bak
 bin/kps-image-1.11-new_wc.so
 Manifest-v1.12.toml
+Manifest-v1.13.toml
 .JETLSConfig.toml
 output/batch-*.yaml
 bin/kps-image-1.12-main.so
@@ -35,6 +36,7 @@ bin/kps-image-1.12-main.so.bak
 docs/build
 install_version_1.11.txt
 install_version_1.12.txt
+install_version_1.13.txt
 .gitignore
 data/windfield*.npz
 bin/kps-image-1.12-turbulence.so

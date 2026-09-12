@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.11'
           - '1.12'
+          - '1.13'
         os:
           - ubuntu-latest
           - windows-latest
@@ -44,7 +44,6 @@ jobs:
         shell: pwsh
         run: (Get-Content test\Project.toml) -notmatch 'KiteViewers|NativeFileDialog|Joysticks|MakieControlPlots|PyPlot' | Set-Content test\Project.toml
       - uses: julia-actions/cache@v3
-        if: runner.os != 'Windows' || matrix.version != '1.11'
         with:
           cache-name: ${{ hashFiles('**/Manifest-v*.toml') }}
       - uses: julia-actions/julia-buildpkg@v1

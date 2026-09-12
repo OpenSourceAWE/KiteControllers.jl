@@ -52,7 +52,6 @@ if ! command -v juliaup &> /dev/null; then
     exit 1
 fi
 
-# if julia is not installed, install Julia 1.11
 if ! command -v julia &> /dev/null; then
     echo "Julia not found. Please run: ./install"
     exit 1
@@ -66,13 +65,11 @@ if [[ $julia_major == "1.1" ]]; then
     julia_major=${julia_version:0:4} 
 fi
 
-# if the current julia version is older than 1.10, exit
-if [[ $julia_major == "1.11" ]] || [[ $julia_major == "1.12" ]]; then
-    echo "Supported Julia version found!"
-else
-    echo "The current Julia version is not supported, installing Julia 1.11!"
-    juliaup add 1.11
-    juliaup default 1.11
+if [[ $julia_major != "1.12" ]] && [[ $julia_major != "1.13" ]]; then
+    echo "Error: Julia $julia_major is not supported. Only Julia 1.12 and 1.13 are supported."
+    echo "You can install Julia 1.12 with the following command:"
+    echo "juliaup add 1.12"
+    exit 1
 fi
 
 # create a logfile for the sysimage creation process
