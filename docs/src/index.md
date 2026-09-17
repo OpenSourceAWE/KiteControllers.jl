@@ -8,7 +8,7 @@
 **KiteControllers.jl** provides discrete controllers for kite power systems. It is part of the
 [Julia Kite Power Tools](https://github.com/aenarete/KiteSimulators.jl) ecosystem.
 
-![Kite Power Tools](https://github.com/aenarete/WinchModels.jl/blob/main/docs/kite_power_tools.png?raw=true)
+![Kite Power Tools](kite_power_tools.png)
 
 ## Overview
 
