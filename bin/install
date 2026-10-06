@@ -60,7 +60,7 @@ if [[ $yes_to_all == false ]] && command -v juliaup &> /dev/null; then
     juliaup add "$desired_julia"
     select_julia_channel "$desired_julia"
 elif ! select_julia_channel $SUPPORTED_JULIA; then
-    echo "Error: Julia $(active_julia) is not supported and no supported Julia is installed."
+    echo "Error: no Julia with a default manifest is installed (active: $(active_julia))."
     echo "Install one of: $SUPPORTED_JULIA, e.g. 'juliaup add ${SUPPORTED_JULIA%% *}'."
     exit 1
 fi
@@ -71,7 +71,8 @@ echo "Using Julia $julia_version"
 
 export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
 
-rm -f "bin/kps-image-${julia_major}.so" Manifest.toml examples/Manifest.toml test/Manifest.toml
+rm -f "bin/kps-image-${julia_major}.so"
+rm -f Manifest.toml examples/Manifest.toml test/Manifest.toml
 
 # Julia 1.11 has no workspaces: examples gets a manifest of its own, and the tracked
 # .default is that one, which the root project resolves down to its own dependencies.
