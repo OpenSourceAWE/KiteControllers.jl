@@ -50,3 +50,4 @@ test/.CondaPkg/
 .CondaPkg/
 
 output/jetls_20260620_150810.log
+LocalPreferences.toml
