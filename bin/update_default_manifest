@@ -8,13 +8,28 @@
 cd "$(dirname "$0")/.."
 . ./bin/setup_env
 
-for version in ${@:-$SUPPORTED_JULIA}; do
-    JULIAUP_CHANNEL=$version ./bin/install --update -y
-    # Julia 1.11 has no workspaces, so only the examples manifest holds every package.
-    if [[ $version == "1.11" ]]; then
-        cp examples/Manifest-v1.11.toml Manifest-v1.11.toml.default
+resolved_manifest() {
+    # Julia 1.11 has no workspaces, so the root manifest lacks the examples' packages.
+    if [[ $1 == "1.11" ]]; then
+        echo "examples/Manifest-v1.11.toml"
     else
-        cp "Manifest-v${version}.toml" "Manifest-v${version}.toml.default"
+        echo "Manifest-v$1.toml"
     fi
+}
+
+[[ $# -gt 0 ]] || set -- $SUPPORTED_JULIA
+for version in "$@"; do
+    if [[ ! -f Manifest-v${version}.toml.default ]]; then
+        echo "Error: no Manifest-v${version}.toml.default to update. Supported: $SUPPORTED_JULIA"
+        exit 1
+    elif [[ $(JULIAUP_CHANNEL=$version active_julia 2> /dev/null) != "$version" ]]; then
+        echo "Error: Julia $version is not installed; try 'juliaup add $version'."
+        exit 1
+    fi
+done
+
+for version in "$@"; do
+    JULIAUP_CHANNEL=$version ./bin/install --update -y
+    cp "$(resolved_manifest "$version")" "Manifest-v${version}.toml.default"
     echo "Updated Manifest-v${version}.toml.default"
 done
