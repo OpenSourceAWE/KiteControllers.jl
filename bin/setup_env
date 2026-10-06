@@ -31,7 +31,7 @@ unset _setup_env_root
 
 # Major.minor of the Julia that `julia` currently starts.
 active_julia() {
-    julia --startup-file=no -e 'print(VERSION.major, ".", VERSION.minor)'
+    julia --version | awk '{ split($3, version, "."); print version[1] "." version[2] }'
 }
 
 # Keep the active Julia if it is one of the given versions, otherwise export
@@ -52,6 +52,11 @@ select_julia_channel() {
     done
     return 1
 }
+
+# Avoid Tk backend issues on macOS (e.g. a non-responsive close button in plot windows).
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    export MPLBACKEND="${MPLBACKEND:-qtagg}"
+fi
 
 # Avoid OpenMP duplicate-runtime conflict on Windows (libiomp5md.dll vs libomp.dll)
 case "$(uname -s)" in

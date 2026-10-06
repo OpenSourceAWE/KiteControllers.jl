@@ -40,7 +40,10 @@ fi
 # Check available disk space in home directory (require at least 5 GB)
 required_kb=$((5 * 1024 * 1024))
 available_kb=$(df -k "$HOME" | awk 'NR==2 {print $4}')
-if (( available_kb < required_kb )); then
+if [[ -z $available_kb ]]; then
+    echo "Error: could not determine free disk space in $HOME."
+    exit 1
+elif (( available_kb < required_kb )); then
     echo "Error: not enough free disk space in $HOME: at least 5 GB required."
     exit 1
 fi
@@ -62,6 +65,7 @@ if [[ $yes_to_all == false ]] && command -v juliaup &> /dev/null; then
 elif ! select_julia_channel $SUPPORTED_JULIA; then
     echo "Error: no Julia with a default manifest is installed (active: $(active_julia))."
     echo "Install one of: $SUPPORTED_JULIA, e.g. 'juliaup add ${SUPPORTED_JULIA%% *}'."
+    command -v juliaup &> /dev/null || echo "juliaup: https://julialang.org/install"
     exit 1
 fi
 julia_version=$(julia --startup-file=no -e 'print(VERSION)')
@@ -74,16 +78,16 @@ export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
 rm -f "bin/kps-image-${julia_major}.so"
 rm -f Manifest.toml examples/Manifest.toml test/Manifest.toml
 
-# Julia 1.11 has no workspaces: examples gets a manifest of its own, and the tracked
-# .default is that one, which the root project resolves down to its own dependencies.
+# Julia 1.11 has no workspaces, so examples needs a manifest of its own.
 if [[ $julia_major == "1.11" ]]; then
-    install_projects=(examples)
+    install_projects=(. examples)
     install_command='using Pkg; Pkg.resolve(); Pkg.instantiate()'
 else
-    install_projects=()
+    install_projects=(.)
     install_command='using Pkg; Pkg.instantiate()'
+    rm -f "examples/$manifest" "test/$manifest"
 fi
-for project in . "${install_projects[@]}"; do
+for project in "${install_projects[@]}"; do
     if [[ $update == false || ! -f $project/$manifest ]]; then
         cp "${manifest}.default" "$project/$manifest"
     fi

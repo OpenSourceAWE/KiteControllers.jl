@@ -7,14 +7,6 @@ fi
 export NO_AT_BRIDGE=1
 export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
 
-if [[ "$(uname -s)" == "Darwin" ]]; then
-    # Avoid Tk backend issues on macOS (e.g. non-responsive close button in PyPlot windows).
-    # Keep user override if MPLBACKEND is already set.
-    if [[ -z "${MPLBACKEND:-}" ]]; then
-        export MPLBACKEND=qtagg
-    fi
-fi
-
 . ./bin/setup_env
 
 installed_julia=""
@@ -32,16 +24,10 @@ else
     FAST_CORES=3 # default value
 fi
 
-GCT="--gcthreads=4,1"
-export JULIA_PKG_SERVER_REGISTRY_PREFERANCE=eager
-
 julia_version=$(julia --version | awk '{print($3)}')
-julia_major=${julia_version:0:3} 
-if [[ $julia_major == "1.1" ]]; then
-    julia_major=${julia_version:0:4}
-else
-    GCT=""
-fi
+julia_major=$(active_julia)
+GCT=""
+[[ $julia_major == 1.1? ]] && GCT="--gcthreads=4,1"
 
 # Check that the current Julia version matches the one used during install
 if [[ -f "install_version_${julia_major}.txt" ]]; then
