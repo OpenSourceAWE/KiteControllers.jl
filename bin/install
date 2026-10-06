@@ -73,11 +73,14 @@ export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
 
 rm -f "bin/kps-image-${julia_major}.so" Manifest.toml examples/Manifest.toml test/Manifest.toml
 
-# Julia 1.11 has no workspaces: examples and test get manifests of their own.
+# Julia 1.11 has no workspaces: examples gets a manifest of its own, and the tracked
+# .default is that one, which the root project resolves down to its own dependencies.
 if [[ $julia_major == "1.11" ]]; then
     install_projects=(examples)
+    install_command='using Pkg; Pkg.resolve(); Pkg.instantiate()'
 else
     install_projects=()
+    install_command='using Pkg; Pkg.instantiate()'
 fi
 for project in . "${install_projects[@]}"; do
     if [[ $update == false || ! -f $project/$manifest ]]; then
@@ -88,7 +91,7 @@ for project in . "${install_projects[@]}"; do
         julia --project="$project" -e 'using Pkg; Pkg.update()'
     else
         echo "Installing $project/$manifest from ${manifest}.default..."
-        julia --project="$project" -e 'using Pkg; Pkg.instantiate()'
+        julia --project="$project" -e "$install_command"
     fi
 done
 echo "Precompiling..."
