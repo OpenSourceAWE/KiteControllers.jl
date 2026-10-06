@@ -22,7 +22,36 @@ _pythoncall_exe="$_setup_env_root/examples/.CondaPkg/.pixi/envs/default/bin/pyth
 if [[ -x "$_pythoncall_exe" ]]; then
     export JULIA_PYTHONCALL_EXE="$_pythoncall_exe"
 fi
-unset _setup_env_root _pythoncall_exe
+unset _pythoncall_exe
+
+# Julia versions this repo has a default manifest for, newest first.
+SUPPORTED_JULIA=$(cd "$_setup_env_root" && ls Manifest-v*.toml.default \
+    | sed 's/^Manifest-v\(.*\)\.toml\.default$/\1/' | sort -rV | xargs)
+unset _setup_env_root
+
+# Major.minor of the Julia that `julia` currently starts.
+active_julia() {
+    julia --startup-file=no -e 'print(VERSION.major, ".", VERSION.minor)'
+}
+
+# Keep the active Julia if it is one of the given versions, otherwise export
+# JULIAUP_CHANNEL as the first of them juliaup has installed; fail if there is none.
+select_julia_channel() {
+    local active channel installed
+    active=$(active_julia)
+    for channel in "$@"; do
+        [[ $active == "$channel" ]] && return 0
+    done
+    command -v juliaup &> /dev/null || return 1
+    installed=$(juliaup status | awk 'NR > 2 { print ($1 == "*") ? $2 : $1 }')
+    for channel in "$@"; do
+        if grep -qx "$channel" <<< "$installed"; then
+            export JULIAUP_CHANNEL="$channel"
+            return 0
+        fi
+    done
+    return 1
+}
 
 # Avoid OpenMP duplicate-runtime conflict on Windows (libiomp5md.dll vs libomp.dll)
 case "$(uname -s)" in

@@ -17,6 +17,15 @@ fi
 
 . ./bin/setup_env
 
+installed_julia=""
+for version in $SUPPORTED_JULIA; do
+    [[ -f "install_version_${version}.txt" ]] && installed_julia+="$version "
+done
+if ! select_julia_channel ${installed_julia:-$SUPPORTED_JULIA}; then
+    echo "Error: Julia $(active_julia) is not supported. Please run bin/install first."
+    exit 1
+fi
+
 if command -v nproc &> /dev/null; then
     FAST_CORES=$(($(nproc) / 2 - 1))
 else
@@ -57,7 +66,7 @@ if [[ $# -gt 0 ]]; then
     fi
 fi
 
-julia_init='using Revise; '
+julia_init='Base.find_package("Revise") === nothing || @eval using Revise; '
 julia_init+='using KiteControllers; test_menu() = Base.include(Main, joinpath(pkgdir(KiteControllers), "test", "test_menu.jl")); menu_learning() = Base.include(Main, joinpath(pkgdir(KiteControllers), "examples", "menu_learning.jl"))'
 
 if test -f "bin/kps-image-${julia_major}.so"; then
