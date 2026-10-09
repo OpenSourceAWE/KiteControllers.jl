@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## KiteControllers v0.2.31 2026-09-03
+## KiteControllers v0.2.31 03-09-2026
 ### Added
 - `--tests` / `--no-tests` command-line options to `bin/install`; when neither is given and `-y`/`--yes` is not set, the script now asks interactively whether to instantiate the test project and run the test suite
 - `bin/count_loc` script to report lines of code via `scc`
@@ -17,14 +17,14 @@
 - Kaimon gate integration from `bin/run_julia`
 - `CondaPkg` dependency from `examples/Project.toml`
 
-## KiteControllers v0.2.30 2026-06-21
+## KiteControllers v0.2.30 21-06-2026
 ### Fixed
 - Added missing `FFMPEG_jll` dependency to `install_examples()` to prevent errors when running `autopilot.jl`
 
 ### Changed
 - Increased plot sizes (`ysize`) in `batch_plot.jl` from 10 to 16 (control/fpc plots) and from 10 to 14 (winch plots) for better readability
 
-## KiteControllers v0.2.29 2026-06-21
+## KiteControllers v0.2.29 21-06-2026
 ### Changed
 - **Switched from ControlPlots to MakieControlPlots** across all examples, tests, and scripts. Main advantages: Less installation issues,
 easy adaptation of GUI possible, faster 2D animations
@@ -35,7 +35,7 @@ easy adaptation of GUI possible, faster 2D animations
 - Added type annotations (`::FPPS`, `::SystemState`) to switch functions in `flightpathplanner2.jl` and `systemstatecontrol.jl` to fix JETLS warnings
 - Updated default manifests
 
-## KiteControllers v0.2.28 2026-05-14
+## KiteControllers v0.2.28 14-05-2026
 ### Added
 - `--update`, `--yes`, `--help` command-line options to `bin/install`
 - `CondaPkg.toml` for managing matplotlib and pyqt via CondaPkg/pixi
@@ -58,7 +58,7 @@ easy adaptation of GUI possible, faster 2D animations
 ### Fixed
 - fixed OpenSSL symbol mismatch by not force-preloading libcrypto in launcher wrappers
 
-## KiteControllers v0.2.27 2026-05-07
+## KiteControllers v0.2.27 07-05-2026
 ### Added
 - added `FFMPEG` to `examples/Project.toml`
 - `parking_wind_dir.jl` creates now a video and stores it in the **output** folder
@@ -81,7 +81,7 @@ easy adaptation of GUI possible, faster 2D animations
 - fixed `autopilot.jl`
 - fixed `parking_wind_dir.jl` to use `update_sys_state!`
 
-## KiteControllers v0.2.26 2026-05-04
+## KiteControllers v0.2.26 04-05-2026
 ### Changed
 - improved `bin/install` script
 - parking examples (`parking_4p.jl`, `parking_wind_dir.jl`) now work with 9% wind turbulence
@@ -92,7 +92,7 @@ easy adaptation of GUI possible, faster 2D animations
 - fixed OpenSSL issue in `bin/setup_env`
 - fixed `bin/run_julia` for Julia 1.11
 
-## KiteControllers v0.2.25 2026-05-03
+## KiteControllers v0.2.25 03-05-2026
 ### Added
 - the functions `set_default_turbulence` and `get_default_turbulence`
 - the menu entry `set_turbulence`
@@ -110,7 +110,7 @@ easy adaptation of GUI possible, faster 2D animations
 - fixed a typo in `docs/src/projects.md`
 - fixed a warning in `examples/parking_wind_dir.jl`
 
-## KiteControllers v0.2.24 2026-05-02
+## KiteControllers v0.2.24 02-05-2026
 ### Added
 - the function `menu_learning()` and the script `menu_learning.jl`
 - the page `Learning Control` to the documentation
@@ -123,15 +123,15 @@ easy adaptation of GUI possible, faster 2D animations
 - the script now stores the corrections directly in the yaml file of the flight path planner
 - it has better error handling and is much more robust
 
-## KiteControllers v0.2.23 2026-04-27
+## KiteControllers v0.2.23 27-04-2026
 ### Fixed
 - updated TagBot.yml
 
-## KiteControllers v0.2.22 2026-04-27
+## KiteControllers v0.2.22 27-04-2026
 ### Fixed
 - the script `autopilot` did not use the renamed system image
 
-## KiteControllers v0.2.21 2026-04-26
+## KiteControllers v0.2.21 26-04-2026
 ### Changed
 - improved `install` script to do a complete installation also with Julia 1.11
 - improved `create_sys_image` script to use less memory on Julia 1.12 and to suppress one warning
@@ -143,7 +143,7 @@ easy adaptation of GUI possible, faster 2D animations
 - decreased v_min to 0.10 m/s (the speed when the brake gets released) to fix sporadic winch controller failures
 - initial state of hydra20_426.yml
 
-## KiteControllers v0.2.20 2026-03-15
+## KiteControllers v0.2.20 15-03-2026
 ### Changed
 - fixed new JETLS warnings, also in the tests
 - improved script `test_flightpathcontroller1.jl`, added unit tests
@@ -157,7 +157,7 @@ easy adaptation of GUI possible, faster 2D animations
 - support for MacOS
 - the script `test/test_menu.jl` for running manual controller tests
 
-## KiteControllers v0.2.19 2026-03-12
+## KiteControllers v0.2.19 12-03-2026
 ### Changed
 - TestEnv is not used any more
 - use subprojects
@@ -181,23 +181,23 @@ easy adaptation of GUI possible, faster 2D animations
 - add Bash script `jetls` to run the static code analysis
 - add Bash script `jetls_examples` to run the static code analysis on the files in the `examples` folder.
 
-## KiteControllers v0.2.18 2025-07-14
+## KiteControllers v0.2.18 14-07-2025
 ### Changed
 - update KiteModels to 0.9.0; this version supports turbulent wind fields
 ### Fixes
 - fix broken dependencies (KiteUtils)
 
-## KiteControllers v0.2.17 2025-06-20
+## KiteControllers v0.2.17 20-06-2025
 ### Changed
 - remove all code related to the winch controller and use the package WinchControllers instead
 - bump KiteUtils and KiteModels
 - update yaml files for new version of KiteUtils
 
-## KiteControllers v0.2.16 2025-05-13
+## KiteControllers v0.2.16 13-05-2025
 ### Added
 - the function `install_examples()`
 
-## KiteControllers v0.2.15 2025-05-12
+## KiteControllers v0.2.15 12-05-2025
 ### Fixed
 - `plot_main` had wrong labels
 ### Added
@@ -208,7 +208,7 @@ easy adaptation of GUI possible, faster 2D animations
 - bump KiteUtils to 0.10.5
 - bump KiteModels to 0.7.3
 
-## KiteControllers v0.2.14 2025-04-22
+## KiteControllers v0.2.14 22-04-2025
 ### Fixed
 - disable multithreading in `run_julia` to avoid crashes related to PyPlot
 ### Changed
@@ -218,15 +218,15 @@ easy adaptation of GUI possible, faster 2D animations
 - bump KiteUtils to 0.10.3
 - bump KiteModels to 0.7
 
-## KiteControllers v0.2.13 2025-01-22
+## KiteControllers v0.2.13 22-01-2025
 ### Fixed
 - add new version of `FFTW` as dependency to fix Windows issue
 
-## KiteControllers v0.2.12 2025-01-21
+## KiteControllers v0.2.12 21-01-2025
 - change the point `zenith` to 79° elevation, 0° azimuth
 - change the initialization in autopilot.jl to work better for high wind speeds
 
-## KiteControllers v0.2.11 2025-01-16
+## KiteControllers v0.2.11 16-01-2025
 ### Changed
 - use KiteModels v0.6.14, which defines the azimuth angle and the orientation differently and make the controllers and examples work with the new definitions
 - bump `KiteUtils` to v0.9.6 The new version has new fields in the `SysState` struct that are used for logging.
@@ -247,7 +247,7 @@ easy adaptation of GUI possible, faster 2D animations
 - add the script `parking_controller.jl` which implements a dual-loop parking controller. The inner loop controls the turn rate. It has an excellent performance.
 - add the script `test/menu.jl` which allows to execute the manual tests, that display plots and fix the tests
 
-## KiteControllers v0.2.10 2024-09-07
+## KiteControllers v0.2.10 07-09-2024
 ### Changed
 - the script `create_sys_image` is now installing matplotlib if required
 - removed calls to se() to be sure the correct settings from the variable set are used
@@ -260,14 +260,14 @@ easy adaptation of GUI possible, faster 2D animations
 - fix all failing test scripts
 - fix most of the example, and the script `menu.jl`to run the examples interactively
 
-## KiteControllers v0.2.9 2024-08-07
+## KiteControllers v0.2.9 07-08-2024
 ### Changed
 - bump KiteUtils to 0.7.4
 - bump KiteModels to 0.6.3
 - fix some examples and the script `create_sys_image`
 - explain different installation methods in README.md
 
-## KiteControllers v0.2.8 2024-07-28
+## KiteControllers v0.2.8 28-07-2024
 ### Changed
 - bump KiteUtils to 0.7.2
 - bump WinchModels to 0.3.2
@@ -275,7 +275,7 @@ easy adaptation of GUI possible, faster 2D animations
 - adapt WinchController to new WinchModel interface
 - fix tests
 
-## KiteControllers v0.2.7 2024-07-12
+## KiteControllers v0.2.7 12-07-2024
 ### Fixed
 - fix control_plot on Windows (added sleep)
 - fix cycle counting in FPP
@@ -286,19 +286,19 @@ easy adaptation of GUI possible, faster 2D animations
 - bump KiteViewers.jl to 0.4.14
 - upgrade GLFW to latest version (the original issue is fixed now)
 
-## KiteControllers v0.2.6 2024-07-02
+## KiteControllers v0.2.6 02-07-2024
 ### Changed
 - downgrade GLFW_jll to fix an issue on Ubuntu 24.04 and on Mac
 ### Added
 - add section kps4-3l to all settings files to be compatible with the latest KiteUtils package
 
-## KiteControllers v0.2.5 2024-06-26
+## KiteControllers v0.2.5 26-06-2024
 ### Added
 - copyright disclaimer from TU Delft
 ### Changed
 - fix #35, save the default log file in the output folder
 
-## KiteControllers v0.2.4 2024-06-18
+## KiteControllers v0.2.4 18-06-2024
 ### Changed
 - add the field `corr_vec` to all `fpp_settings_xxx.yaml` files
 - modify `kiteobserver.jl` to use this correction vector
@@ -306,7 +306,7 @@ easy adaptation of GUI possible, faster 2D animations
 - new plot control_plot_II
 - remove compatibility with Julia 1.9, version 1.10 is the only supported version now
 
-## KiteControllers v0.2.3 2024-05-06
+## KiteControllers v0.2.3 06-05-2024
 ### Changed
 - use 60 Hz refresh rate for 3x, 6x, 9x and 12x time lapse
 - refactoring: add type KiteApp to the script autopilot.jl
@@ -326,7 +326,7 @@ easy adaptation of GUI possible, faster 2D animations
 - add the file `kiteobservers.jl` which provides the type `KiteObserver` and methods to determine deviations from the desired flight path
 - add the script `learning.jl` that provides the method `train()` that implements iterative learning of a vector of flight path corrections
 
-## KiteControllers v0.2.2 2024-03-29
+## KiteControllers v0.2.2 29-03-2024
 ### Changed
 - the new, pure Julia solver DFBDF is now the default. It is on average 4 times faster, uses only half the memory and is much more stable. In my tests, for rel\_tol $=0.0005$ the solver induced error of the peak tether force and the harvested energy was always $<0.1$%.
 
