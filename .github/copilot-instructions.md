@@ -4,7 +4,7 @@
 This is **KiteControllers.jl**, a Julia package providing discrete controllers for kite power systems. It is part of the [Julia Kite Power Tools](https://github.com/aenarete/KiteSimulators.jl) ecosystem.
 
 ## Language & Runtime
-- All source code is **Julia** (v1.11 or v1.12)
+- All source code is **Julia** (v1.11, v1.12 or v1.13)
 - Package manager is **Pkg.jl** with a workspace layout (`Project.toml`, `examples/`, `test/`)
 - The workspace root is the repo root; sub-projects live in `examples/` and `test/`
 

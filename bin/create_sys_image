@@ -58,8 +58,6 @@ if ! command -v julia &> /dev/null; then
     exit 1
 fi
 
-. ./bin/setup_env
-
 julia_version=$($JULIA_CMD --version | awk '{print($3)}')
 julia_major=${julia_version:0:3}
 if [[ $julia_major == "1.1" ]]; then
@@ -67,7 +65,7 @@ if [[ $julia_major == "1.1" ]]; then
 fi
 
 # if the current julia version is older than 1.10, exit
-if [[ $julia_major == "1.11" ]] || [[ $julia_major == "1.12" ]]; then
+if [[ $julia_major == "1.11" ]] || [[ $julia_major == "1.12" ]] || [[ $julia_major == "1.13" ]]; then
     echo "Supported Julia version found!"
 else
     echo "The current Julia version is not supported, installing Julia 1.11!"

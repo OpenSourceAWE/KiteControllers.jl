@@ -7,10 +7,13 @@ if [[ $(basename $(pwd)) == "bin" ]]; then
 fi
 
 # Ask which Julia version to use
-# Default to 1.12 if it is already installed and is the current default, otherwise 1.11
+# Default to 1.12 or 1.13 if it is already installed and is the current default, otherwise 1.11
 if juliaup status 2>/dev/null | grep '^\s*\*' | grep -q '1\.12'; then
     _default_choice=2
     _default_julia="1.12"
+elif juliaup status 2>/dev/null | grep '^\s*\*' | grep -q '1\.13'; then
+    _default_choice=3
+    _default_julia="1.13"
 else
     _default_choice=1
     _default_julia="1.11"
@@ -19,7 +22,8 @@ fi
 echo "Which Julia version do you want to update the manifest for?"
 echo "  1) Julia 1.11"
 echo "  2) Julia 1.12"
-read -rp "Enter 1 or 2 [default: ${_default_choice}]: " _julia_choice
+echo "  3) Julia 1.13"
+read -rp "Enter 1, 2 or 3 [default: ${_default_choice}]: " _julia_choice
 
 case "${_julia_choice}" in
     1)
@@ -28,11 +32,14 @@ case "${_julia_choice}" in
     2)
         _desired_julia="1.12"
         ;;
+    3)
+        _desired_julia="1.13"
+        ;;
     "")
         _desired_julia="${_default_julia}"
         ;;
     *)
-        echo "Invalid choice: '${_julia_choice}'. Please enter 1 or 2."
+        echo "Invalid choice: '${_julia_choice}'. Please enter 1, 2 or 3."
         exit 1
         ;;
 esac
@@ -44,7 +51,7 @@ echo "Switched to Julia ${_desired_julia}."
 echo
 
 cd bin
-./install --update -y
+./install --update -y --tests
 
 julia_version=$(julia --version | awk '{print($3)}')
 julia_major=${julia_version:0:3}
@@ -53,6 +60,11 @@ if [[ $julia_major == "1.1" ]]; then
 fi
 
 cd ..
+
+# Run the test suite; abort (set -e) without updating the default manifest if it fails
+echo "Running the test suite..."
+julia --project -e 'using Pkg; Pkg.test()'
+
 if [[ $julia_major == "1.10" ]]; then
     cp examples/Manifest-v1.10.toml Manifest-v1.10.toml.default
     rm -rf ~/.julia/compiled/v1.10/KiteControllers/
@@ -64,7 +76,7 @@ elif [[ $julia_major == "1.11" ]]; then
     echo "Updated Manifest-v1.11.toml.default !"
     echo "Please run ./install again to check if all resolve calls succeed on the first attempt."
 else
-    cp Manifest-v1.12.toml Manifest-v1.12.toml.default
-    rm -rf ~/.julia/compiled/v1.12/KiteControllers/
-    echo "Updated Manifest-v1.12.toml.default !"
+    cp "Manifest-v${julia_major}.toml" "Manifest-v${julia_major}.toml.default"
+    rm -rf ~/.julia/compiled/v${julia_major}/KiteControllers/
+    echo "Updated Manifest-v${julia_major}.toml.default !"
 fi

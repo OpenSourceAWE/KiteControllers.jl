@@ -51,3 +51,5 @@ test/.CondaPkg/
 
 output/jetls_20260620_150810.log
 Manifest-v1.13.toml
+install_version_1.13.txt
+bin/kps-image-1.13.so

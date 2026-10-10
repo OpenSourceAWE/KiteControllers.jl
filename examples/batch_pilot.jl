@@ -115,6 +115,11 @@ function simulate(app::KiteApp)
     finally
         app.set.use_turbulence = saved_use_turbulence
     end
+    if isnothing(integrator)
+        error("Could not find the initial steady state for project $(KiteUtils.PROJECT) " *
+              "(delta=$(app.set.delta), stiffness_factor=$(app.set.stiffness_factor)). " *
+              "Try other values of delta and stiffness_factor in the settings file.")
+    end
 
     sys_state = SysState(app.kps4::KPS4)
     sys_state.e_mech   = 0

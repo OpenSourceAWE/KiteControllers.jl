@@ -8,8 +8,6 @@ fi
 export QT_QPA_PLATFORM=xcb
 export NO_AT_BRIDGE=1
 
-. ./bin/setup_env
-
 if command -v nproc &> /dev/null; then
     FAST_CORES=$(($(nproc) / 2 - 1))
 else

@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+### Added
+- support for Julia 1.13 (compat bounds, CI matrix, default manifest, and the `bin/install`, `bin/update_default_manifest` and `bin/create_sys_image` scripts)
+- test `test/test-steady_state.jl` that checks that the initial steady state converges (without solver warnings) for all projects in `data/` and for the settings used by the other examples of the menu
+
+### Changed
+- `bin/install` no longer runs the test suite; `--tests` (or answering yes to the prompt) only instantiates and precompiles the test project
+- `bin/install` no longer instantiates the test project by default (also with `-y`); use `--tests` or answer yes to the prompt to do so
+- `bin/update_default_manifest` now instantiates the test project and runs the test suite before updating the default manifest
+
+### Fixed
+- `examples/autopilot.jl` and `examples/batch_pilot.jl` now stop with a clear error message if the initial steady state cannot be found, instead of failing later with `FieldError: type Nothing has no field t`
+
+### Removed
+- `bin/setup_env` and all references to it (it was only needed for ControlPlots.jl); `copy_bin()` no longer copies it
+
 ## KiteControllers v0.2.31 - 2026-09-03
 ### Added
 - `--tests` / `--no-tests` command-line options to `bin/install`; when neither is given and `-y`/`--yes` is not set, the script now asks interactively whether to instantiate the test project and run the test suite

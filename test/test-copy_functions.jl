@@ -63,7 +63,6 @@ end
             @test isdir("bin")
             files = readdir("bin")
             @test "run_julia" in files
-            @test "setup_env" in files
             # run_julia must be executable (Unix only; Windows has no executable bits)
             if !Sys.iswindows()
                 @test (filemode(joinpath("bin", "run_julia")) & 0o111) != 0

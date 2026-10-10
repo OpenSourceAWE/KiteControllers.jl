@@ -4,7 +4,7 @@
 
 _yes_to_all=false
 update=false
-run_tests=true
+run_tests=false
 _run_tests_explicit=false
 
 print_usage() {
@@ -57,21 +57,19 @@ if [[ $(basename $(pwd)) == "bin" ]]; then
     cd ..
 fi
 
-# Ask whether to instantiate the test project and run the test suite, unless
+# Ask whether to instantiate the test project (the test suite itself is not run), unless
 # already decided via -y/--yes or an explicit --tests/--no-tests flag.
 if [[ $_yes_to_all == false && $_run_tests_explicit == false ]]; then
-    read -rp "Instantiate the test project and run the test suite? [Y/n]: " _run_tests_choice
+    read -rp "Instantiate and precompile the test project? [y/N]: " _run_tests_choice
     case "${_run_tests_choice}" in
-        [Nn]*)
-            run_tests=false
+        [Yy]*)
+            run_tests=true
             ;;
         *)
-            run_tests=true
+            run_tests=false
             ;;
     esac
 fi
-
-. ./bin/setup_env
 
 # Check if juliaup is installed
 if ! command -v juliaup &> /dev/null; then
@@ -112,10 +110,13 @@ if [[ $_yes_to_all == true ]]; then
     echo "Using currently active Julia ${_desired_julia}..."
 else
     # Interactive mode: ask which Julia version to use
-    # Default to 1.12 if it is already installed and is the current default, otherwise 1.11
+    # Default to 1.12 or 1.13 if it is already installed and is the current default, otherwise 1.11
     if juliaup status 2>/dev/null | grep '^\s*\*' | grep -q '1\.12'; then
         _default_choice=2
         _default_julia="1.12"
+    elif juliaup status 2>/dev/null | grep '^\s*\*' | grep -q '1\.13'; then
+        _default_choice=3
+        _default_julia="1.13"
     else
         _default_choice=1
         _default_julia="1.11"
@@ -123,7 +124,8 @@ else
     echo "Which Julia version do you want to use?"
     echo "  1) Julia 1.11"
     echo "  2) Julia 1.12"
-    read -rp "Enter 1 or 2 [default: ${_default_choice}]: " _julia_choice
+    echo "  3) Julia 1.13"
+    read -rp "Enter 1, 2 or 3 [default: ${_default_choice}]: " _julia_choice
     case "${_julia_choice}" in
         1)
             _desired_julia="1.11"
@@ -131,11 +133,14 @@ else
         2)
             _desired_julia="1.12"
             ;;
+        3)
+            _desired_julia="1.13"
+            ;;
         "")
             _desired_julia="${_default_julia}"
             ;;
         *)
-            echo "Invalid choice: '${_julia_choice}'. Please enter 1 or 2."
+            echo "Invalid choice: '${_julia_choice}'. Please enter 1, 2 or 3."
             exit 1
             ;;
     esac
@@ -173,8 +178,6 @@ echo "Detected Julia version: $julia_version (major: $julia_major)"
 
 export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
 
-. ./bin/setup_env
-
 if [[ "$(uname -s)" == "Darwin" ]]; then
     # Avoid Tk backend issues on macOS (e.g. non-responsive close button in MakieControlPlots windows).
     # Keep user override if MPLBACKEND is already set.
@@ -197,9 +200,9 @@ if test -f "$SOFILE"; then
     rm -f "$SOFILE"
 fi
 
-# Only accept Julia 1.11 and 1.12
-if [[ $julia_major != "1.11" ]] && [[ $julia_major != "1.12" ]]; then
-    echo "Error: Julia $julia_major is not supported. Only Julia 1.11 and 1.12 are supported."
+# Only accept Julia 1.11, 1.12 and 1.13
+if [[ $julia_major != "1.11" ]] && [[ $julia_major != "1.12" ]] && [[ $julia_major != "1.13" ]]; then
+    echo "Error: Julia $julia_major is not supported. Only Julia 1.11, 1.12 and 1.13 are supported."
     echo "You can install Julia 1.11 with the following commands:"
     echo "juliaup add 1.11"
     echo "juliaup default 1.11"
@@ -217,12 +220,12 @@ if [[ $update == false ]]; then
             exit 1
         fi
     else
-        # Default to 1.12 for newer versions
-        if [ -f "Manifest-v1.12.toml.default" ]; then
-            cp Manifest-v1.12.toml.default Manifest-v1.12.toml
-            echo "Copied Manifest-v1.12.toml.default to Manifest-v1.12.toml"
+        # Julia 1.12 and newer
+        if [ -f "Manifest-v${julia_major}.toml.default" ]; then
+            cp "Manifest-v${julia_major}.toml.default" "Manifest-v${julia_major}.toml"
+            echo "Copied Manifest-v${julia_major}.toml.default to Manifest-v${julia_major}.toml"
         else
-            echo "Warning: Manifest-v1.12.toml.default not found"
+            echo "Warning: Manifest-v${julia_major}.toml.default not found"
             exit 1
         fi
     fi
@@ -416,26 +419,17 @@ if [[ $julia_major == "1.11" ]]; then
     elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("examples (1.11)"); fi
     echo "Precompiling examples project..."
     julia --project=examples -e 'using Pkg; Pkg.precompile()'
-    # On Linux, verify that MakieControlPlots loads correctly.
-    if [[ "$(uname -s)" == "Linux" ]]; then
-        echo "Checking if MakieControlPlots is working in the examples project..."
-        if ! env -u LD_PRELOAD -u LD_LIBRARY_PATH \
-                julia --project=examples -e 'using MakieControlPlots' &>/dev/null 2>&1; then
-            echo "Warning: MakieControlPlots could not be loaded. Install matplotlib (e.g. via apt or CondaPkg)."
-        fi
-    fi
     if [[ $run_tests == true ]]; then
         rm -f test/Manifest-v1.11.toml test/Manifest.toml
         cp Manifest-v1.11.toml test/Manifest-v1.11.toml
         _ec=0; run_resolve_with_retry "test" 0 || _ec=$?
         if [[ $_ec -eq 2 ]]; then RETRIED_RESOLVES+=("test (1.11)")
         elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("test (1.11)"); fi
-        echo "Precompiling test project and running the tests..."
+        echo "Precompiling test project..."
         julia --project=test -e 'using Pkg; Pkg.precompile()'
-        julia --project -e 'using Pkg; Pkg.test()'
         normalize_manifest_name "test"
     else
-        echo "Skipping test project instantiation and tests (as requested)."
+        echo "Skipping test project instantiation (as requested)."
     fi
 
     # Rename the manifest file to version-specific name
@@ -449,8 +443,8 @@ else
     # instantiation (Julia 1.12 does not need a pinned manifest there).
     rm -f "examples/Manifest-v${julia_major}.toml" examples/Manifest.toml
     _ec=0; run_resolve_with_retry "examples" 0 || _ec=$?
-    if [[ $_ec -eq 2 ]]; then RETRIED_RESOLVES+=("examples (1.12)")
-    elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("examples (1.12)"); fi
+    if [[ $_ec -eq 2 ]]; then RETRIED_RESOLVES+=("examples (${julia_major})")
+    elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("examples (${julia_major})"); fi
     echo "Precompiling examples project..."
     julia --project=examples -e 'using Pkg; Pkg.precompile()'
 
@@ -459,14 +453,13 @@ else
         # Julia 1.12: do not seed examples with the main manifest (no manifest will be kept there)
         cp "Manifest-v${julia_major}.toml" "test/Manifest-v${julia_major}.toml"
         _ec=0; run_resolve_with_retry "test" 0 || _ec=$?
-        if [[ $_ec -eq 2 ]]; then RETRIED_RESOLVES+=("test (1.12)")
-        elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("test (1.12)"); fi
-        echo "Precompiling test project and running the tests..."
+        if [[ $_ec -eq 2 ]]; then RETRIED_RESOLVES+=("test (${julia_major})")
+        elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("test (${julia_major})"); fi
+        echo "Precompiling test project..."
         julia --project=test -e 'using Pkg; Pkg.precompile()'
-        julia --project -e 'using Pkg; Pkg.test()'
         normalize_manifest_name "test"
     else
-        echo "Skipping test project instantiation and tests (as requested)."
+        echo "Skipping test project instantiation (as requested)."
     fi
     # Julia 1.12: do not keep a manifest in the examples folder
     rm -f "examples/Manifest-v${julia_major}.toml" examples/Manifest.toml

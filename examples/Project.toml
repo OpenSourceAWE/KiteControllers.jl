@@ -22,10 +22,11 @@ YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [sources]
 KiteControllers = {path = ".."}
+KiteModels = {rev = "main", url = "https://github.com/OpenSourceAWE/KiteModels.jl.git"}
 
 [compat]
 Joysticks = "0.1.4"
-KiteModels = "0.11.14"
+KiteModels = "0.11.18"
 KitePodModels = "0.4.0"
 KiteViewers = "0.5.2"
 LaTeXStrings = "1.4"
