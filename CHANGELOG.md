@@ -1,15 +1,20 @@
 # Changelog
 
-## Unreleased
+## KiteControllers v0.2.31 - 2026-10-11
 ### Added
 - support for Julia 1.13 (compat bounds, CI matrix, default manifest, and the `bin/install`, `bin/update_default_manifest` and `bin/create_sys_image` scripts)
 - test `test/test-steady_state.jl` that checks that the initial steady state converges (without solver warnings) for all projects in `data/` and for the settings used by the other examples of the menu
+- `--tests` / `--no-tests` command-line options to `bin/install`; when neither is given and `-y`/`--yes` is not set, the script now asks interactively whether to instantiate and precompile the test project
+- `bin/count_loc` script to report lines of code via `scc`
+- `bin/create_release` script to post release notes from `CHANGELOG.md` to the JuliaRegistrator issue
 
 ### Changed
-- `bin/install` no longer runs the test suite; `--tests` (or answering yes to the prompt) only instantiates and precompiles the test project
-- `bin/install` no longer instantiates the test project by default (also with `-y`); use `--tests` or answer yes to the prompt to do so
+- `bin/install` no longer runs the test suite and no longer instantiates the test project by default (also with `-y`); use `--tests` or answer yes to the prompt to instantiate and precompile it
 - `bin/update_default_manifest` now instantiates the test project and runs the test suite before updating the default manifest
 - `bin/update_default_manifest` now checks that all dependencies are released versions (no git branches or local paths) before updating the default manifest
+- `bin/install` no longer instantiates the `docs` project (removed the `docs` resolve/precompile/instantiate steps)
+- `bin/run_julia` now launches Julia with `--project=examples` by default instead of the top-level project
+- Updated default manifest for Julia 1.12
 
 ### Fixed
 - the hydra20_426 simulation of `examples/autopilot.jl` failed on Julia 1.13 (`AssertionError: height > -1000`): when the winch passed through zero speed, its brake engaged and the reel-out speed ran away. The minimal winch speed `v_min` is now `0.1` m/s, as in `batch_pilot.jl`, instead of `0.15` m/s. The underlying problem (the winch state is updated on every residual evaluation of the solver) is fixed in WinchModels 0.3.12 and KiteModels 0.11.19
@@ -18,19 +23,6 @@
 ### Removed
 - support for Julia 1.11 (compat bounds, CI matrix, `Manifest-v1.11.toml.default`, and the `bin/install`, `bin/update_default_manifest`, `bin/create_sys_image` and `bin/autopilot` scripts)
 - `bin/setup_env` and all references to it (it was only needed for ControlPlots.jl); `copy_bin()` no longer copies it
-
-## KiteControllers v0.2.31 - 2026-09-03
-### Added
-- `--tests` / `--no-tests` command-line options to `bin/install`; when neither is given and `-y`/`--yes` is not set, the script now asks interactively whether to instantiate the test project and run the test suite
-- `bin/count_loc` script to report lines of code via `scc`
-- `bin/create_release` script to post release notes from `CHANGELOG.md` to the JuliaRegistrator issue
-
-### Changed
-- `bin/install` no longer instantiates the `docs` project (removed the `docs` resolve/precompile/instantiate steps)
-- `bin/run_julia` now launches Julia with `--project=examples` by default instead of the top-level project
-- Updated default manifest for Julia 1.12
-
-### Removed
 - Kaimon gate integration from `bin/run_julia`
 - `CondaPkg` dependency from `examples/Project.toml`
 
