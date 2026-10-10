@@ -63,7 +63,7 @@ if test -f "bin/kps-image-${julia_major}.so"; then
     if [[ -n "$script_file" ]]; then
         PLOT=1 julia --project -J bin/kps-image-${julia_major}.so -t auto $GCT --project "$script_file" "$@"
     else
-        PLOT=1 julia --projects -J bin/kps-image-${julia_major}.so -t auto $GCT --project -i -e "$julia_init"
+        PLOT=1 julia --project -J bin/kps-image-${julia_major}.so -t auto $GCT --project -i -e "$julia_init"
     fi
 else
     if [[ -n "$script_file" ]]; then
