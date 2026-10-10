@@ -43,28 +43,31 @@ try
     end
 
     @testset "FPPSettings load from YAML" begin
-        fpps = FPPSettings(true)
-        # The fpp_settings.yaml is not found in the KiteUtils test data path,
-        # so FPPSettings(true) gracefully falls back to defaults.
-        @test fpps.log_level         == 2
-        @test fpps.beta_set          ≈ 26.0
-        @test fpps.k_factor          ≈ 1.0
-        @test fpps.heading_upper_turn ≈ 335.0
-        @test fpps.min_depower       ≈ 22.0
-        @test fpps.max_depower       ≈ 40.0
-        @test fpps.parking_depower   ≈ 25.0
-        @test fpps.min_length        ≈ 168.5
-        @test fpps.max_length        ≈ 500.0
-        @test fpps.w_fig             ≈ 36.0
-        @test fpps.psi_dot_max       ≈ 3.0
-        @test fpps.r_min             ≈ 3.0
-        @test fpps.r_max             ≈ 4.5
-        @test fpps.heading_offset_low  ≈ 22.0
-        @test fpps.heading_offset_int  ≈ 32.0
-        @test fpps.heading_offset_high ≈ 54.0
-        @test fpps.heading_offset_up   ≈ 60.0
-        @test fpps.corr_vec[1]       ≈ 24.02
-        @test fpps.corr_vec[end]     ≈ 3.84
+        # Load data/fpp_settings.yaml of this repository. Its corr_vec is rewritten by
+        # save_corr (e.g. in examples/learn_corrections.jl), so compare with the file.
+        data_path = joinpath(dirname(@__DIR__), "data")
+        config_file = joinpath(data_path, "fpp_settings.yaml")
+        @test isfile(config_file)
+        old_project = KiteUtils.PROJECT
+        try
+            KiteUtils.set_data_path(data_path)
+            KiteUtils.PROJECT = "system.yaml"
+            fpps = FPPSettings(true)
+            dict = YAML.load_file(config_file)["fpp_settings"]
+            for (key, value) in dict
+                if key == "corr_vec"
+                    @test fpps.corr_vec[1:length(value)] ≈ value
+                else
+                    @test getfield(fpps, Symbol(key)) ≈ value
+                end
+            end
+            # the file differs from the defaults, so the values must come from the file
+            @test fpps.beta_set ≈ 24.0
+            @test fpps.k_factor ≈ 1.2
+        finally
+            KiteUtils.PROJECT = old_project
+            KiteUtils.set_data_path("")
+        end
     end
 
     @testset "FPPSettings corr_vec padding" begin
