@@ -15,6 +15,7 @@
 - `examples/autopilot.jl` and `examples/batch_pilot.jl` now stop with a clear error message if the initial steady state cannot be found, instead of failing later with `FieldError: type Nothing has no field t`
 
 ### Removed
+- support for Julia 1.11 (compat bounds, CI matrix, `Manifest-v1.11.toml.default`, and the `bin/install`, `bin/update_default_manifest`, `bin/create_sys_image` and `bin/autopilot` scripts)
 - `bin/setup_env` and all references to it (it was only needed for ControlPlots.jl); `copy_bin()` no longer copies it
 
 ## KiteControllers v0.2.31 - 2026-09-03
