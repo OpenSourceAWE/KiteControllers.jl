@@ -11,6 +11,7 @@
 - `bin/update_default_manifest` now instantiates the test project and runs the test suite before updating the default manifest
 
 ### Fixed
+- the hydra20_426 simulation of `examples/autopilot.jl` failed on Julia 1.13 (`AssertionError: height > -1000`): when the winch passed through zero speed, its brake engaged and the reel-out speed ran away. The minimal winch speed `v_min` is now `0.1` m/s, as in `batch_pilot.jl`, instead of `0.15` m/s. The underlying problem (the winch state is updated on every residual evaluation of the solver) is fixed in WinchModels 0.3.12 and KiteModels 0.11.19
 - `examples/autopilot.jl` and `examples/batch_pilot.jl` now stop with a clear error message if the initial steady state cannot be found, instead of failing later with `FieldError: type Nothing has no field t`
 
 ### Removed
