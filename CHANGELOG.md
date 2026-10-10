@@ -9,6 +9,7 @@
 - `bin/install` no longer runs the test suite; `--tests` (or answering yes to the prompt) only instantiates and precompiles the test project
 - `bin/install` no longer instantiates the test project by default (also with `-y`); use `--tests` or answer yes to the prompt to do so
 - `bin/update_default_manifest` now instantiates the test project and runs the test suite before updating the default manifest
+- `bin/update_default_manifest` now checks that all dependencies are released versions (no git branches or local paths) before updating the default manifest
 
 ### Fixed
 - the hydra20_426 simulation of `examples/autopilot.jl` failed on Julia 1.13 (`AssertionError: height > -1000`): when the winch passed through zero speed, its brake engaged and the reel-out speed ran away. The minimal winch speed `v_min` is now `0.1` m/s, as in `batch_pilot.jl`, instead of `0.15` m/s. The underlying problem (the winch state is updated on every residual evaluation of the solver) is fixed in WinchModels 0.3.12 and KiteModels 0.11.19

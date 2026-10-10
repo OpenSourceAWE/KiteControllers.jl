@@ -54,6 +54,32 @@ fi
 
 cd ..
 
+# Check that all dependencies are released versions (no git branches or local paths);
+# abort (set -e) without updating the default manifest if not
+echo "Checking that all dependencies are released versions..."
+julia --startup-file=no -e '
+using TOML
+manifest_file = ARGS[1]
+manifest = TOML.parsefile(manifest_file)
+unreleased = String[]
+for (name, entries) in manifest["deps"], entry in entries
+    name == "KiteControllers" && continue   # the package itself
+    if haskey(entry, "repo-url")
+        push!(unreleased, "$name (repo-url = $(entry["repo-url"]), repo-rev = $(get(entry, "repo-rev", "")))")
+    elseif haskey(entry, "path")
+        push!(unreleased, "$name (path = $(entry["path"]))")
+    end
+end
+if isempty(unreleased)
+    println("All dependencies in $manifest_file are released versions.")
+else
+    println("Error: the following dependencies in $manifest_file are not released versions:")
+    foreach(p -> println("  - ", p), sort(unreleased))
+    println("Remove the corresponding [sources] entries from the Project.toml files and try again.")
+    exit(1)
+end
+' "Manifest-v${julia_major}.toml"
+
 # Run the test suite; abort (set -e) without updating the default manifest if it fails
 echo "Running the test suite..."
 julia --project -e 'using Pkg; Pkg.test()'
