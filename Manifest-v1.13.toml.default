@@ -2,7 +2,7 @@
 
 julia_version = "1.13.1"
 manifest_format = "2.1"
-project_hash = "63f5b465561d6f038ad6b2d15b208345dc3c5250"
+project_hash = "2e331a82d9536a56cca9e196d9e90b5938b651ba"
 
 [[deps.ADTypes]]
 deps = ["PrecompileTools"]
@@ -1455,8 +1455,7 @@ version = "0.2.31"
 [[deps.KiteModels]]
 deps = ["AtmosphericModels", "Dierckx", "DiffEqBase", "DiscretePIDs", "DocStringExtensions", "Interpolations", "KitePodModels", "KiteUtils", "LinearAlgebra", "LinearSolve", "Logging", "NLSolversBase", "NLsolve", "NonlinearSolve", "OrdinaryDiffEqBDF", "OrdinaryDiffEqCore", "OrdinaryDiffEqNonlinearSolve", "Parameters", "Pkg", "PrecompileTools", "REPL", "Reexport", "Rotations", "StaticArrays", "Statistics", "Sundials", "Suppressor", "WinchModels"]
 git-tree-sha1 = "50bc1aa120f941a823507af6c47cf650d899dceb"
-repo-rev = "main"
-repo-url = "https://github.com/OpenSourceAWE/KiteModels.jl.git"
+registries = "General"
 uuid = "b94af626-7959-4878-9336-2adc27959007"
 version = "0.11.19"
 
