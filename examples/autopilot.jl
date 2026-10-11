@@ -189,7 +189,7 @@ function simulate(integrator, stopped=true)
                 saved_use_turbulence = app.set.use_turbulence
                 app.set.use_turbulence = 0.0
                 try
-                    integrator = check_integrator(KiteModels.init!(app.kps4::KPS4))
+                    integrator = check_integrator(KiteModels.init!(app.kps4::KPS4; trim=true))
                 finally
                     app.set.use_turbulence = saved_use_turbulence
                 end
@@ -325,7 +325,7 @@ function play(stopped=false)
         saved_use_turbulence = app.set.use_turbulence
         app.set.use_turbulence = 0.0
         integrator = try
-            check_integrator(KiteModels.init!(app.kps4::KPS4))
+            check_integrator(KiteModels.init!(app.kps4::KPS4; trim=true))
         finally
             app.set.use_turbulence = saved_use_turbulence
         end
