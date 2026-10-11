@@ -11,7 +11,7 @@ if realpath(pwd()) == realpath(@__DIR__)
 end
 KiteUtils.set_data_path("") 
 
-@testset verbose = true "Testing KiteControllers..." begin
+ts = @testset verbose = true "Testing KiteControllers..." begin
     for file in sort(readdir(@__DIR__))
         if isnothing(match(r"^test-.*\.jl$", file))
             continue
@@ -23,4 +23,5 @@ KiteUtils.set_data_path("")
         end
     end
 end
+nothing
 
