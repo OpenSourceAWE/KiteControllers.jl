@@ -114,7 +114,7 @@ end
 function test_parking()
     clear!(kps4)
     KitePodModels.init_kcu!(kcu, set)
-    integrator = KiteModels.init!(kps4, stiffness_factor=0.04)
+    integrator = KiteModels.init!(kps4)
     simulate(integrator)
 end
 

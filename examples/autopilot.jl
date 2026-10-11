@@ -142,9 +142,7 @@ bring_viewer_to_front()
 # stop with a clear message if the initial steady state could not be found
 function check_integrator(integrator)
     if isnothing(integrator)
-        error("Could not find the initial steady state for project $(PROJECT) " *
-              "(delta=$(app.set.delta), stiffness_factor=$(app.set.stiffness_factor)). " *
-              "Try other values of delta and stiffness_factor in the settings file.")
+        error("Could not find the initial steady state for project $(PROJECT).")
     end
     integrator
 end
@@ -191,7 +189,7 @@ function simulate(integrator, stopped=true)
                 saved_use_turbulence = app.set.use_turbulence
                 app.set.use_turbulence = 0.0
                 try
-                    integrator = check_integrator(KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor))
+                    integrator = check_integrator(KiteModels.init!(app.kps4::KPS4))
                 finally
                     app.set.use_turbulence = saved_use_turbulence
                 end
@@ -327,7 +325,7 @@ function play(stopped=false)
         saved_use_turbulence = app.set.use_turbulence
         app.set.use_turbulence = 0.0
         integrator = try
-            check_integrator(KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor))
+            check_integrator(KiteModels.init!(app.kps4::KPS4))
         finally
             app.set.use_turbulence = saved_use_turbulence
         end

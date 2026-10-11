@@ -111,14 +111,12 @@ function simulate(app::KiteApp)
     saved_use_turbulence = app.set.use_turbulence
     app.set.use_turbulence = 0.0
     integrator = try
-        KiteModels.init!(app.kps4::KPS4; delta = app.set.delta, stiffness_factor = app.set.stiffness_factor)
+        KiteModels.init!(app.kps4::KPS4)
     finally
         app.set.use_turbulence = saved_use_turbulence
     end
     if isnothing(integrator)
-        error("Could not find the initial steady state for project $(KiteUtils.PROJECT) " *
-              "(delta=$(app.set.delta), stiffness_factor=$(app.set.stiffness_factor)). " *
-              "Try other values of delta and stiffness_factor in the settings file.")
+        error("Could not find the initial steady state for project $(KiteUtils.PROJECT).")
     end
 
     sys_state = SysState(app.kps4::KPS4)
@@ -304,7 +302,6 @@ let
         use_turbulence = get_use_turbulence(project)
         isnothing(use_turbulence) || (app.set.use_turbulence = use_turbulence)
         app.max_time = app.set.sim_time
-        @printf("\nInit parameters: delta=%.6f, stiffness_factor=%.3f\n", app.set.delta, app.set.stiffness_factor)
 
         init(app)
         if TIMESTAMPS

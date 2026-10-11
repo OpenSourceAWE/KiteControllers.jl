@@ -178,7 +178,7 @@ function residual(corr_vec=nothing; full_sim=false)
     end
 
     on_parking(ssc)
-    integrator = KiteModels.init!(kps4; delta=set.delta, stiffness_factor=set.stiffness_factor)
+    integrator = KiteModels.init!(kps4)
     sim_error = simulate(integrator)
     println()  # end the progress-dot line
     on_stop(ssc)
