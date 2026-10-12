@@ -1,6 +1,6 @@
 # Changelog
 
-## KiteControllers v0.3.0 - unreleased
+## KiteControllers v0.3.0 - 2026-10-12
 ### Changed
 - compat extended to KiteUtils 0.12 and 0.13 and WinchControllers 0.6
 - BREAKING: the examples and tests now require KiteModels 0.12, KiteViewers 0.7 and therefore KiteUtils 0.13, whose `SysState` stores orientations in the `KA` convention and no longer has the fields `roll`, `pitch` and `yaw` (compat bounds in `examples/Project.toml` and `test/Project.toml`)
