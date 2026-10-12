@@ -7,6 +7,7 @@
 - the examples and tests no longer pass the deprecated `init!` keywords `delta` and `stiffness_factor`; `examples/autopilot.jl` initializes the kite with `trim=true`
 - `examples/autopilot.jl` and `examples/batch_pilot.jl` compute the yaw angle with `euler_KS(sys_state.orient)`, because `SysState` no longer has a `yaw` field
 - `test/runtests.jl` keeps the result of the test run in the variable `ts`
+- `bin/update_default_manifest` no longer changes the default Julia version of juliaup; it selects the Julia version with `JULIAUP_CHANNEL` instead. The Julia version can be passed as a command-line parameter (`1.12` or `1.13`) to skip the dialog
 - the plot functions are no longer defined twice in `examples/plots.jl` and `examples/batch_plot.jl`; both now use the shared implementation in `examples/plot_functions.jl` and `examples/plot_helpers.jl`
 
 ### Fixed
