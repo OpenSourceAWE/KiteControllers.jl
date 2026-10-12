@@ -87,8 +87,7 @@ function simulate(integrator)
         AZIMUTH[i] = sys_state.azimuth        
         on_new_systate(ssc, sys_state)
         if mod(i, TIME_LAPSE_RATIO) == 0
-            sys_state.orient = quat2viewer(QuatRotation(sys_state.orient))
-            KiteViewers.update_system(viewer, sys_state; scale = 0.08, kite_scale=3, ned=false)
+            KiteViewers.update_system(viewer, sys_state; scale = 0.08, kite_scale=3)
             set_status(viewer, String(Symbol(ssc.state)))
             wait_until(start_time_ns + 1e9*dt, always_sleep=true) 
             mtime = 0
@@ -121,7 +120,7 @@ end
 
 function play()
     global steps
-    integrator = KiteModels.init!(kps, stiffness_factor=0.04)
+    integrator = KiteModels.init!(kps)
     toc()
     steps = simulate(integrator)
     GC.enable(true)

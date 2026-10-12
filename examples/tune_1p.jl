@@ -111,7 +111,7 @@ function test_parking(LAST_RES, p=fcs.p, i=fcs.i, d=fcs.d; suppress_overshoot=10
     fcs.i = i
     fcs.d = d
     AZIMUTH .= zeros(Int64(MAX_TIME / dt))
-    integrator = KiteModels.init!(kps, stiffness_factor=0.04)
+    integrator = KiteModels.init!(kps)
     status = simulate(integrator)
     if status != 1
         return 1e6

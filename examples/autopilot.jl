@@ -142,9 +142,7 @@ bring_viewer_to_front()
 # stop with a clear message if the initial steady state could not be found
 function check_integrator(integrator)
     if isnothing(integrator)
-        error("Could not find the initial steady state for project $(PROJECT) " *
-              "(delta=$(app.set.delta), stiffness_factor=$(app.set.stiffness_factor)). " *
-              "Try other values of delta and stiffness_factor in the settings file.")
+        error("Could not find the initial steady state for project $(PROJECT).")
     end
     integrator
 end
@@ -191,7 +189,7 @@ function simulate(integrator, stopped=true)
                 saved_use_turbulence = app.set.use_turbulence
                 app.set.use_turbulence = 0.0
                 try
-                    integrator = check_integrator(KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor))
+                    integrator = check_integrator(KiteModels.init!(app.kps4::KPS4; trim=true))
                 finally
                     app.set.use_turbulence = saved_use_turbulence
                 end
@@ -241,12 +239,13 @@ function simulate(integrator, stopped=true)
             sys_state.var_11 = app.ssc.fpp.fpca.fpc.est_chi_dot
             sys_state.var_12 = app.ssc.fpp.fpca.fpc.c2
             sys_state.acc = norm(acc)
-            if abs((sys_state.yaw - last_yaw) / app.dt ) < 20.0
-                sys_state.var_15 = (sys_state.yaw - last_yaw) / app.dt # yaw rate
+            yaw = euler_KS(sys_state.orient)[3]
+            if abs((yaw - last_yaw) / app.dt ) < 20.0
+                sys_state.var_15 = (yaw - last_yaw) / app.dt # yaw rate
             else
                 sys_state.var_15 = last_yaw_rate
             end
-            last_yaw = sys_state.yaw
+            last_yaw = yaw
             last_yaw_rate = sys_state.var_15
             sys_state.var_16 = app.kps4.side_slip
             
@@ -327,7 +326,7 @@ function play(stopped=false)
         saved_use_turbulence = app.set.use_turbulence
         app.set.use_turbulence = 0.0
         integrator = try
-            check_integrator(KiteModels.init!(app.kps4::KPS4; delta=app.set.delta, stiffness_factor=app.set.stiffness_factor))
+            check_integrator(KiteModels.init!(app.kps4::KPS4; trim=true))
         finally
             app.set.use_turbulence = saved_use_turbulence
         end

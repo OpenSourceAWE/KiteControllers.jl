@@ -1,5 +1,17 @@
 # Changelog
 
+## KiteControllers v0.3.0 - unreleased
+### Changed
+- compat extended to KiteUtils 0.12 and 0.13 and WinchControllers 0.6
+- BREAKING: the examples and tests now require KiteModels 0.12, KiteViewers 0.7 and therefore KiteUtils 0.13, whose `SysState` stores orientations in the `KA` convention and no longer has the fields `roll`, `pitch` and `yaw` (compat bounds in `examples/Project.toml` and `test/Project.toml`)
+- the examples and tests no longer pass the deprecated `init!` keywords `delta` and `stiffness_factor`; `examples/autopilot.jl` initializes the kite with `trim=true`
+- `examples/autopilot.jl` and `examples/batch_pilot.jl` compute the yaw angle with `euler_KS(sys_state.orient)`, because `SysState` no longer has a `yaw` field
+- `test/runtests.jl` keeps the result of the test run in the variable `ts`
+
+### Fixed
+- `examples/parking_1p.jl` no longer converts the orientation with `quat2viewer` before calling `update_system`, which now does this itself and no longer accepts the keyword `ned`
+- `test/test-kiteobserver.jl` builds its `SysState` with `SysState(P)` instead of the removed constructor `SysState{P}()`
+
 ## KiteControllers v0.2.31 - 2026-10-11
 ### Added
 - support for Julia 1.13 (compat bounds, CI matrix, default manifest, and the `bin/install`, `bin/update_default_manifest` and `bin/create_sys_image` scripts)

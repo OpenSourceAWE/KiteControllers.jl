@@ -128,7 +128,7 @@ function play(PARKING::Ref{Bool}, stopped=false)
     global steps, kcu, kps4, wcs, fcs, fpps, ssc
     init_globals(kcu, wcs, fcs, fpps)
     on_parking(ssc)
-    integrator = KiteModels.init!(kps4, stiffness_factor=0.04)
+    integrator = KiteModels.init!(kps4)
     toc()
     steps = simulate(integrator, kps4, ssc, PARKING, stopped)
     stopped = ! viewer.sw.active[]
