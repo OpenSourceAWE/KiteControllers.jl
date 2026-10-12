@@ -186,12 +186,13 @@ function simulate(app::KiteApp)
         sys_state.var_12 = app.ssc.fpp.fpca.fpc.c2
         sys_state.acc    = norm(acc)
 
-        if abs((sys_state.yaw - last_yaw) / app.dt) < 20.0
-            sys_state.var_15 = (sys_state.yaw - last_yaw) / app.dt
+        yaw = euler_KS(sys_state.orient)[3]
+        if abs((yaw - last_yaw) / app.dt) < 20.0
+            sys_state.var_15 = (yaw - last_yaw) / app.dt
         else
             sys_state.var_15 = last_yaw_rate
         end
-        last_yaw      = sys_state.yaw
+        last_yaw      = yaw
         last_yaw_rate = sys_state.var_15
         sys_state.var_16 = (app.kps4::KPS4).side_slip
         sys_state.var_08 = norm((app.kps4::KPS4).lift_force) / norm((app.kps4::KPS4).drag_force)

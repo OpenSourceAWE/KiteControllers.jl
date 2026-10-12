@@ -15,18 +15,18 @@ const P_TEST = 4
 #   sys_state = 6 (FLY_RIGHT) or 8 (FLY_LEFT)
 #   azimuth   = alternating sign to trigger sign-change detection
 #   elevation = known value [rad]
-#   l_tether  = MVector of length P_TEST (first element = total tether length)
+#   l_tether  = total tether length (first winch)
 function build_test_log(entries; n_steps=length(entries))
     logger = Logger(P_TEST, n_steps)
     for (i, e) in enumerate(entries)
-        ss = SysState{P_TEST}()
+        ss = SysState(P_TEST)
         ss.time      = Float64(i) * 0.05
         ss.sys_state = Int16(get(e, :sys_state, 0))
         ss.cycle     = Int16(get(e, :cycle,    0))
         ss.fig_8     = Int16(get(e, :fig8,     0))
         ss.azimuth   = Float32(get(e, :azimuth,  0.0))
         ss.elevation = Float32(get(e, :elevation, 0.0))
-        ss.l_tether .= MVector{4, Float32}(get(e, :l_tether, 150.0), 0, 0, 0)
+        ss.l_tether[1] = get(e, :l_tether, 150.0)
         log!(logger, ss)
     end
     KiteUtils.sys_log(logger)
