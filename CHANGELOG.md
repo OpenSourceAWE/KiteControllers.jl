@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## KiteControllers v0.3.1 - 2026-10-16
 ### Fixed
 - `install_examples()` failed on Julia 1.13 with `Unknown package: DiffEqBase`, because the auto-precompilation of `Pkg.add` cannot handle indirect dependencies that change their version. It now adds all packages in one `Pkg.add` call with auto-precompilation disabled and calls `Pkg.precompile()` afterwards
 
