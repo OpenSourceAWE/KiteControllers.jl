@@ -131,17 +131,14 @@ function install_examples(add_packages=true)
     Base.invokelatest(copy_control_settings)
     copy_bin()
     if add_packages
-        Pkg.add("KiteViewers")
-        Pkg.add("KiteUtils")
-        Pkg.add("KitePodModels")
-        Pkg.add("WinchModels")
-        Pkg.add("KiteModels")
-        Pkg.add("NativeFileDialog")
-        Pkg.add("MakieControlPlots")
-        Pkg.add("LaTeXStrings")
-        Pkg.add("StatsBase")
-        Pkg.add("Timers")
-        Pkg.add("FFMPEG_jll")
+        # Julia 1.13: auto-precompilation after Pkg.add fails with "Unknown package"
+        # if an indirect dependency changes its version, so precompile explicitly
+        withenv("JULIA_PKG_PRECOMPILE_AUTO" => "0") do
+            Pkg.add(["KiteViewers", "KiteUtils", "KitePodModels", "WinchModels", "KiteModels",
+                     "NativeFileDialog", "MakieControlPlots", "LaTeXStrings", "StatsBase",
+                     "Timers", "FFMPEG_jll"])
+        end
+        Pkg.precompile()
     end
     mkpath("output")
 end
