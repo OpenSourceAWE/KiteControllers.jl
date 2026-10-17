@@ -1,0 +1,47 @@
+#!/bin/bash -eu
+# SPDX-FileCopyrightText: 2025 Uwe Fechner
+# SPDX-License-Identifier: MIT
+
+# Update Manifest-v<version>.toml.default for each supported Julia version.
+# The .default manifest is only replaced if the install, the release check and the tests succeed.
+
+if [[ $(basename $(pwd)) == "bin" ]]; then
+    cd ..
+fi
+
+for julia_major in 1.12 1.13; do
+    echo "Updating the manifest for Julia ${julia_major}..."
+    ./bin/install --update -y --tests --version "${julia_major}"
+
+    # Check that all dependencies are released versions (no git branches or local paths)
+    echo "Checking that all dependencies are released versions..."
+    julia +${julia_major} --startup-file=no -e '
+using TOML
+manifest_file = ARGS[1]
+manifest = TOML.parsefile(manifest_file)
+unreleased = String[]
+for (name, entries) in manifest["deps"], entry in entries
+    name == "KiteControllers" && continue   # the package itself
+    if haskey(entry, "repo-url")
+        push!(unreleased, "$name (repo-url = $(entry["repo-url"]), repo-rev = $(get(entry, "repo-rev", "")))")
+    elseif haskey(entry, "path")
+        push!(unreleased, "$name (path = $(entry["path"]))")
+    end
+end
+if isempty(unreleased)
+    println("All dependencies in $manifest_file are released versions.")
+else
+    println("Error: the following dependencies in $manifest_file are not released versions:")
+    foreach(p -> println("  - ", p), sort(unreleased))
+    println("Remove the corresponding [sources] entries from the Project.toml files and try again.")
+    exit(1)
+end
+' "Manifest-v${julia_major}.toml"
+
+    echo "Running the test suite..."
+    julia +${julia_major} --project -e 'using Pkg; Pkg.test()'
+
+    cp "Manifest-v${julia_major}.toml" "Manifest-v${julia_major}.toml.default"
+    rm -rf ~/.julia/compiled/v${julia_major}/KiteControllers/
+    echo "Updated Manifest-v${julia_major}.toml.default !"
+done

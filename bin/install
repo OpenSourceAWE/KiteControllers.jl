@@ -6,6 +6,7 @@ _yes_to_all=false
 update=false
 run_tests=false
 _run_tests_explicit=false
+_desired_julia=""
 
 print_usage() {
     echo "Usage:"
@@ -16,6 +17,7 @@ print_usage() {
     echo "./install --update -y"
     echo "./install --tests"
     echo "./install --no-tests"
+    echo "./install --version 1.12 | --version 1.13 | +1.12 | +1.13"
     echo "./install -h"
     echo "./install --help"
 }
@@ -43,6 +45,18 @@ while [[ $# -gt 0 ]]; do
         --no-tests)
             run_tests=false
             _run_tests_explicit=true
+            shift
+            ;;
+        --version)
+            if [[ $# -lt 2 ]]; then
+                echo "Error: --version requires a value (e.g. --version 1.12)"
+                exit 1
+            fi
+            _desired_julia="$2"
+            shift 2
+            ;;
+        +*)
+            _desired_julia="${1#+}"
             shift
             ;;
         *)
@@ -104,7 +118,13 @@ fi
 unset _required_kb _available_kb _available_gb
 
 # Determine which Julia version to use
-if [[ $_yes_to_all == true ]]; then
+if [[ -n "$_desired_julia" ]]; then
+    # Explicit version: select it for this script and its child processes only,
+    # leave the juliaup default unchanged
+    echo "Installing Julia ${_desired_julia} (juliaup default left unchanged)..."
+    juliaup add "${_desired_julia}"
+    export JULIAUP_CHANNEL="${_desired_julia}"
+elif [[ $_yes_to_all == true ]]; then
     # Non-interactive mode: use the currently active Julia version
     _desired_julia=$(julia --startup-file=no -e 'print("$(VERSION.major).$(VERSION.minor)")')
     echo "Using currently active Julia ${_desired_julia}..."
