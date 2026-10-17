@@ -8,6 +8,9 @@
 - `bin/update_default_manifest` was replaced by `bin/update_default_manifests`, which updates the default manifests for Julia 1.12 and 1.13 in one run, without asking questions
 - `bin/install` accepts the Julia version as parameter (`--version 1.12`, `--version 1.13`, `+1.12` or `+1.13`); it then uses this version without asking and without changing the juliaup default
 
+### Removed
+- `examples/CondaPkg.toml` (left over from ControlPlots; MakieControlPlots does not need Python)
+
 ## KiteControllers v0.3.1 - 2026-10-16
 ### Fixed
 - `install_examples()` failed on Julia 1.13 with `Unknown package: DiffEqBase`, because the auto-precompilation of `Pkg.add` cannot handle indirect dependencies that change their version. It now adds all packages in one `Pkg.add` call with auto-precompilation disabled and calls `Pkg.precompile()` afterwards
