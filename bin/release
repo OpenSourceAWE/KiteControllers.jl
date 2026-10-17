@@ -4,7 +4,7 @@
 
 # Create a new release by posting to JuliaRegistrator via issue #5
 #
-# Usage:  bin/create_release
+# Usage:  bin/release
 #
 # This script extracts the latest release notes from CHANGELOG.md
 # and posts them as a comment to GitHub issue #5 using the GitHub CLI.
