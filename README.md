@@ -32,7 +32,7 @@ julia --project=.
 (don't forget typing the dot at the end), and then, on the Julia prompt enter:
 ```julia
 using Pkg
-pkg"add KiteControllers#main"
+pkg"add KiteControllers"
 ```
 You can run the tests with:
 ```julia
@@ -106,17 +106,18 @@ FlightPathController as specified in chapter six of the [PhD thesis](https://res
 ```julia
 FlightPathController
 FPCSettings
-on_control_command(fpc, attractor=nothing, psi_dot_set=nothing, radius=nothing, intermediate = true)
+on_control_command(fpc; attractor=nothing, psi_dot_set=nothing, radius=nothing, intermediate = true)
 on_est_sysstate(fpc, phi, beta, psi, chi, omega, v_a; u_d=nothing, u_d_prime=nothing)
 on_timer(fpc)
 calc_steering(fpc, parking)
 ```
-The control commands are usually received from the FlightPathPlanner, the output of the model or the system state estimator must call `on_est_systate()` each time step.
+The control commands are usually received from the FlightPathPlanner, the output of the model or the system state estimator must call `on_est_sysstate()` each time step.
 <p align="center"><img src="./docs/flight_path_controller_I.png" width="500" /></p>
 <p align="center"><img src="./docs/flight_path_controller_II.png" width="500" /></p>
 
 ## Scientific background
-[Flight path control of kite power systems in a turbulent wind environment](https://ieeexplore.ieee.org/document/7525563)
+- [A Methodology for the Design of Kite-Power Control Systems](https://research.tudelft.nl/en/publications/a-methodology-for-the-design-of-kite-power-control-systems)
+- [Flight path control of kite power systems in a turbulent wind environment](https://ieeexplore.ieee.org/document/7525563)
 
 
 ### Flight Path Calculator (FPCA)
@@ -133,7 +134,7 @@ steering, parking etc.
 
 ## Hints for developers/ contributors
 If you want to modify this package, create a fork on github and checkout the fork using Git.
-Then create a system image of all the packages, used by Kitecontrollers itself and the examples by running the script `bin/create_sysimage`. If you are on Windows make sure you have git-bash installed because this is a bash script. You can then launch Julia with the command `bin/run_julia` which is fast. Try to run the test scripts from the folder test to understand what they are doing.
+Then create a system image of all the packages, used by KiteControllers itself and the examples by running the script `bin/create_sys_image`. If you are on Windows make sure you have git-bash installed because this is a bash script. You can then launch Julia with the command `bin/run_julia` which is fast. Try to run the test scripts from the folder test to understand what they are doing.
 Now you can modify the source code according to your needs, restart Julia, run the relevant test script again and see the effect.
 If you are happy, commit your changes and create a pull request. If you have any questions, please ask them at https://discourse.julialang.org/ .
 
@@ -141,12 +142,9 @@ If you are happy, commit your changes and create a pull request. If you have any
 This project is licensed under the MIT License. Please see the below WAIVER in association with the license.
 
 ## WAIVER
-Technische Universiteit Delft hereby disclaims all copyright interest in the package “KiteController.jl” (controllers for airborne wind energy systems) written by the Author(s).
+Technische Universiteit Delft hereby disclaims all copyright interest in the package “KiteControllers.jl” (controllers for airborne wind energy systems) written by the Author(s).
 
 Prof.dr. H.G.C. (Henri) Werij, Dean of Aerospace Engineering
-
-## Scientific background
-[A Methodology for the Design of Kite-Power Control Systems](https://research.tudelft.nl/en/publications/a-methodology-for-the-design-of-kite-power-control-systems)
 
 ## Donations
 If you like this software, please consider donating to https://gofund.me/bba01d43 .
@@ -154,5 +152,5 @@ If you like this software, please consider donating to https://gofund.me/bba01d4
 ## Related
 - [Research Fechner](https://research.tudelft.nl/en/publications/?search=wind+Fechner&pageSize=50&ordering=rating&descending=true) for the scientific background of this code
 - The meta package [KiteSimulators](https://github.com/aenarete/KiteSimulators.jl) which contains all packages from Julia Kite Power Tools.
-- the packages [KiteModels](https://github.com/ufechner7/KiteModels.jl) and [WinchModels](https://github.com/aenarete/WinchModels.jl) and [AtmosphericModels](https://github.com/aenarete/AtmosphericModels.jl)
-- the packages [KiteViewers](https://github.com/aenarete/KiteViewers.jl) and [KiteUtils](https://github.com/ufechner7/KiteUtils.jl)
+- the packages [KiteModels](https://github.com/OpenSourceAWE/KiteModels.jl) and [WinchModels](https://github.com/aenarete/WinchModels.jl) and [AtmosphericModels](https://github.com/OpenSourceAWE/AtmosphericModels.jl)
+- the packages [KiteViewers](https://github.com/OpenSourceAWE/KiteViewers.jl) and [KiteUtils](https://github.com/OpenSourceAWE/KiteUtils.jl)
