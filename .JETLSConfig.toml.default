@@ -1,10 +1,16 @@
 formatter = "JuliaFormatter"
 
 [full_analysis]
-auto_instantiate = false            # boolean, default: true
+auto_instantiate = "never"          # was `false` (deprecated)
 
 [diagnostic]
 all_files = false                   # boolean, default: true
+
+[[diagnostic.patterns]]
+pattern = "not concretized"
+match_by = "message"
+match_type = "regex"
+severity = "off"
 
 [[diagnostic.patterns]]
 pattern = "copy!.*Random.TaskLocalRNG.*Nothing"
