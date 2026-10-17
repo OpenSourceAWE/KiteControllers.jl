@@ -4,6 +4,7 @@
 ### Changed
 - BREAKING: the examples and tests now require KiteModels 0.13 (compat bounds in `examples/Project.toml` and `test/Project.toml`). Its `SysState(s)` stores the spring forces of `n_springs(s)` segments, so `examples/autopilot.jl`, `examples/batch_pilot.jl`, `examples/learn_corrections.jl` and `test/test_fpc_low_right.jl` create their `Logger` with `segments=n_springs(kps4)`
 - compat extended to NLsolve 5 (`Project.toml` and `test/Project.toml`), which KiteModels 0.13 allows; it is only used once WinchControllers also allows NLsolve 5 (from WinchControllers 0.6.5)
+- BREAKING: requires WinchControllers 0.6.5 (`Project.toml`); WinchControllers 0.5 and 0.6.0 - 0.6.4 are no longer supported
 - `bin/update_default_manifest` was replaced by `bin/update_default_manifests`, which updates the default manifests for Julia 1.12 and 1.13 in one run, without asking questions
 - `bin/install` accepts the Julia version as parameter (`--version 1.12`, `--version 1.13`, `+1.12` or `+1.13`); it then uses this version without asking and without changing the juliaup default
 
