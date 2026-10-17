@@ -83,5 +83,12 @@ match_type = "literal"
 severity   = "off"
 path       = "examples/**"
 
+[[diagnostic.patterns]]
+pattern    = "toplevel/analysis-skipped"
+match_by   = "code"
+match_type = "literal"
+severity   = "off"
+path       = "test/create_sys_image.jl"
+
 [inlay_hint.types]
 enabled = false  # Hide type hints; keep `end`-tag hints
