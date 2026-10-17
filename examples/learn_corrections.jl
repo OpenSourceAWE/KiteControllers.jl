@@ -96,7 +96,7 @@ function residual(corr_vec=nothing; full_sim=false)
     dt = wcs.dt
     steps = Int64(sim_time/dt)
     particles = set.segments + 5
-    logger = KiteControllers.Logger(particles, steps)
+    logger = KiteControllers.Logger(particles, steps; segments=KiteModels.n_springs(kps4))
 
     function simulate(integrator)
         i = 1

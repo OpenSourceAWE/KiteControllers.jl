@@ -58,7 +58,7 @@ end
 
 steps = Int64(MAX_TIME/dt)
 particles = set.segments + 5
-logger::Logger = Logger(particles, steps)
+logger::Logger = Logger(particles, steps; segments=n_springs(kps4))
 
 function simulate(integrator)
     i=1

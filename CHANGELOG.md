@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+### Changed
+- BREAKING: the examples and tests now require KiteModels 0.13 (compat bounds in `examples/Project.toml` and `test/Project.toml`). Its `SysState(s)` stores the spring forces of `n_springs(s)` segments, so `examples/autopilot.jl`, `examples/batch_pilot.jl`, `examples/learn_corrections.jl` and `test/test_fpc_low_right.jl` create their `Logger` with `segments=n_springs(kps4)`
+- compat extended to NLsolve 5 (`Project.toml` and `test/Project.toml`), which KiteModels 0.13 allows; it is only used once WinchControllers also allows NLsolve 5 (from WinchControllers 0.6.5)
+
 ## KiteControllers v0.3.1 - 2026-10-16
 ### Fixed
 - `install_examples()` failed on Julia 1.13 with `Unknown package: DiffEqBase`, because the auto-precompilation of `Pkg.add` cannot handle indirect dependencies that change their version. It now adds all packages in one `Pkg.add` call with auto-precompilation disabled and calls `Pkg.precompile()` afterwards

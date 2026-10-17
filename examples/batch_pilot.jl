@@ -102,7 +102,7 @@ function init(app::KiteApp)
 
     app.steps     = Int64(app.max_time / app.dt)
     app.particles = app.set.segments + 5
-    app.logger    = Logger(app.particles, app.steps)
+    app.logger    = Logger(app.particles, app.steps; segments=n_springs(app.kps4))
     app.initialized = true
 end
 

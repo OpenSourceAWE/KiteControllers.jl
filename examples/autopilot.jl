@@ -125,7 +125,7 @@ function init(app::KiteApp; init_viewer=false)
     app.viewer.t_sim.displayed_string[]=repr(Int64(round(app.set.sim_time)))
     app.steps = Int64(app.max_time/app.dt)
     app.particles = app.set.segments + 5
-    app.logger = Logger(app.particles, app.steps)
+    app.logger = Logger(app.particles, app.steps; segments=n_springs(app.kps4))
     app.parking = false
     app.max_time      = app.set.sim_time
     app.next_max_time = app.max_time
@@ -184,7 +184,7 @@ function simulate(integrator, stopped=true)
                 app.max_time = app.next_max_time
                 app.steps = Int64(app.max_time/app.dt)
                 app.particles = app.set.segments + 5
-                app.logger = Logger(app.particles, app.steps)
+                app.logger = Logger(app.particles, app.steps; segments=n_springs(app.kps4))
                 log!(app.logger::Logger, sys_state)
                 saved_use_turbulence = app.set.use_turbulence
                 app.set.use_turbulence = 0.0
