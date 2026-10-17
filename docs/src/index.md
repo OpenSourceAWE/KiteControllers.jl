@@ -24,7 +24,7 @@ The package implements the control hierarchy described in the PhD thesis of Uwe 
 
 The winch components (`WinchController`, `Winch`, `SpeedController`,
 `LowerForceController`, `UpperForceController`) are re-exported from
-[WinchControllers.jl](https://github.com/aenarete/WinchControllers.jl).
+[WinchControllers.jl](https://github.com/OpenSourceAWE/WinchControllers.jl).
 
 ## Installation
 
@@ -53,7 +53,7 @@ julia --project=.
 (don't forget typing the dot at the end), and then, on the Julia prompt enter:
 ```julia
 using Pkg
-pkg"add KiteControllers#main"
+pkg"add KiteControllers"
 ```
 You can run the tests with:
 ```julia
@@ -141,6 +141,6 @@ KiteControllers.jl
 ## Contents
 
 ```@contents
-Pages = ["types.md", "functions.md", "examples.md"]
+Pages = ["types.md", "functions.md", "examples.md", "projects.md", "learning.md"]
 Depth = 2
 ```
