@@ -7,6 +7,7 @@
 - BREAKING: requires WinchControllers 0.6.5 (`Project.toml`); WinchControllers 0.5 and 0.6.0 - 0.6.4 are no longer supported
 - `bin/update_default_manifest` was replaced by `bin/update_default_manifests`, which updates the default manifests for Julia 1.12 and 1.13 in one run, without asking questions
 - `bin/install` accepts the Julia version as parameter (`--version 1.12`, `--version 1.13`, `+1.12` or `+1.13`); it then uses this version without asking and without changing the juliaup default
+- `bin/create_sys_image` builds the system image for the native CPU also on Julia 1.13 (`cpu_target="native"`), which needs less than half the memory and time
 
 ### Removed
 - `examples/CondaPkg.toml` (left over from ControlPlots; MakieControlPlots does not need Python)

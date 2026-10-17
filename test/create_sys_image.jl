@@ -32,5 +32,9 @@ PackageCompiler.create_sysimage(
    :KiteViewers, :KiteModels, :KitePodModels, :StructTypes, :YAML, :Statistics, :MakieControlPlots];
     sysimage_path="kps-image_tmp.so",
     include_transitive_dependencies=true,
-    precompile_execution_file=precompile_script
+    precompile_execution_file=precompile_script,
+    # PackageCompiler 2.4.1+ defaults to the multi-target CPU list of the Julia binary on
+    # Julia 1.13+, which compiles every function several times and needs more than twice
+    # the memory and time (JuliaLang/julia#63141); build for this machine only, as on 1.12
+    cpu_target="native"
 )
