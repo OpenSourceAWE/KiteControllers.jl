@@ -104,7 +104,8 @@ Compute and return the winch speed set-point [m/s] for the current time step.
 Returns `nothing` if no system state has been provided yet via `on_new_systate`.
 """
 function calc_v_set(ssc::SystemStateControl)
-    if isnothing(ssc.sys_state)
+    sys_state = ssc.sys_state
+    if isnothing(sys_state)
         return nothing
     end
     if ssc.state == ssReelIn || ssc.fpp.fpca._sys_state == ssDepower
@@ -112,8 +113,8 @@ function calc_v_set(ssc::SystemStateControl)
     else
         f_low = ssc.wc.wcs.f_low
     end
-    force = ssc.sys_state.winch_force[1]
-    v_act = ssc.sys_state.v_reelout[1]
+    force = sys_state.winch_force[1]
+    v_act = sys_state.v_reelout[1]
     if ssc.state in [ssParking, ssManualOperation]
         f_low = ssc.wc.wcs.f_low
         v_set = calc_v_set(ssc.wc, v_act, force, f_low, 0.0)
@@ -125,21 +126,22 @@ function calc_v_set(ssc::SystemStateControl)
 end
 
 function calc_steering(ssc::SystemStateControl, manual_steering = 0.0; heading = nothing, azimuth = nothing)
-    if isnothing(ssc.sys_state)
+    sys_state = ssc.sys_state
+    if isnothing(sys_state)
         return 0.0
     end
-    phi  = isnothing(azimuth) ? ssc.sys_state.azimuth : azimuth
-    beta = ssc.sys_state.elevation
+    phi  = isnothing(azimuth) ? sys_state.azimuth : azimuth
+    beta = sys_state.elevation
     if isnothing(heading)
-        psi = ssc.sys_state.heading
+        psi = sys_state.heading
     else
         psi = heading
     end
-    v_a = ssc.sys_state.v_app
-    chi = ssc.sys_state.course
-    u_d = ssc.sys_state.depower
-    length = ssc.sys_state.l_tether[1]
-    height = ssc.sys_state.Z[end]
+    v_a = sys_state.v_app
+    chi = sys_state.course
+    u_d = sys_state.depower
+    length = sys_state.l_tether[1]
+    height = sys_state.Z[end]
     set_azimuth_elevation(ssc.fpp.fpca, phi, beta)
     on_new_systate(ssc.fpp, phi, beta, psi, chi, v_a, u_d)
     if ssc.state == ssPowerProduction

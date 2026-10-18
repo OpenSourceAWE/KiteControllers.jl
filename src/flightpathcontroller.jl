@@ -439,7 +439,7 @@ function calc_steering(fpc::FlightPathController, parking)
             fpc.psi_dot_set_final = fpc.omega / fpc.radius::Float64 # desired turn rate during the turns
         end
         fpc.psi_dot_set = fpc.psi_dot_set::Float64 * TAU + fpc.psi_dot_set_final::Float64 * (1-TAU)
-        fpc.u_s = saturate(linearize(fpc, fpc.psi_dot_set), -1.0, 1.0)
+        fpc.u_s = saturate(linearize(fpc, fpc.psi_dot_set::Float64), -1.0, 1.0)
     else
         fpc.u_s = sat2_out
     end

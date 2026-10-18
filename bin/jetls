@@ -8,4 +8,4 @@ if [[ $(basename $(pwd)) == "bin" ]]; then
 fi
 
 LOG_FILE="output/jetls_$(date +%Y%m%d_%H%M%S).log"
-jetls check --root=. src/ 2>&1 | tee "$LOG_FILE"
+jetls check . 2>&1 | tee "$LOG_FILE"

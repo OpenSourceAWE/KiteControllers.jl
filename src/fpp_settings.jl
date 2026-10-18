@@ -104,7 +104,7 @@ function save_corr(corr_vec::Vector{Float64})
     result = String[]
     for line in lines
         if startswith(lstrip(line), "corr_vec")
-            indent = match(r"^(\s*)", line).captures[1]
+            indent = line[1:end-length(lstrip(line))]
             push!(result, indent * "corr_vec: " * vec_str)
         else
             push!(result, line)
