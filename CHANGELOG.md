@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+### Changed
+- `bin/create_sys_image` checks the memory and chooses the number of image threads (`JULIA_IMAGE_THREADS`) with the same rules as Tethers.jl and KiteModels.jl, documented in `docs/sysimage.md`: it stops if RAM + swap (Windows: maximum pagefile size, macOS: free disk space) is less than 30 GB, or if the RAM is less than 15 GB (macOS: 7 GB); it uses one thread if RAM + swap is less than 34 GB, two threads with less than 27 GB of RAM, and otherwise half the CPU threads, at most 16. Before, it used one thread with less than 27 GB of RAM and did not check the swap
+- `bin/create_sys_image` checks the memory before anything else, so that a machine with too little memory fails right away
+- `bin/create_sys_image` no longer passes `--heap-size-hint=8000M`; it only limited the Julia process that drives PackageCompiler, not the processes where the peak memory demand occurs
+
 ## KiteControllers v0.4.0 - 2026-10-18
 ### Changed
 - BREAKING: the examples and tests now require KiteModels 0.13 (compat bounds in `examples/Project.toml` and `test/Project.toml`). Its `SysState(s)` stores the spring forces of `n_springs(s)` segments, so `examples/autopilot.jl`, `examples/batch_pilot.jl`, `examples/learn_corrections.jl` and `test/test_fpc_low_right.jl` create their `Logger` with `segments=n_springs(kps4)`
