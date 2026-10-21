@@ -2,6 +2,7 @@
 
 ## Unreleased
 ### Changed
+- on macOS, `create_sys_image` counts twice the free disk space (minus 5 GB) as swap, because macOS writes compressed memory to its swap files (measured: 2.5 : 1); a Mac with 8 GB of RAM now needs about 16 GB of free disk space instead of 27 GB
 - `bin/create_sys_image` checks the memory and chooses the number of image threads (`JULIA_IMAGE_THREADS`) with the same rules as Tethers.jl and KiteModels.jl, documented in `docs/sysimage.md`: it stops if RAM + swap (Windows: maximum pagefile size, macOS: free disk space) is less than 30 GB, or if the RAM is less than 15 GB (macOS: 7 GB); it uses one thread if RAM + swap is less than 34 GB, two threads with less than 27 GB of RAM, and otherwise half the CPU threads, at most 16. Before, it used one thread with less than 27 GB of RAM and did not check the swap
 - `bin/create_sys_image` checks the memory before anything else, so that a machine with too little memory fails right away
 - `bin/create_sys_image` no longer passes `--heap-size-hint=8000M`; it only limited the Julia process that drives PackageCompiler, not the processes where the peak memory demand occurs
