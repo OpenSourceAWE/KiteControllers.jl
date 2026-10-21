@@ -64,7 +64,7 @@ cd bin
 ./create_sys_image
 cd ..
 ```
-The startup time without system image is about 30s, with system image 5s, but creating a system image takes 15 minutes or more.
+The startup time without system image is about 30s, with system image 5s, but creating a system image takes 15 minutes or more. Building it needs at least 16 GB of RAM (8 GB on macOS) and at least 30 GB of RAM + swap.
 
 On Linux you can install the `autopilot` GUI app as normal application with the command `bin/install_app`.
 
