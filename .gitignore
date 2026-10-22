@@ -1,13 +1,10 @@
 /Manifest.toml
-/Manifest.toml.bak
 /.vscode
 bin/kps-image-1.9-main.so
 bin/kps-image-1.10-main.so
 data/last_plot.jld2
 data/*.jld2
 data/*.arrow
-data/ref_sim.arrow.bak
-data/corr_vec.jld2.bak
 output/*.arrow
 data/gui.yaml
 bin/kps-image-1.10-plot_II.so
@@ -22,16 +19,11 @@ data/settings_v9d.yaml
 data/settings_v9e.yaml
 bin/kps-image-1.11-main.so
 Manifest-v1.10.toml
-Manifest-v1.11.toml.bak
-bin/kps-image-1.11-main.so.bak
-bin/kps-image-1.10-main.so.bak
-Manifest-v1.10.toml.bak
 bin/kps-image-1.11-new_wc.so
 Manifest-v1.12.toml
 .JETLSConfig.toml
 output/batch-*.yaml
 bin/kps-image-1.12-main.so
-bin/kps-image-1.12-main.so.bak
 docs/build
 install_version_1.11.txt
 install_version_1.12.txt
@@ -41,7 +33,6 @@ bin/kps-image-1.12-turbulence.so
 bin/kps-image-1.11.so
 bin/kps-image-1.12.so
 examples/LocalPreferences.toml
-bin/kps-image-1.12.so.bak
 video/
 output/parking_wind_dir.mp4
 output/
@@ -53,3 +44,4 @@ output/jetls_20260620_150810.log
 Manifest-v1.13.toml
 install_version_1.13.txt
 bin/kps-image-1.13.so
+*.bak
