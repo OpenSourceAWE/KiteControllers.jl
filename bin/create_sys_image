@@ -156,6 +156,14 @@ $JULIA_CMD --project=examples -J bin/kps-image-${julia_major}.so -e "using NOMAD
 echo "Precompiling Revise with sysimage..."
 $JULIA_CMD --project -J bin/kps-image-${julia_major}.so -e 'using Revise'
 
+# KaimonGate, if installed, loads Profile in interactive sessions, which is not part of the
+# sys image; precompile it with the sys image so run_julia doesn't recompile it
+$JULIA_CMD --startup-file=no --project -J bin/kps-image-${julia_major}.so -e '
+if Base.identify_package("KaimonGate") !== nothing
+    println("Precompiling Profile with sysimage...")
+    Base.require(Base.PkgId(Base.UUID("9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"), "Profile"))
+end'
+
 # On Linux, suppress known-harmless Julia extension loading warnings (e.g. DistributionsTestExt).
 # The error spans multiple lines (┌ Error: ... │ ... └ @ Base), so use sed range deletion.
 if [[ "$(uname -s)" == "Linux" ]]; then
