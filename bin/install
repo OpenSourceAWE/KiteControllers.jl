@@ -12,7 +12,7 @@ MIN_FREE_GB=5
 
 usage() {
     cat <<'USAGE'
-Usage: bin/install [-y] [-i] [--tests | --no-tests] [--version <v> | +<v>] [--update] [-h]
+Usage: bin/install [-y] [-i] [-h]
 
 Make this checkout ready to use with the tested package versions:
   - check that the active Julia version is supported, i.e. that a
@@ -41,42 +41,15 @@ To update all packages to their latest versions use bin/update_default_manifests
                   Revise in the global environment if it is missing, optionally
                   precompile the test and docs environments and run the tests
   -h, --help      show this message
-
-Options used by bin/update_default_manifests (deviations from the documented
-behaviour of the install script):
-  --tests         also instantiate and precompile the test environment
-  --no-tests      do not precompile the test environment (default)
-  --version <v>, +<v>
-                  use Julia <v> (e.g. 1.13) for this run only, without changing
-                  the juliaup default; it must be installed already
-  --update        do not copy the default manifest, but update all packages to
-                  their latest versions with Pkg.update(); the old manifest is
-                  kept as Manifest-v<version>.toml.bak
 USAGE
 }
 
 interactive=false
-update=false
-precompile_tests=false
-tests_explicit=false
-desired_julia=""
 while [ $# -gt 0 ]; do
     case "$1" in
         -y|--yes) ;;
         -i) interactive=true ;;
         -h|--help) usage; exit 0 ;;
-        --update) update=true ;;
-        --tests) precompile_tests=true; tests_explicit=true ;;
-        --no-tests) precompile_tests=false; tests_explicit=true ;;
-        --version)
-            if [ $# -lt 2 ]; then
-                echo "bin/install: --version needs a value, e.g. --version 1.13" >&2
-                exit 1
-            fi
-            desired_julia=$2
-            shift
-            ;;
-        +*) desired_julia=${1#+} ;;
         *) echo "bin/install: unknown option $1" >&2; usage >&2; exit 1 ;;
     esac
     shift
@@ -116,17 +89,6 @@ active_julia() {
     julia --startup-file=no -e 'print(VERSION.major, ".", VERSION.minor)' 2>/dev/null || true
 }
 
-# Select the Julia version for this script and its child processes only,
-# leave the juliaup default unchanged
-if [ -n "$desired_julia" ]; then
-    export JULIAUP_CHANNEL="$desired_julia"
-    if [ "$(active_julia)" != "$desired_julia" ]; then
-        echo "bin/install: Julia $desired_julia is not installed; install it with:" >&2
-        echo "  juliaup add $desired_julia" >&2
-        exit 1
-    fi
-fi
-
 # Let the user pick one option with an arrow-key menu from REPL.TerminalMenus.
 # Arguments: the preselected option, the prompt, the options. Prints the chosen
 # option; fails if the user cancels with q or Ctrl-C. The menu is drawn on stderr,
@@ -165,6 +127,7 @@ ask() {
 }
 
 install_revise=false
+precompile_tests=false
 precompile_docs=false
 run_tests=false
 
@@ -216,9 +179,8 @@ if $interactive; then
         fi
     fi
 
-    # A version given with --version is used as it is
     active=$(active_julia)
-    if [ -z "$desired_julia" ] && { ! is_supported "$active" || [ ${#installed[@]} -gt 1 ]; }; then
+    if ! is_supported "$active" || [ ${#installed[@]} -gt 1 ]; then
         echo "Active Julia version: ${active:-none}. Supported and installed: ${installed[*]}"
         default=$active
         is_supported "$active" || default=${installed[${#installed[@]}-1]}
@@ -253,7 +215,7 @@ if $interactive; then
         install_revise=true
     fi
 
-    if ! $tests_explicit && ask n "Precompile the test environment?"; then
+    if ask n "Precompile the test environment?"; then
         precompile_tests=true
     fi
     if ask n "Precompile the docs environment?"; then
@@ -294,23 +256,16 @@ same_packages() {
     cmp -s <(grep -v '^project_hash' "$1") <(grep -v '^project_hash' "$2")
 }
 manifest_changed=true
-if $update; then
-    if [ -f "$manifest" ]; then
-        mv "$manifest" "$manifest.bak"
-        echo "Moved $manifest to $manifest.bak, --update creates a new one"
+if [ -f "$manifest" ]; then
+    if same_packages "$manifest" "$manifest.default"; then
+        manifest_changed=false
+    else
+        cp "$manifest" "$manifest.bak"
+        echo "Backed up $manifest to $manifest.bak"
     fi
-else
-    if [ -f "$manifest" ]; then
-        if same_packages "$manifest" "$manifest.default"; then
-            manifest_changed=false
-        else
-            cp "$manifest" "$manifest.bak"
-            echo "Backed up $manifest to $manifest.bak"
-        fi
-    fi
-    cp "$manifest.default" "$manifest"
-    echo "Copied $manifest.default to $manifest"
 fi
+cp "$manifest.default" "$manifest"
+echo "Copied $manifest.default to $manifest"
 # The system image contains the packages of the manifest it was built with
 sysimage="bin/kps-image-$version.so"
 if $manifest_changed && [ -f "$sysimage" ]; then
@@ -327,24 +282,14 @@ for default in .*.default *.default; do
     fi
 done
 
-# Resolve (or with --update: update), instantiate and precompile the environment in
-# the given folder
+# Resolve, instantiate and precompile the environment in the given folder
 install_env() {
     echo "Instantiating and precompiling the environment in $1 ..."
-    INSTALL_UPDATE=$update julia --startup-file=no --project="$1" -e '
-        using Pkg
-        ENV["INSTALL_UPDATE"] == "true" ? Pkg.update() : Pkg.resolve()
-        Pkg.instantiate()
-        Pkg.precompile(; strict=true)'
+    julia --startup-file=no --project="$1" -e \
+        'using Pkg; Pkg.resolve(); Pkg.instantiate(); Pkg.precompile(; strict=true)'
 }
 
 install_env .
-# Without a manifest, Pkg.update() writes a plain Manifest.toml
-if [ -f Manifest.toml ] && [ ! -f "$manifest" ]; then
-    mv Manifest.toml "$manifest"
-    echo "Renamed Manifest.toml to $manifest"
-fi
-update=false
 install_env examples
 if $install_revise; then
     echo "Adding Revise to the global environment ..."
