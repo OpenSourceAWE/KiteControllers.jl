@@ -81,10 +81,10 @@ In most cases -- if you want to modify, tune and understand kite controllers -- 
 git clone https://github.com/OpenSourceAWE/KiteControllers.jl.git
 cd KiteControllers.jl
 ```
-Then, run the install script and optionally create a system image:
+Then, run the install script (`-i` asks which Julia version to use and whether to add the alias `jl`, install Revise and precompile the tests; without `-i` it asks nothing) and optionally create a system image:
 ```bash
 cd bin
-./install
+./install -i
 ./create_sys_image
 cd ..
 ```
