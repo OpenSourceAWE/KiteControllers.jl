@@ -1,11 +1,60 @@
-#!/bin/bash
+#!/bin/bash -eu
+# SPDX-FileCopyrightText: 2022 Uwe Fechner
+# SPDX-License-Identifier: MIT
 
-if [[ $(basename $(pwd)) == "bin" ]]; then
+print_usage() {
+    cat <<'EOF'
+Usage: bin/run_julia [-h|--help] [julia options]
+       bin/run_julia script.jl [script args...]
+
+Start an interactive Julia REPL for KiteControllers, usually via the alias `jl`.
+
+The script
+  - sets JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager, NO_AT_BRIDGE=1 and PLOT=1, and on
+    macOS MPLBACKEND=qtagg (unless MPLBACKEND is already set)
+  - stops if the Julia version differs from the one used by bin/install
+    (file install_version_<julia version>.txt); run bin/install again in that case
+  - starts Julia with --project, using the project in the repository root; the examples
+    and the tests activate their own projects
+  - uses all threads (-t auto) and, for Julia 1.10 and newer, --gcthreads=4,1
+  - uses the system image bin/kps-image-<julia version>.so if it exists
+    (create it with bin/create_sys_image)
+  - loads Revise, if it is available (e.g. in the global environment), and then
+    KiteControllers
+  - defines the functions
+      menu()           menu of the examples (examples/menu.jl)
+      test_menu()      menu of the tests (test/test_menu.jl)
+      menu_learning()  menu of the learning examples (examples/menu_learning.jl)
+
+All arguments are passed to Julia after the startup code, and the REPL stays open.
+
+Deviation from the repository scripts page: if the first argument is an existing .jl
+file, Julia runs this script without opening a REPL, without Revise and without the
+startup code, and exits afterwards. The remaining arguments are available in ARGS.
+bin/batch_pilot and bin/batch_plot use this.
+
+Examples:
+  bin/run_julia
+  bin/run_julia -t 4
+  bin/run_julia -e 'println("ok")'
+  bin/run_julia examples/batch_pilot.jl hydra20_426
+EOF
+}
+
+case "${1:-}" in
+    -h|--help)
+        print_usage
+        exit 0
+        ;;
+esac
+
+if [[ $(basename "$(pwd)") == "bin" ]]; then
     cd ..
 fi
 
 export NO_AT_BRIDGE=1
 export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
+export PLOT=1
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
     # Avoid Tk backend issues on macOS (e.g. non-responsive close button in PyPlot windows).
@@ -15,22 +64,12 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
     fi
 fi
 
-if command -v nproc &> /dev/null; then
-    FAST_CORES=$(($(nproc) / 2 - 1))
-else
-    FAST_CORES=3 # default value
+if [[ $HOSTNAME == "ufryzen" || $HOSTNAME == "framework" ]]; then
+    export NO_MTK=true
 fi
-
-GCT="--gcthreads=4,1"
-export JULIA_PKG_SERVER_REGISTRY_PREFERANCE=eager
 
 julia_version=$(julia --version | awk '{print($3)}')
-julia_major=${julia_version:0:3} 
-if [[ $julia_major == "1.1" ]]; then
-    julia_major=${julia_version:0:4}
-else
-    GCT=""
-fi
+julia_major=$(echo "$julia_version" | sed -E 's/^([0-9]+\.[0-9]+).*/\1/')
 
 # Check that the current Julia version matches the one used during install
 if [[ -f "install_version_${julia_major}.txt" ]]; then
@@ -41,35 +80,38 @@ if [[ -f "install_version_${julia_major}.txt" ]]; then
         exit 1
     fi
 fi
-if [[ $HOSTNAME == "ufryzen" || $HOSTNAME == "framework" ]]; then
-    export NO_MTK=true
+
+JULIA_ARGS=(--project)
+
+# Multi-threading; --gcthreads requires Julia 1.10 or newer
+JULIA_ARGS+=(-t auto)
+if [[ $julia_major =~ ^1\.1[0-9]$ ]]; then
+    JULIA_ARGS+=("--gcthreads=4,1")
 fi
 
-script_file=""
-if [[ $# -gt 0 ]]; then
-    script_file="$1"
-    shift
-    if [[ ! -f "$script_file" ]]; then
-        echo "Error: script file '$script_file' not found."
+SOFILE="bin/kps-image-${julia_major}.so"
+if [[ -f "$SOFILE" ]]; then
+    echo "Found system image $SOFILE"
+    JULIA_ARGS+=(-J "$SOFILE")
+fi
+
+# Run a script without REPL, as used by bin/batch_pilot and bin/batch_plot
+if [[ $# -gt 0 && "$1" == *.jl ]]; then
+    if [[ ! -f "$1" ]]; then
+        echo "Error: script file '$1' not found."
         exit 1
     fi
+    exec julia "${JULIA_ARGS[@]}" "$@"
 fi
 
-julia_init='using Revise; '
-julia_init+='using KiteControllers; test_menu() = Base.include(Main, joinpath(pkgdir(KiteControllers), "test", "test_menu.jl")); menu_learning() = Base.include(Main, joinpath(pkgdir(KiteControllers), "examples", "menu_learning.jl"))'
+julia_init='if Base.find_package("Revise") !== nothing
+    using Revise
+end
+using KiteControllers
+menu() = Base.include(Main, joinpath(pwd(), "examples", "menu.jl"))
+test_menu() = Base.include(Main, joinpath(pkgdir(KiteControllers), "test", "test_menu.jl"))
+menu_learning() = Base.include(Main, joinpath(pkgdir(KiteControllers), "examples", "menu_learning.jl"))'
 
-if test -f "bin/kps-image-${julia_major}.so"; then
-    echo "Found system image!"
-    if [[ -n "$script_file" ]]; then
-        PLOT=1 julia --project -J bin/kps-image-${julia_major}.so -t auto $GCT --project "$script_file" "$@"
-    else
-        PLOT=1 julia --project -J bin/kps-image-${julia_major}.so -t auto $GCT --project -i -e "$julia_init"
-    fi
-else
-    if [[ -n "$script_file" ]]; then
-        PLOT=1 julia --project -t auto $GCT "$script_file" "$@"
-    else
-        PLOT=1 julia --project -t auto $GCT -i -e "$julia_init"
-    fi
-    # julia --project
-fi
+JULIA_ARGS+=(-i -e "$julia_init")
+
+exec julia "${JULIA_ARGS[@]}" "$@"
