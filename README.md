@@ -53,18 +53,22 @@ exit()
 ### Installation of KiteControllers using git
 
 In most cases -- if you want to modify, tune and understand kite controllers -- it is better to check out this project from git. You can do this with:
+
 ```bash
 git clone https://github.com/OpenSourceAWE/KiteControllers.jl.git
 cd KiteControllers.jl
 ```
+
 Then, run the install script (`-i` asks which Julia version to use and whether to add the alias `jl`, install Revise and precompile the tests; without `-i` it asks nothing) and optionally create a system image:
+
 ```bash
 cd bin
 ./install -i
 ./create_sys_image
 cd ..
 ```
-The startup time without system image is about 30s, with system image 5s, but creating a system image takes 15 minutes or more. Building it needs at least 16 GB of RAM (8 GB on macOS) and at least 30 GB of RAM + swap.
+
+The startup time without system image is about 30s, with system image 5s, but creating a system image takes 30 minutes or more. Building it needs at least 16 GB of RAM (8 GB on macOS) and at least 30 GB of RAM + swap.
 
 On Linux you can install the `autopilot` GUI app as normal application with the command `bin/install_app`.
 
@@ -73,15 +77,18 @@ On Linux you can install the `autopilot` GUI app as normal application with the 
 ### Running the first example
 
 You can now start Julia with `./bin/run_julia` and execute the autopilot or any other of the examples with:
+
 ```julia
 include("examples/autopilot.jl")
 ```
+
 Clicking on the "RUN" button starts the simulation. When the simulation is finished, you can click on the "OK"
 button at the top left. After some time a plot of the flight should appear. You can use the drop-down menu
 on the left to select other plots or the statistics. You can also load or save log files or projects.
 A project consists of a kite/ physical system, controller settings and a wind condition.
 
 You get a menu with all the examples by typing:
+
 ```julia
 menu()
 ```
@@ -89,6 +96,7 @@ menu()
 ## This package provides
 
 ### Types that are not generic
+
 ```julia
 FlightPathController    # represents the flight path controller
 FPCSettings             # settings of the flight path controller
@@ -103,6 +111,7 @@ SystemStateControl      # high level state machine, receives commands from the G
 
 ## Flight path controller
 FlightPathController as specified in chapter six of the [PhD thesis](https://research.tudelft.nl/en/publications/a-methodology-for-the-design-of-kite-power-control-systems) of Uwe Fechner.
+
 ```julia
 FlightPathController
 FPCSettings
@@ -111,6 +120,7 @@ on_est_sysstate(fpc, phi, beta, psi, chi, omega, v_a; u_d=nothing, u_d_prime=not
 on_timer(fpc)
 calc_steering(fpc, parking)
 ```
+
 The control commands are usually received from the FlightPathPlanner, the output of the model or the system state estimator must call `on_est_sysstate()` each time step.
 <p align="center"><img src="./docs/flight_path_controller_I.png" width="500" /></p>
 <p align="center"><img src="./docs/flight_path_controller_II.png" width="500" /></p>
@@ -118,7 +128,6 @@ The control commands are usually received from the FlightPathPlanner, the output
 ## Scientific background
 - [A Methodology for the Design of Kite-Power Control Systems](https://research.tudelft.nl/en/publications/a-methodology-for-the-design-of-kite-power-control-systems)
 - [Flight path control of kite power systems in a turbulent wind environment](https://ieeexplore.ieee.org/document/7525563)
-
 
 ### Flight Path Calculator (FPCA)
 The FPCA is a stateless component that calculates the coordinates of the attractor points and turn points that
