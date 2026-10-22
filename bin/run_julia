@@ -10,8 +10,7 @@ Usage: bin/run_julia [-h|--help] [julia options]
 Start an interactive Julia REPL for KiteControllers, usually via the alias `jl`.
 
 The script
-  - sets JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager, NO_AT_BRIDGE=1 and PLOT=1, and on
-    macOS MPLBACKEND=qtagg (unless MPLBACKEND is already set)
+  - sets JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager, NO_AT_BRIDGE=1 and PLOT=1
   - stops if the Julia version differs from the one used by bin/install
     (file install_version_<julia version>.txt); run bin/install again in that case
   - starts Julia with --project, using the project in the repository root; the examples
@@ -55,18 +54,6 @@ fi
 export NO_AT_BRIDGE=1
 export JULIA_PKG_SERVER_REGISTRY_PREFERENCE=eager
 export PLOT=1
-
-if [[ "$(uname -s)" == "Darwin" ]]; then
-    # Avoid Tk backend issues on macOS (e.g. non-responsive close button in PyPlot windows).
-    # Keep user override if MPLBACKEND is already set.
-    if [[ -z "${MPLBACKEND:-}" ]]; then
-        export MPLBACKEND=qtagg
-    fi
-fi
-
-if [[ $HOSTNAME == "ufryzen" || $HOSTNAME == "framework" ]]; then
-    export NO_MTK=true
-fi
 
 julia_version=$(julia --version | awk '{print($3)}')
 julia_major=$(echo "$julia_version" | sed -E 's/^([0-9]+\.[0-9]+).*/\1/')
