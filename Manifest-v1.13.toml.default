@@ -2,7 +2,7 @@
 
 julia_version = "1.13.2"
 manifest_format = "2.1"
-project_hash = "68f2d569fc9069572c2ee426fa370d06adbc651b"
+project_hash = "78791de4fdc62be748c625befc3c224d95147d76"
 
 [[deps.ADTypes]]
 deps = ["PrecompileTools"]
@@ -1531,6 +1531,12 @@ git-tree-sha1 = "af4a3c6727f9bb33f920e45f62a107db8b5281fe"
 registries = "General"
 uuid = "b94af626-7959-4878-9336-2adc27959007"
 version = "0.13.1"
+
+[[deps.KitePlots]]
+deps = ["KiteUtils", "LaTeXStrings", "MakieControlPlots"]
+path = "lib/KitePlots"
+uuid = "0b16aec0-02e8-48df-811e-5ff0d82eaaf3"
+version = "0.1.0"
 
 [[deps.KitePodModels]]
 deps = ["DocStringExtensions", "KiteUtils", "Reexport"]

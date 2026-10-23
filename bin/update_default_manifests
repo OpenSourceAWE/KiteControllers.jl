@@ -90,7 +90,7 @@ manifest_file = ARGS[1]
 manifest = TOML.parsefile(manifest_file)
 unreleased = String[]
 for (name, entries) in manifest["deps"], entry in entries
-    name == "KiteControllers" && continue   # the package itself
+    name in ("KiteControllers", "KitePlots") && continue   # the packages of this repository
     if haskey(entry, "repo-url")
         push!(unreleased, "$name (repo-url = $(entry["repo-url"]), repo-rev = $(get(entry, "repo-rev", "")))")
     elseif haskey(entry, "path")

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+### Changed
+- the plot functions of the examples (before `examples/plot_functions.jl` and `examples/plot_helpers.jl`) moved to the new local package KitePlots in `lib/KitePlots`, which is part of the system image. Defined in `Main`, they could not be stored in it: the first plot of a log, e.g. with the OK button next to `plot_main` in the autopilot, took about 20 s to compile, mostly for the very large log type. The system image has to be created again with `bin/create_sys_image`
+- `bin/update_default_manifests` accepts the path dependency KitePlots, as it does KiteControllers itself
+
 ## KiteControllers v0.4.1 - 2026-10-22
 ### Changed
 - on macOS, `create_sys_image` counts twice the free disk space (minus 5 GB) as swap, because macOS writes compressed memory to its swap files (measured: 2.5 : 1); a Mac with 8 GB of RAM now needs about 16 GB of free disk space instead of 27 GB
