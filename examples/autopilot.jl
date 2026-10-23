@@ -18,6 +18,7 @@ using KiteViewers
 using KiteControllers, KiteModels, LaTeXStrings, MakieControlPlots, NativeFileDialog, Statistics
 using LinearAlgebra, Printf
 using KiteViewers: Viewer3D
+using KitePlots: force, v_reelout
 import KiteViewers.GLMakie
 import KiteViewers.GLMakie.GLFW
 using FFMPEG_jll

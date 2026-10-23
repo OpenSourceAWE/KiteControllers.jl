@@ -1,5 +1,6 @@
-# Shared plot functions (core logic) live in plot_functions.jl
-include("plot_functions.jl")
+# The plot functions that take a log are implemented in the package KitePlots (lib/KitePlots),
+# so that the system image can store their compiled code
+import KitePlots
 using KiteViewers
 
 # ---------------------------------------------------------------------------

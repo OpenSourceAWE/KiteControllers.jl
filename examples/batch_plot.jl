@@ -79,9 +79,9 @@ const PLOT_FILE = Ref{String}(
 )
 
 # ---------------------------------------------------------------------------
-# Core plot logic (shared with plots.jl via plot_functions.jl)
+# Core plot logic (shared with plots.jl), implemented in the package KitePlots
 # ---------------------------------------------------------------------------
-include("plot_functions.jl")
+import KitePlots
 
 # ---------------------------------------------------------------------------
 # Load helper
