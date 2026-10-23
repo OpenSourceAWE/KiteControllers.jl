@@ -12,7 +12,7 @@ end
 LOG_LIFT_DRAG::Bool = false
 DRAG_CORR::Float64 = 0.93
 const CREATE_VIDEO = false
-const PX_PER_UNIT = Sys.iswindows() ? 1.0 : 2.0  # supersampling factor of the 3D viewer, higher is smoother but slower
+const PX_PER_UNIT = 1.0  # supersampling factor of the 3D viewer; 2.0 is smoother but misses deadlines at high replay speeds
 
 using KiteViewers
 using KiteControllers, KiteModels, LaTeXStrings, MakieControlPlots, NativeFileDialog, Statistics
