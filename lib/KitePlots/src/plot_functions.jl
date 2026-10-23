@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------
 # Helper: find the first index where sl.cycle == n; without n, the first index
 # ---------------------------------------------------------------------------
-_cycle_index(sl, ::Nothing) = 1
+_cycle_index(_, ::Nothing) = 1
 function _cycle_index(sl, n)
     for i in 1:length(sl.cycle)
         if sl.cycle[i] == n; return i; end
