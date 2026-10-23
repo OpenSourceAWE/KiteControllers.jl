@@ -14,6 +14,17 @@ let
         end
     end
 
+    # plots.jl (the autopilot) calls plot_power without energy; each combination of
+    # keyword arguments is a specialization of its own, which the call above does not cover
+    println("Precompiling plot_power of the autopilot ...")
+    try
+        KitePlots.plot_power(load_plot_log(); dt=0.05)
+        sleep(1)
+        GC.gc()
+    catch e
+        println("  Skipped plot_power of the autopilot: $e")
+    end
+
 end
 
 GC.gc(true)
