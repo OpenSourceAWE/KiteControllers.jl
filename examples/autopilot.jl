@@ -12,6 +12,7 @@ end
 LOG_LIFT_DRAG::Bool = false
 DRAG_CORR::Float64 = 0.93
 const CREATE_VIDEO = false
+const PX_PER_UNIT = Sys.iswindows() ? 1.0 : 2.0  # supersampling factor of the 3D viewer, higher is smoother but slower
 
 using KiteViewers
 using KiteControllers, KiteModels, LaTeXStrings, MakieControlPlots, NativeFileDialog, Statistics
@@ -92,7 +93,7 @@ function init(app::KiteApp; init_viewer=false)
     u_d = 0.01 * se(project).depowers[1]
     app.ssc = SystemStateControl(app.wcs, app.fcs, app.fpps; u_d0, u_d, v_wind=app.set.v_wind)
     if init_viewer
-        app.viewer= Viewer3D(app.set, app.show_kite; menus=true)
+        app.viewer= Viewer3D(app.set, app.show_kite; menus=true, px_per_unit=PX_PER_UNIT)
         app.viewer.menu.options[]=["plot_main", "plot_power", "plot_control", "plot_control_II", "plot_winch_control", "plot_aerodynamics",
                                    "plot_elev_az", "plot_elev_az2", "plot_elev_az3", "plot_side_view", "plot_side_view2", "plot_side_view3", "plot_front_view3", "plot_timing", 
                                    "print_stats", "load logfile", "save logfile"]
