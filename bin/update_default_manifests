@@ -78,7 +78,9 @@ for version in "${versions[@]}"; do
     rm -f "bin/kps-image-$version.so"
     rm -rf "$depot/compiled/v$version/KiteControllers/"
     echo "update_default_manifests: updating and testing under Julia $version"
-    julia "+$version" --startup-file=no --project -e 'using Pkg; Pkg.update()'
+    # load Pkg before activating the project: with the empty manifest, Julia 1.12 fails
+    # with a KeyError in the precompilation if Pkg is loaded via the project
+    julia "+$version" --startup-file=no -e 'using Pkg; Pkg.activate("."); Pkg.update()'
 
     # Check that all dependencies are released versions (no git branches or local paths)
     # shellcheck disable=SC2016  # the $ belong to Julia
