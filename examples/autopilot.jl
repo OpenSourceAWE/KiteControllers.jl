@@ -84,18 +84,16 @@ viewer_btn_OK() = viewer().btn_OK::GLMakie.Button
 function init(app::KiteApp; init_viewer=false)
     app.max_time = app.next_max_time
     app.kcu   = KCU(app.set)
-    project=(KiteUtils.PROJECT)
     app.kps4 = KPS4(app.kcu::KCU)
     (app.kps4::KPS4).wm.v_min = 0.1
-    KiteUtils.PROJECT = project
     app.dt = 1/app.set.sample_freq
     app.wcs = WCSettings(true; dt=app.dt)
     app.fcs = FPCSettings(true; dt=app.dt) 
     app.fcs.log_level = app.set.log_level
     app.fpps = FPPSettings(true)
     app.fpps.log_level = app.set.log_level
-    u_d0 = 0.01 * se(project).depower_offset
-    u_d = 0.01 * se(project).depowers[1]
+    u_d0 = 0.01 * se().depower_offset
+    u_d = 0.01 * se().depowers[1]
     app.ssc = SystemStateControl(app.wcs, app.fcs, app.fpps; u_d0, u_d, v_wind=app.set.v_wind)
     if init_viewer
         app.viewer= Viewer3D(app.set, app.show_kite; menus=true, px_per_unit=PX_PER_UNIT)
