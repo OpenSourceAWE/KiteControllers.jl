@@ -86,6 +86,7 @@ Clicking on the "RUN" button starts the simulation. When the simulation is finis
 button at the top left. After some time a plot of the flight should appear. You can use the drop-down menu
 on the left to select other plots or the statistics. You can also load or save log files or projects.
 A project consists of a kite/ physical system, controller settings and a wind condition.
+<p align="center"><img src="./docs/src/autopilot.png" alt="Autopilot GUI" width="500" /></p>
 
 You get a menu with all the examples by typing:
 
