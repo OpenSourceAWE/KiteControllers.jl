@@ -94,25 +94,7 @@ You get a menu with all the examples by typing:
 menu()
 ```
 
-## This package provides
-
-### Types that are not generic
-
-```julia
-FlightPathController    # represents the flight path controller
-FPCSettings             # settings of the flight path controller
-FlightPathCalculator    # calculate the planned flight path
-FlightPathPlanner       # execute the planned flight path
-FPPSettings             # settings of the flight path planner
-KiteModel               # simplified model for unit testing
-
-SystemStateControl      # high level state machine, receives commands from the GUI
-                        # and calls FlightPathPlanner and WinchController
-```
-
-## Scientific background
-- [A Methodology for the Design of Kite-Power Control Systems](https://research.tudelft.nl/en/publications/a-methodology-for-the-design-of-kite-power-control-systems)
-- [Flight path control of kite power systems in a turbulent wind environment](https://ieeexplore.ieee.org/document/7525563)
+## Main Components
 
 ### Flight Path Calculator (FPCA)
 The FPCA is a stateless component that calculates the coordinates of the attractor points and turn points that
@@ -142,6 +124,10 @@ Prof.dr. H.G.C. (Henri) Werij, Dean of Aerospace Engineering
 
 ## Donations
 If you like this software, please consider donating to https://gofund.me/bba01d43 .
+
+## Scientific background
+- [A Methodology for the Design of Kite-Power Control Systems](https://research.tudelft.nl/en/publications/a-methodology-for-the-design-of-kite-power-control-systems)
+- [Flight path control of kite power systems in a turbulent wind environment](https://ieeexplore.ieee.org/document/7525563)
 
 ## Related
 - [Research Fechner](https://research.tudelft.nl/en/publications/?search=wind+Fechner&pageSize=50&ordering=rating&descending=true) for the scientific background of this code
