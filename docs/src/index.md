@@ -131,16 +131,12 @@ See [Examples, if installed using Git](@ref) to learn more about the provided ex
 
 ```text
 KiteControllers.jl
-├── SystemStateControl   – top-level state machine
-├── FlightPathPlanner    – path planning (chapter 5 of PhD thesis)
-│   └── FlightPathCalculator  – attractor & omega calculation
-│       └── FlightPathController  – PID/NDI steering (chapter 6)
-└── WinchController      – reel-in/-out speed control (re-exported)
-```
-
-## Contents
-
-```@contents
-Pages = ["types.md", "functions.md", "examples.md", "projects.md", "learning.md"]
-Depth = 2
+├── SystemStateControl        – top-level state machine
+│   ├── FlightPathPlanner     – path planning (chapter 5 of PhD thesis)
+│   │   └── FlightPathCalculator  – attractor & omega calculation
+│   │       └── FlightPathController  – PID/NDI steering (chapter 6)
+│   └── WinchController       – reel-in/-out speed control (from WinchControllers.jl)
+├── KiteObserver              – collects flight path statistics to correct the elevation
+├── KiteModel                 – simplified kite model for unit testing
+└── lib/KitePlots             – plotting sub-package
 ```

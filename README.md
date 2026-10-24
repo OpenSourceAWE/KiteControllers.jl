@@ -109,22 +109,6 @@ SystemStateControl      # high level state machine, receives commands from the G
                         # and calls FlightPathPlanner and WinchController
 ```
 
-## Flight path controller
-FlightPathController as specified in chapter six of the [PhD thesis](https://research.tudelft.nl/en/publications/a-methodology-for-the-design-of-kite-power-control-systems) of Uwe Fechner.
-
-```julia
-FlightPathController
-FPCSettings
-on_control_command(fpc; attractor=nothing, psi_dot_set=nothing, radius=nothing, intermediate = true)
-on_est_sysstate(fpc, phi, beta, psi, chi, omega, v_a; u_d=nothing, u_d_prime=nothing)
-on_timer(fpc)
-calc_steering(fpc, parking)
-```
-
-The control commands are usually received from the FlightPathPlanner, the output of the model or the system state estimator must call `on_est_sysstate()` each time step.
-<p align="center"><img src="./docs/flight_path_controller_I.png" width="500" /></p>
-<p align="center"><img src="./docs/flight_path_controller_II.png" width="500" /></p>
-
 ## Scientific background
 - [A Methodology for the Design of Kite-Power Control Systems](https://research.tudelft.nl/en/publications/a-methodology-for-the-design-of-kite-power-control-systems)
 - [Flight path control of kite power systems in a turbulent wind environment](https://ieeexplore.ieee.org/document/7525563)

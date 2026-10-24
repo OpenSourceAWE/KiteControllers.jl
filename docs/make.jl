@@ -12,6 +12,7 @@ makedocs(
         "Home"      => "index.md",
         "Types"     => "types.md",
         "Functions" => "functions.md",
+        "Flight Path Controller" => "flight_path_controller.md",
         "Examples"  => "examples.md",
         "Projects and Turbulence" => "projects.md",
         "Learning Control"  => "learning.md",
