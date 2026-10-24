@@ -8,4 +8,6 @@ if [[ $(basename $(pwd)) == "bin" ]]; then
 fi
 
 LOG_FILE="output/jetls_$(date +%Y%m%d_%H%M%S).log"
-jetls check . 2>&1 | tee "$LOG_FILE"
+# with more than one thread, JETLS may load GLMakie on another thread than thread 1,
+# and GLFW then fails (https://github.com/aviatesk/JETLS.jl/issues/559)
+jetls --threads=1,0 -- check . 2>&1 | tee "$LOG_FILE"

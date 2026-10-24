@@ -79,9 +79,9 @@ const PLOT_FILE = Ref{String}(
 )
 
 # ---------------------------------------------------------------------------
-# Core plot logic (shared with plots.jl via plot_functions.jl)
+# Core plot logic (shared with plots.jl), implemented in the package KitePlots
 # ---------------------------------------------------------------------------
-include("plot_functions.jl")
+import KitePlots
 
 # ---------------------------------------------------------------------------
 # Load helper
@@ -94,56 +94,56 @@ end
 # Plot wrappers — load the log, then delegate to the shared implementation
 # ---------------------------------------------------------------------------
 function plot_main()
-    _plot_main(load_plot_log())
+    KitePlots.plot_main(load_plot_log())
 end
 
 function plot_power()
     log = load_plot_log()
-    _plot_power(log; energy=log.syslog.e_mech, dt=0.0)
+    KitePlots.plot_power(log; energy=log.syslog.e_mech, dt=0.0)
 end
 
 function plot_control()
-    _plot_control(load_plot_log())
+    KitePlots.plot_control(load_plot_log())
 end
 
 function plot_control_II()
-    _plot_control_II(load_plot_log())
+    KitePlots.plot_control_II(load_plot_log())
 end
 
 function plot_winch_control()
-    _plot_winch_control(load_plot_log())
+    KitePlots.plot_winch_control(load_plot_log())
 end
 
 function plot_aerodynamics(plot_lift_drag=false)
-    _plot_aerodynamics(load_plot_log(); plot_lift_drag=plot_lift_drag)
+    KitePlots.plot_aerodynamics(load_plot_log(); plot_lift_drag=plot_lift_drag)
 end
 
 function plot_elev_az()
-    _plot_elev_az(load_plot_log())
+    KitePlots.plot_elev_az(load_plot_log())
 end
 
 function plot_elev_az2()
-    _plot_elev_az_n(load_plot_log(), 2)
+    KitePlots.plot_elev_az(load_plot_log(), 2)
 end
 
 function plot_elev_az3()
-    _plot_elev_az_n(load_plot_log(), 3)
+    KitePlots.plot_elev_az(load_plot_log(), 3)
 end
 
 function plot_side_view()
-    _plot_side_view(load_plot_log())
+    KitePlots.plot_side_view(load_plot_log())
 end
 
 function plot_side_view2()
-    _plot_side_view_n(load_plot_log(), 2)
+    KitePlots.plot_side_view(load_plot_log(), 2)
 end
 
 function plot_side_view3()
-    _plot_side_view_n(load_plot_log(), 3)
+    KitePlots.plot_side_view(load_plot_log(), 3)
 end
 
 function plot_front_view3()
-    _plot_front_view_n(load_plot_log(), 3)
+    KitePlots.plot_front_view(load_plot_log(), 3)
 end
 
 # ---------------------------------------------------------------------------

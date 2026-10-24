@@ -1,4 +1,4 @@
-# Shared helper accessors used by both plots.jl and batch_plot.jl
+# Shared helper accessors used by the plot functions and examples/autopilot.jl
 
 function l_tether(sl)
     getindex.(sl.l_tether, 1)

@@ -1,5 +1,6 @@
-# Shared plot functions (core logic) live in plot_functions.jl
-include("plot_functions.jl")
+# The plot functions that take a log are implemented in the package KitePlots (lib/KitePlots),
+# so that the system image can store their compiled code
+import KitePlots
 using KiteViewers
 
 # ---------------------------------------------------------------------------
@@ -40,67 +41,67 @@ end
 # ---------------------------------------------------------------------------
 function plot_main()
     log_file_exists() || return
-    _plot_main(_load_log())
+    KitePlots.plot_main(_load_log())
 end
 
 function plot_power()
     log_file_exists() || return
-    _plot_power(_load_log(); dt=app.dt)
+    KitePlots.plot_power(_load_log(); dt=app.dt)
 end
 
 function plot_control()
     log_file_exists() || return
-    _plot_control(_load_log())
+    KitePlots.plot_control(_load_log())
 end
 
 function plot_control_II()
     log_file_exists() || return
-    _plot_control_II(_load_log())
+    KitePlots.plot_control_II(_load_log())
 end
 
 function plot_winch_control()
     log_file_exists() || return
-    _plot_winch_control(_load_log())
+    KitePlots.plot_winch_control(_load_log())
 end
 
 function plot_aerodynamics(plot_lift_drag=false)
     log_file_exists() || return
-    _plot_aerodynamics(_load_log(); plot_lift_drag=plot_lift_drag)
+    KitePlots.plot_aerodynamics(_load_log(); plot_lift_drag=plot_lift_drag)
 end
 
 function plot_elev_az()
     log_file_exists() || return
-    _plot_elev_az(_load_log())
+    KitePlots.plot_elev_az(_load_log())
 end
 
 function plot_elev_az2()
     log_file_exists() || return
-    _plot_elev_az_n(_load_log(), 2)
+    KitePlots.plot_elev_az(_load_log(), 2)
 end
 
 function plot_elev_az3()
     log_file_exists() || return
-    _plot_elev_az_n(_load_log(), 3)
+    KitePlots.plot_elev_az(_load_log(), 3)
 end
 
 function plot_side_view()
     log_file_exists() || return
-    _plot_side_view(_load_log())
+    KitePlots.plot_side_view(_load_log())
 end
 
 function plot_side_view2()
     log_file_exists() || return
-    _plot_side_view_n(_load_log(), 2)
+    KitePlots.plot_side_view(_load_log(), 2)
 end
 
 function plot_side_view3()
     log_file_exists() || return
-    _plot_side_view_n(_load_log(), 3)
+    KitePlots.plot_side_view(_load_log(), 3)
 end
 
 function plot_front_view3()
     log_file_exists() || return
-    _plot_front_view_n(_load_log(), 3)
+    KitePlots.plot_front_view(_load_log(), 3)
 end
 
 # ---------------------------------------------------------------------------

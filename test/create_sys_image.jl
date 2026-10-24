@@ -4,8 +4,8 @@ if ! ("MakieControlPlots" ∈ keys(Pkg.project().dependencies))
 end
 
 @info "Loading packages ..."
-using BenchmarkTools, MakieControlPlots, KiteModels, KitePodModels, KiteUtils, KiteViewers,
-      NLsolve, PackageCompiler, Parameters, StaticArrays, Statistics, StructTypes,
+using BenchmarkTools, MakieControlPlots, KiteModels, KitePlots, KitePodModels, KiteUtils,
+      KiteViewers, NLsolve, PackageCompiler, Parameters, StaticArrays, Statistics, StructTypes,
       WinchModels, WinchControllers, YAML
 
 @info "Creating sysimage ..."
@@ -115,7 +115,8 @@ end
 
 PackageCompiler.create_sysimage(
   [:KiteUtils, :NLsolve, :Parameters, :StaticArrays, :WinchModels, :WinchControllers,
-   :KiteViewers, :KiteModels, :KitePodModels, :StructTypes, :YAML, :Statistics, :MakieControlPlots];
+   :KiteViewers, :KiteModels, :KitePodModels, :StructTypes, :YAML, :Statistics, :MakieControlPlots,
+   :KitePlots];
     sysimage_path="kps-image_tmp.so",
     include_transitive_dependencies=true,
     precompile_execution_file=precompile_script,

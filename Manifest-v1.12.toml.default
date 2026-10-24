@@ -1375,6 +1375,12 @@ git-tree-sha1 = "af4a3c6727f9bb33f920e45f62a107db8b5281fe"
 uuid = "b94af626-7959-4878-9336-2adc27959007"
 version = "0.13.1"
 
+[[deps.KitePlots]]
+deps = ["KiteUtils", "LaTeXStrings", "MakieControlPlots"]
+path = "lib/KitePlots"
+uuid = "0b16aec0-02e8-48df-811e-5ff0d82eaaf3"
+version = "0.1.0"
+
 [[deps.KitePodModels]]
 deps = ["DocStringExtensions", "KiteUtils", "Reexport"]
 git-tree-sha1 = "a54b0d8d4e011b2c8e6135322b1e57d2f2d250be"

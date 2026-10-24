@@ -1,12 +1,11 @@
-# Core plot functions shared by plots.jl (interactive GUI) and batch_plot.jl (CLI).
-# Each function takes a log object and accepts keyword arguments for the few
-# parameters that differ between the two UIs (energy source, dt).
-
-include("plot_helpers.jl")
+# Core plot functions shared by examples/plots.jl (interactive GUI) and
+# examples/batch_plot.jl (CLI). Each function takes a log object and accepts keyword
+# arguments for the few parameters that differ between the two UIs (energy source, dt).
 
 # ---------------------------------------------------------------------------
-# Helper: find the first index where sl.cycle == n
+# Helper: find the first index where sl.cycle == n; without n, the first index
 # ---------------------------------------------------------------------------
+_cycle_index(_, ::Nothing) = 1
 function _cycle_index(sl, n)
     for i in 1:length(sl.cycle)
         if sl.cycle[i] == n; return i; end
@@ -15,9 +14,9 @@ function _cycle_index(sl, n)
 end
 
 # ---------------------------------------------------------------------------
-# _plot_main
+# plot_main
 # ---------------------------------------------------------------------------
-function _plot_main(log)
+function plot_main(log)
     sl = log.syslog
     display(plotx(sl.time, log.z, rad2deg.(sl.elevation), rad2deg.(sl.azimuth),
                   l_tether(sl), force(sl), v_reelout(sl), sl.cycle;
@@ -28,9 +27,9 @@ function _plot_main(log)
 end
 
 # ---------------------------------------------------------------------------
-# _plot_power
+# plot_power
 # ---------------------------------------------------------------------------
-function _plot_power(log; energy=nothing, dt=0.0)
+function plot_power(log; energy=nothing, dt=0.0)
     sl = log.syslog
     if energy === nothing
         v_ro = v_reelout(sl)
@@ -51,9 +50,9 @@ function _plot_power(log; energy=nothing, dt=0.0)
 end
 
 # ---------------------------------------------------------------------------
-# _plot_control  (two sub-plots: control + fpc)
+# plot_control  (two sub-plots: control + fpc)
 # ---------------------------------------------------------------------------
-function _plot_control(log)
+function plot_control(log)
     sl = log.syslog
     display(plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth),
                   rad2deg.(wrap2pi.(sl.heading)), force(sl),
@@ -72,9 +71,9 @@ function _plot_control(log)
 end
 
 # ---------------------------------------------------------------------------
-# _plot_control_II
+# plot_control_II
 # ---------------------------------------------------------------------------
-function _plot_control_II(log)
+function plot_control_II(log)
     sl = log.syslog
     display(plotx(sl.time, rad2deg.(sl.azimuth), -rad2deg.(wrap2pi.(sl.heading)),
                   100*sl.steering, sl.var_12, rad2deg.(sl.course .- pi),
@@ -86,9 +85,9 @@ function _plot_control_II(log)
 end
 
 # ---------------------------------------------------------------------------
-# _plot_winch_control  (two sub-plots)
+# plot_winch_control  (two sub-plots)
 # ---------------------------------------------------------------------------
-function _plot_winch_control(log)
+function plot_winch_control(log)
     sl = log.syslog
     display(plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth),
                   force(sl), sl.var_04, v_reelout(sl),
@@ -105,9 +104,9 @@ function _plot_winch_control(log)
 end
 
 # ---------------------------------------------------------------------------
-# _plot_aerodynamics
+# plot_aerodynamics
 # ---------------------------------------------------------------------------
-function _plot_aerodynamics(log; plot_lift_drag=false)
+function plot_aerodynamics(log; plot_lift_drag=false)
     sl = log.syslog
     if plot_lift_drag
         display(plotx(sl.time, sl.var_08, rad2deg.(sl.AoA), sl.CL2, sl.CD2;
@@ -130,16 +129,10 @@ function _plot_aerodynamics(log; plot_lift_drag=false)
 end
 
 # ---------------------------------------------------------------------------
-# _plot_elev_az variations
+# plot_elev_az, plot_side_view and plot_front_view: the whole log, or only the
+# part from the start of the given cycle on
 # ---------------------------------------------------------------------------
-function _plot_elev_az(log)
-    sl = log.syslog
-    display(plotxy(rad2deg.(sl.azimuth), rad2deg.(sl.elevation);
-            ylabel="elevation [°]", xlabel="azimuth [°]", fig="elev_az"))
-    nothing
-end
-
-function _plot_elev_az_n(log, cycle_number)
+function plot_elev_az(log, cycle_number=nothing)
     sl = log.syslog
     idx = _cycle_index(sl, cycle_number)
     display(plotxy(rad2deg.(sl.azimuth)[idx:end], rad2deg.(sl.elevation)[idx:end];
@@ -147,29 +140,15 @@ function _plot_elev_az_n(log, cycle_number)
     nothing
 end
 
-# ---------------------------------------------------------------------------
-# _plot_side_view variations
-# ---------------------------------------------------------------------------
-function _plot_side_view(log)
-    display(plotxy(log.x, log.z;
-            ylabel="pos_x [m]", xlabel="height [m]", fig="side_view"))
-    nothing
-end
-
-function _plot_side_view_n(log, cycle_number)
-    sl = log.syslog
-    idx = _cycle_index(sl, cycle_number)
+function plot_side_view(log, cycle_number=nothing)
+    idx = _cycle_index(log.syslog, cycle_number)
     display(plotxy(log.x[idx:end], log.z[idx:end];
             ylabel="pos_x [m]", xlabel="height [m]", fig="side_view"))
     nothing
 end
 
-# ---------------------------------------------------------------------------
-# _plot_front_view_n
-# ---------------------------------------------------------------------------
-function _plot_front_view_n(log, cycle_number)
-    sl = log.syslog
-    idx = _cycle_index(sl, cycle_number)
+function plot_front_view(log, cycle_number=nothing)
+    idx = _cycle_index(log.syslog, cycle_number)
     display(plotxy(log.y[idx:end], log.z[idx:end];
             xlabel="pos_y [m]", ylabel="height [m]", fig="front_view"))
     nothing

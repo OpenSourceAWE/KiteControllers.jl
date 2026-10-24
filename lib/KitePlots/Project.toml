@@ -1,0 +1,15 @@
+name = "KitePlots"
+uuid = "0b16aec0-02e8-48df-811e-5ff0d82eaaf3"
+version = "0.1.0"
+authors = ["Uwe Fechner <fechner@aenarete.eu> and contributors"]
+
+[deps]
+KiteUtils = "90980105-b163-44e5-ba9f-8b1c83bb0533"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+MakieControlPlots = "6d616b69-6563-4f6e-8472-6f6c706c6f74"
+
+[compat]
+KiteUtils = "0.11.7, 0.12, 0.13"
+LaTeXStrings = "1.4"
+MakieControlPlots = "0.1.5"
+julia = "1.12, 1.13"
