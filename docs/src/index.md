@@ -28,7 +28,7 @@ The winch components (`WinchController`, `Winch`, `SpeedController`,
 <summary>Installation of Julia</summary>
 ```
 
-If you do not have Julia installed yet, please read [Installation](https://github.com/aenarete/KiteSimulators.jl/blob/main/docs/Installation.md).
+If you do not have Julia installed yet, please read [Installing Julia 1.13 and VSCode](https://ufechner7.github.io/2026/10/24/installing-julia-1.13-and-vscode.html).
 
 ```@raw html
 </details>
