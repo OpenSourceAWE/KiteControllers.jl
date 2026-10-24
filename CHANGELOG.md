@@ -1,11 +1,18 @@
 # Changelog
 
-## Unreleased
+## KiteControllers v0.4.2 - 2026-10-24
 ### Changed
 - the plot functions of the examples (before `examples/plot_functions.jl` and `examples/plot_helpers.jl`) moved to the new local package KitePlots in `lib/KitePlots`, which is part of the system image. Defined in `Main`, they could not be stored in it: the first plot of a log, e.g. with the OK button next to `plot_main` in the autopilot, took about 20 s to compile, mostly for the very large log type. The system image has to be created again with `bin/create_sys_image`
 - the plot functions that take a log lost their leading underscore and are public in KitePlots, e.g. `KitePlots.plot_main(log)` instead of `_plot_main(log)`; the variants `_plot_elev_az_n`, `_plot_side_view_n` and `_plot_front_view_n` became an optional argument `cycle_number` of `plot_elev_az`, `plot_side_view` and `plot_front_view`
 - the precompile script of the system image also calls `plot_power` without `energy`, as the autopilot does; before, its first plot took about 5 s to compile
 - `bin/update_default_manifests` accepts the path dependency KitePlots, as it does KiteControllers itself
+- `examples/autopilot.jl` creates the 3D viewer with `px_per_unit=1.0` (new constant `PX_PER_UNIT`); at 2.0, the replay with 12x speed missed its 12.5 ms deadline 6-9 % of the time on a laptop, at 1.0 it misses none
+- `examples/autopilot.jl` no longer causes JETLS warnings: fields of `KiteApp` and the menus of the viewer, which can be `nothing`, are read with type assertions or with the new accessors `viewer()`, `viewer_menu(name)`, `viewer_t_sim()` and `viewer_btn_OK()`
+
+### Fixed
+- `bin/install` failed in a new, empty Julia depot with "no registries have been installed"; it now adds the General registry if no registry exists, and otherwise updates the registries
+- `bin/update_default_manifests` failed under Julia 1.12 with a `KeyError` in the precompilation; it now loads Pkg before activating the project
+- `bin/create_sys_image` precompiles Revise only if it is installed, because `bin/install -y` no longer installs it in the global environment
 
 ## KiteControllers v0.4.1 - 2026-10-22
 ### Changed
