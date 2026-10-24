@@ -34,7 +34,7 @@ function change_value(lines, varname, value::String)
     res = String[]
     for line in lines
         if startswith(lstrip(line), varname)
-            start = (findfirst(varname, line)).stop+1
+            start = (findfirst(varname, line)::UnitRange{Int}).stop+1
             comment_pos = findfirst('#', line)
             stop = isnothing(comment_pos) ? lastindex(line) : comment_pos - 1
             new_line = ""
