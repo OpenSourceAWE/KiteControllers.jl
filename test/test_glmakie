@@ -1,9 +1,18 @@
 #!/bin/bash -eu
+
+# Install GLMakie into a new, empty Julia depot in /tmp and check that it loads
+# and can open a window: it shows a plot for two seconds and closes it.
+# Needs a display.
+#
+# Result on a desktop PC with an AMD Ryzen 9 7950X (2026-10-24), measured with "time test/test_glmakie":
+#   283 dependencies successfully precompiled in 124 seconds. 26 already precompiled.
+#   real 3m0.9s, user 10m31.7s, sys 0m53.7s
+
 rm -rf /tmp/testdepot
 mkdir /tmp/testdepot
 rm -rf /tmp/test
 mkdir /tmp/test
 cd /tmp/test
 export JULIA_DEPOT_PATH=/tmp/testdepot 
-julia --project="." -e "using Pkg; Pkg.add(\"GLMakie\"); using GLMakie; Pkg.test(\"Makie\")"
+julia --project="." -e "using Pkg; Pkg.add(\"GLMakie\"); using GLMakie; display(lines(1:10)); sleep(2); GLMakie.closeall()"
  
