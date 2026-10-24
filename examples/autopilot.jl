@@ -74,59 +74,62 @@ end
 app.max_time      = app.set.sim_time
 app.next_max_time = app.max_time
 
+# the viewer, once init(app; init_viewer=true) has created it, and its menus, text box
+# and OK button, which exist because it is created with menus=true
+viewer() = app.viewer::Viewer3D
+viewer_menu(name::Symbol) = getproperty(viewer(), name)::GLMakie.Menu
+viewer_t_sim() = viewer().t_sim::GLMakie.Textbox
+viewer_btn_OK() = viewer().btn_OK::GLMakie.Button
+
 function init(app::KiteApp; init_viewer=false)
     app.max_time = app.next_max_time
     app.kcu   = KCU(app.set)
-    project=(KiteUtils.PROJECT)
     app.kps4 = KPS4(app.kcu::KCU)
-    app.kps4.wm.v_min = 0.1
-    KiteUtils.PROJECT = project
-    app.wcs = WCSettings(true; dt=1/app.set.sample_freq)
-    
-    app.wcs.dt = 1/app.set.sample_freq
-    app.dt = app.wcs.dt
+    (app.kps4::KPS4).wm.v_min = 0.1
+    app.dt = 1/app.set.sample_freq
+    app.wcs = WCSettings(true; dt=app.dt)
     app.fcs = FPCSettings(true; dt=app.dt) 
     app.fcs.log_level = app.set.log_level
     app.fpps = FPPSettings(true)
     app.fpps.log_level = app.set.log_level
-    u_d0 = 0.01 * se(project).depower_offset
-    u_d = 0.01 * se(project).depowers[1]
+    u_d0 = 0.01 * se().depower_offset
+    u_d = 0.01 * se().depowers[1]
     app.ssc = SystemStateControl(app.wcs, app.fcs, app.fpps; u_d0, u_d, v_wind=app.set.v_wind)
     if init_viewer
         app.viewer= Viewer3D(app.set, app.show_kite; menus=true, px_per_unit=PX_PER_UNIT)
-        app.viewer.menu.options[]=["plot_main", "plot_power", "plot_control", "plot_control_II", "plot_winch_control", "plot_aerodynamics",
+        viewer_menu(:menu).options[]=["plot_main", "plot_power", "plot_control", "plot_control_II", "plot_winch_control", "plot_aerodynamics",
                                    "plot_elev_az", "plot_elev_az2", "plot_elev_az3", "plot_side_view", "plot_side_view2", "plot_side_view3", "plot_front_view3", "plot_timing", 
                                    "print_stats", "load logfile", "save logfile"]
-        app.viewer.menu_rel_tol.options[]=["0.005","0.001","0.0005","0.0001","0.00005", "0.00001",
+        viewer_menu(:menu_rel_tol).options[]=["0.005","0.001","0.0005","0.0001","0.00005", "0.00001",
                                            "0.000005","0.000001"]
-        app.viewer.menu_time_lapse.options[]=["1x","2x","3x","4x","6x","9x","12x","18x","24x"]
-        app.viewer.menu_project.options[]=["Open...", "Save as...", "Edit..."]
+        viewer_menu(:menu_time_lapse).options[]=["1x","2x","3x","4x","6x","9x","12x","18x","24x"]
+        viewer_menu(:menu_project).options[]=["Open...", "Save as...", "Edit..."]
     end
     if app.set.time_lapse==24.0
-        app.viewer.menu_time_lapse.i_selected[] = 9
+        viewer_menu(:menu_time_lapse).i_selected[] = 9
     elseif app.set.time_lapse==18.0
-        app.viewer.menu_time_lapse.i_selected[] = 8
+        viewer_menu(:menu_time_lapse).i_selected[] = 8
     elseif app.set.time_lapse==12.0
-        app.viewer.menu_time_lapse.i_selected[] = 7    
+        viewer_menu(:menu_time_lapse).i_selected[] = 7    
     elseif app.set.time_lapse==9.0
-        app.viewer.menu_time_lapse.i_selected[] = 6
+        viewer_menu(:menu_time_lapse).i_selected[] = 6
     elseif app.set.time_lapse==6.0
-        app.viewer.menu_time_lapse.i_selected[] = 5
+        viewer_menu(:menu_time_lapse).i_selected[] = 5
     elseif app.set.time_lapse==4.0
-        app.viewer.menu_time_lapse.i_selected[] = 4
+        viewer_menu(:menu_time_lapse).i_selected[] = 4
     elseif app.set.time_lapse==3.0
-        app.viewer.menu_time_lapse.i_selected[] = 3
+        viewer_menu(:menu_time_lapse).i_selected[] = 3
     elseif app.set.time_lapse==2.0
-        app.viewer.menu_time_lapse.i_selected[] = 2
+        viewer_menu(:menu_time_lapse).i_selected[] = 2
     elseif app.set.time_lapse==1.0
-        app.viewer.menu_time_lapse.i_selected[] = 1
+        viewer_menu(:menu_time_lapse).i_selected[] = 1
     else
         println("Warning: Invalid setting for time_lapse in config file.")
     end
-    app.viewer.t_sim.displayed_string[]=repr(Int64(round(app.set.sim_time)))
+    viewer_t_sim().displayed_string[]=repr(Int64(round(app.set.sim_time)))
     app.steps = Int64(app.max_time/app.dt)
     app.particles = app.set.segments + 5
-    app.logger = Logger(app.particles, app.steps; segments=n_springs(app.kps4))
+    app.logger = Logger(app.particles, app.steps; segments=n_springs(app.kps4::KPS4))
     app.parking = false
     app.max_time      = app.set.sim_time
     app.next_max_time = app.max_time
@@ -152,14 +155,14 @@ function simulate(integrator, stopped=true)
     start_time_ns = time_ns()
     sys_state = SysState(app.kps4::KPS4)
     sys_state.e_mech = 0
-    sys_state.sys_state = Int16(app.ssc.fpp._state)
+    sys_state.sys_state = Int16((app.ssc::SystemStateControl).fpp._state)
     e_mech = 0.0
     last_vel = [0.0, 0.0, 0.0]
     on_new_systate(app.ssc::SystemStateControl, sys_state)
     clear_viewer(app.viewer::Viewer3D)
     KiteViewers.update_system(app.viewer::Viewer3D, sys_state; scale = 0.04/1.1, kite_scale=app.set.kite_scale)
     KiteViewers.running[] = ! stopped
-    app.viewer.stop = stopped
+    viewer().stop = stopped
     if ! stopped
         set_status(app.viewer::Viewer3D, "ssParking")
     end
@@ -178,14 +181,14 @@ function simulate(integrator, stopped=true)
     last_yaw_rate = 0.0
     while app.initialized
         v_ro = 0.0
-        if app.viewer.stop
+        if viewer().stop
             sleep(app.dt)
         else
             if i == 1
                 app.max_time = app.next_max_time
                 app.steps = Int64(app.max_time/app.dt)
                 app.particles = app.set.segments + 5
-                app.logger = Logger(app.particles, app.steps; segments=n_springs(app.kps4))
+                app.logger = Logger(app.particles, app.steps; segments=n_springs(app.kps4::KPS4))
                 log!(app.logger::Logger, sys_state)
                 saved_use_turbulence = app.set.use_turbulence
                 app.set.use_turbulence = 0.0
@@ -220,25 +223,26 @@ function simulate(integrator, stopped=true)
             on_new_systate(app.ssc::SystemStateControl, sys_state)
             e_mech += (sys_state.winch_force[1] * sys_state.v_reelout[1])/3600*app.dt
             sys_state.e_mech = e_mech
-            sys_state.sys_state = Int16(app.ssc.fpp._state)
-            sys_state.cycle  = app.ssc.fpp.fpca.cycle
-            sys_state.fig_8   = app.ssc.fpp.fpca.fig8
-            sys_state.var_03 = get_state(app.ssc.wc) # 0=lower_force_control 1=square_root_control 2=upper_force_control
-            sys_state.var_04 = app.ssc.wc.lfc.f_set # set force of lower force controller
-            sys_state.var_05 = app.ssc.wc.lfc.v_set_out
-            sys_state.var_06 = app.ssc.fpp.fpca.fpc.ndi_gain
-            if isnothing(app.ssc.fpp.fpca.fpc.psi_dot_set)
-                sys_state.var_07 = app.ssc.fpp.fpca.fpc.chi_set
+            ssc = app.ssc::SystemStateControl
+            sys_state.sys_state = Int16(ssc.fpp._state)
+            sys_state.cycle  = ssc.fpp.fpca.cycle
+            sys_state.fig_8   = ssc.fpp.fpca.fig8
+            sys_state.var_03 = get_state(ssc.wc) # 0=lower_force_control 1=square_root_control 2=upper_force_control
+            sys_state.var_04 = ssc.wc.lfc.f_set # set force of lower force controller
+            sys_state.var_05 = ssc.wc.lfc.v_set_out
+            sys_state.var_06 = ssc.fpp.fpca.fpc.ndi_gain
+            if isnothing(ssc.fpp.fpca.fpc.psi_dot_set)
+                sys_state.var_07 = ssc.fpp.fpca.fpc.chi_set
                 sys_state.var_10 = NaN
                 sys_state.var_09 = NaN
             else
                 sys_state.var_07 = NaN
-                sys_state.var_09 = app.ssc.fpp.fpca.fpc.psi_dot_set
-                sys_state.var_10 = app.ssc.fpp.fpca.fpc.est_psi_dot
+                sys_state.var_09 = ssc.fpp.fpca.fpc.psi_dot_set
+                sys_state.var_10 = ssc.fpp.fpca.fpc.est_psi_dot
             end
             
-            sys_state.var_11 = app.ssc.fpp.fpca.fpc.est_chi_dot
-            sys_state.var_12 = app.ssc.fpp.fpca.fpc.c2
+            sys_state.var_11 = ssc.fpp.fpca.fpc.est_chi_dot
+            sys_state.var_12 = ssc.fpp.fpca.fpc.c2
             sys_state.acc = norm(acc)
             yaw = euler_KS(sys_state.orient)[3]
             if abs((yaw - last_yaw) / app.dt ) < 20.0
@@ -248,9 +252,9 @@ function simulate(integrator, stopped=true)
             end
             last_yaw = yaw
             last_yaw_rate = sys_state.var_15
-            sys_state.var_16 = app.kps4.side_slip
+            sys_state.var_16 = (app.kps4::KPS4).side_slip
             
-            sys_state.var_08 = norm(app.kps4.lift_force)/norm(app.kps4.drag_force)
+            sys_state.var_08 = norm((app.kps4::KPS4).lift_force)/norm((app.kps4::KPS4).drag_force)
             if i > 10
                 sys_state.t_sim = t_sim*1000
             end
@@ -265,10 +269,10 @@ function simulate(integrator, stopped=true)
             if app.set.time_lapse == 12
                 ratio = 4
             end
-            app.viewer.mod_text = 3*ratio
+            viewer().mod_text = 3*ratio
             if mod(i, Int64(app.set.time_lapse)/ratio) == 0 
                 KiteViewers.update_system(app.viewer::Viewer3D, sys_state; scale = 0.04/1.1, kite_scale=app.set.kite_scale)
-                set_status(app.viewer::Viewer3D, String(Symbol(app.ssc.state)))
+                set_status(app.viewer::Viewer3D, String(Symbol((app.ssc::SystemStateControl).state)))
                 if CREATE_VIDEO && mod(i, SAVE_INTERVAL) == 0
                     video_frame += 1
                     save_png(app.viewer::Viewer3D, index=video_frame)
@@ -295,7 +299,7 @@ function simulate(integrator, stopped=true)
             end
             i += 1
         end
-        if ! isopen(app.viewer.fig.scene) break end
+        if ! isopen(viewer().fig.scene) break end
         if KiteViewers.status[] == "Stopped" && i > 10 
             if app.set.log_level > 0
                 @timev KiteModels.next_step!(app.kps4::KPS4, integrator; set_speed=v_ro, dt=app.dt)
@@ -318,7 +322,7 @@ function simulate(integrator, stopped=true)
 end
 
 function play(stopped=false)
-    while isopen(app.viewer.fig.scene)
+    while isopen(viewer().fig.scene)
         if ! app.initialized
             init(app)
         end
@@ -333,14 +337,14 @@ function play(stopped=false)
         end
         if !isnothing(app.viewer)
             _ss = SysState(app.kps4::KPS4)
-            _ss.sys_state = Int16(app.ssc.fpp._state)
+            _ss.sys_state = Int16((app.ssc::SystemStateControl).fpp._state)
             KiteViewers.update_system(app.viewer::Viewer3D, _ss; scale = 0.04/1.1, kite_scale=app.set.kite_scale)
         end
         if app.run == 0; toc(); end
         app.run += 1
         simulate(integrator, stopped)
         app.initialized = false
-        stopped = ! app.viewer.sw.active[]
+        stopped = ! viewer().sw.active[]
         if !isnothing(app.logger) && (app.logger::Logger).index > 100
             KiteViewers.plot_file[]=DEFAULT_LOG
             if app.set.log_level > 0
@@ -357,13 +361,13 @@ end
 
 function parking()
     app.parking     = true
-    app.viewer.stop = false
+    viewer().stop = false
     on_parking(app.ssc::SystemStateControl)
 end
 
 function autopilot()
     app.parking     = false
-    app.viewer.stop = false
+    viewer().stop = false
     on_autopilot(app.ssc::SystemStateControl)
 end
 
@@ -379,16 +383,16 @@ function stop_(; clear_display=true)
 end
 
 stop_(; clear_display=false)
-on(app.viewer.btn_PARKING.clicks) do _; parking(); end
-on(app.viewer.btn_AUTO.clicks) do _; autopilot(); end
-on(app.viewer.btn_STOP.clicks) do _; stop_(); end
-on(app.viewer.btn_PLAY.clicks) do _;
-    if ! app.viewer.stop
+on(viewer().btn_PARKING.clicks) do _; parking(); end
+on(viewer().btn_AUTO.clicks) do _; autopilot(); end
+on(viewer().btn_STOP.clicks) do _; stop_(); end
+on(viewer().btn_PLAY.clicks) do _;
+    if ! viewer().stop
         app.parking = false
     end
 end
-on(app.viewer.menu_time_lapse.selection) do _;
-    val=app.viewer.menu_time_lapse.selection[][begin:end-1]
+on(viewer_menu(:menu_time_lapse).selection) do _;
+    val=viewer_menu(:menu_time_lapse).selection[][begin:end-1]
     app.set.time_lapse=parse(Int64, val)
 end
 
@@ -497,7 +501,7 @@ function print_stats()
 end
 
 function do_menu(c)
-    if isnothing(app.viewer) || !isopen(app.viewer.fig.scene)
+    if isnothing(app.viewer) || !isopen(viewer().fig.scene)
         return nothing
     end
     if c == "save logfile"
@@ -537,30 +541,30 @@ function do_menu(c)
     end
 end
 
-on(app.viewer.btn_OK.clicks) do _
-    do_menu(app.viewer.menu.selection[])
+on(viewer_btn_OK().clicks) do _
+    do_menu(viewer_menu(:menu).selection[])
 end
 
-on(app.viewer.menu.selection) do c
+on(viewer_menu(:menu).selection) do c
     do_menu(c)
 end
 
-on(app.viewer.menu_rel_tol.selection) do c
+on(viewer_menu(:menu_rel_tol).selection) do c
     rel_tol = parse(Float64, c)
     factor = rel_tol/0.001
     app.set.rel_tol = rel_tol
     app.set.abs_tol = factor * 0.0006 
 end
 
-on(app.viewer.menu_project.i_selected) do _
+on(viewer_menu(:menu_project).i_selected) do _
     global PROJECT, app
-    sel = app.viewer.menu_project.selection[]
+    sel = viewer_menu(:menu_project).selection[]
     if sel == "Open..."
         @async begin 
             filename = fetch(Threads.@spawn pick_file("data"; filterlist="yml"))
             if filename != ""
                 PROJECT = basename(filename)
-                GLFW.SetWindowTitle(app.viewer.screen.glscreen, PROJECT)
+                GLFW.SetWindowTitle(viewer().screen.glscreen, PROJECT)
                 lines = readfile(joinpath(KiteControllers.KiteUtils.get_data_path(), "gui.yaml"))
                 lines = change_value(lines, "project:", PROJECT)
                 writefile(lines, joinpath(KiteControllers.KiteUtils.get_data_path(), "gui.yaml"))
@@ -577,11 +581,11 @@ on(app.viewer.menu_project.i_selected) do _
     end
 end
 
-on(app.viewer.t_sim.stored_string) do c
+on(viewer_t_sim().stored_string) do c
     val = (parse(Int64, c))
     if val == 0
         val = repr(Int64(round(app.set.sim_time)))
-        app.viewer.t_sim.displayed_string[]=repr(Int64(round(val)))
+        viewer_t_sim().displayed_string[]=repr(Int64(round(val)))
     end
     app.next_max_time=val
     app.set.sim_time=val
@@ -592,12 +596,12 @@ if __PRECOMPILE__
     app.next_max_time = 30
     play(false)
 else
-    app.viewer.menu_rel_tol.i_selected[]=2
-    app.viewer.menu_rel_tol.i_selected[]=DEFAULT_TOLERANCE
+    viewer_menu(:menu_rel_tol).i_selected[]=2
+    viewer_menu(:menu_rel_tol).i_selected[]=DEFAULT_TOLERANCE
     play(true)
 end
 if @isdefined __PRECOMPILE__ 
-    do_menu(app.viewer.menu.selection[])
+    do_menu(viewer_menu(:menu).selection[])
     sleep(0.1)   
 end
 stop_()
