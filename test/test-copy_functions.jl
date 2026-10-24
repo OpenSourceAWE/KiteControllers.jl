@@ -71,6 +71,20 @@ end
     end
 end
 
+@testset "copy_kiteplots" begin
+    mktempdir() do tmpdir
+        cd(tmpdir) do
+            @test !isdir("lib")
+            KiteControllers.copy_kiteplots()
+            @test isfile(joinpath("lib", "KitePlots", "Project.toml"))
+            @test isfile(joinpath("lib", "KitePlots", "src", "KitePlots.jl"))
+            # copying a second time must overwrite the first copy
+            KiteControllers.copy_kiteplots()
+            @test isfile(joinpath("lib", "KitePlots", "Project.toml"))
+        end
+    end
+end
+
 @testset "install_examples" begin
     saved_data_path = KiteUtils.get_data_path()
     mktempdir() do tmpdir
@@ -85,6 +99,7 @@ end
                 @test any(endswith(f, ".jl") for f in readdir("examples"))
                 @test "settings.yaml" in readdir("data")
                 @test "run_julia" in readdir("bin")
+                @test isfile(joinpath("lib", "KitePlots", "Project.toml"))
             finally
                 KiteUtils.set_data_path(saved_data_path)
             end

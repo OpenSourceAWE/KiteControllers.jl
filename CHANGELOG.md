@@ -10,6 +10,7 @@
 - `examples/autopilot.jl` no longer causes JETLS warnings: fields of `KiteApp` and the menus of the viewer, which can be `nothing`, are read with type assertions or with the new accessors `viewer()`, `viewer_menu(name)`, `viewer_t_sim()` and `viewer_btn_OK()`
 
 ### Fixed
+- `install_examples()` copies the local package KitePlots to `lib/KitePlots` and adds it with `Pkg.develop`; before, `examples/autopilot.jl`, `examples/plots.jl` and `examples/batch_plot.jl` failed in an installation from the registry with "Package KitePlots not found"
 - `bin/install` failed in a new, empty Julia depot with "no registries have been installed"; it now adds the General registry if no registry exists, and otherwise updates the registries
 - `bin/update_default_manifests` failed under Julia 1.12 with a `KeyError` in the precompilation; it now loads Pkg before activating the project
 - `bin/create_sys_image` precompiles Revise only if it is installed, because `bin/install -y` no longer installs it in the global environment

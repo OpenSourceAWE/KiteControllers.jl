@@ -125,11 +125,28 @@ function copy_bin()
     chmod(joinpath(PATH, "run_julia"), 0o774)
 end
 
+"""
+    copy_kiteplots()
+
+Copy the local package KitePlots, which the examples use, to the folder `lib/KitePlots`
+(it will be created if it doesn't exist). KitePlots is not registered, so it must be
+added with `Pkg.develop(path="lib/KitePlots")`.
+"""
+function copy_kiteplots()
+    PATH = joinpath("lib", "KitePlots")
+    mkpath("lib")
+    cp(joinpath(@__DIR__, "..", PATH), PATH, force=true)
+    # the package files in the depot are read-only
+    chmod(PATH, 0o774; recursive=true)
+    PATH
+end
+
 function install_examples(add_packages=true)
     copy_examples()
     copy_settings()
     Base.invokelatest(copy_control_settings)
     copy_bin()
+    copy_kiteplots()
     if add_packages
         # Julia 1.13: auto-precompilation after Pkg.add fails with "Unknown package"
         # if an indirect dependency changes its version, so precompile explicitly
@@ -137,6 +154,7 @@ function install_examples(add_packages=true)
             Pkg.add(["KiteViewers", "KiteUtils", "KitePodModels", "WinchModels", "KiteModels",
                      "NativeFileDialog", "MakieControlPlots", "LaTeXStrings", "StatsBase",
                      "Timers", "FFMPEG_jll"])
+            Pkg.develop(path=joinpath("lib", "KitePlots"))
         end
         Pkg.precompile()
     end
