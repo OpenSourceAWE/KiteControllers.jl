@@ -1,4 +1,10 @@
 #!/bin/bash -eu
+
+# Install the registered version of KiteControllers into a new, empty Julia depot in /tmp,
+# install the examples with install_examples() and run examples/autopilot.jl in
+# precompile mode (a 30 s simulation, then the plot selected in the menu). Needs a display.
+# Use test/test_installation to test the main branch instead.
+
 rm -rf /tmp/testdepot
 mkdir /tmp/testdepot
 rm -rf /tmp/test
