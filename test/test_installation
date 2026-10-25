@@ -4,6 +4,9 @@
 # install the examples with install_examples() and run examples/autopilot.jl in
 # precompile mode (a 30 s simulation, then the plot selected in the menu). Needs a display.
 # Use test/test_installation2 to test the registered version instead.
+#
+# Result on a desktop PC with an AMD Ryzen 9 7950X (2026-10-25), measured with "time test/test_installation":
+# real    4m30.849s
 
 rm -rf /tmp/testdepot
 mkdir /tmp/testdepot
