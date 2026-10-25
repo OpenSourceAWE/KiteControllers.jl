@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 
-# Clone the main branch of KiteControllers into /tmp/test and use a new, empty Julia depot
+# Clone the julia-1.14 branch of KiteControllers into /tmp/test and use a new, empty Julia depot
 # in /tmp, install it with bin/install, create a system image with bin/create_sys_image and
 # run examples/autopilot.jl with this image in precompile mode (a 30 s simulation, then the
 # plot selected in the menu). Needs a display and at least 30 GB of RAM + swap.
@@ -9,7 +9,7 @@
 rm -rf /tmp/testdepot
 mkdir /tmp/testdepot
 rm -rf /tmp/test
-git clone --depth 1 https://github.com/OpenSourceAWE/KiteControllers.jl /tmp/test
+git clone --depth 1 -b julia-1.14 https://github.com/OpenSourceAWE/KiteControllers.jl /tmp/test
 cd /tmp/test
 export JULIA_DEPOT_PATH=/tmp/testdepot
 bin/install
