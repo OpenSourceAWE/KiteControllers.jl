@@ -131,6 +131,6 @@ If you like this software, please consider donating to https://gofund.me/bba01d4
 
 ## Related
 - [Research Fechner](https://research.tudelft.nl/en/publications/?search=wind+Fechner&pageSize=50&ordering=rating&descending=true) for the scientific background of this code
-- The meta package [KiteSimulators](https://github.com/aenarete/KiteSimulators.jl) which contains all packages from Julia Kite Power Tools.
+- The package [RobustKiteControllers](https://github.com/OpenSourceAWE/RobustKiteControllers.jl) which provides path following controllers, but no reel-in control yet.
 - the packages [KiteModels](https://github.com/OpenSourceAWE/KiteModels.jl) and [WinchModels](https://github.com/aenarete/WinchModels.jl) and [AtmosphericModels](https://github.com/OpenSourceAWE/AtmosphericModels.jl)
 - the packages [KiteViewers](https://github.com/OpenSourceAWE/KiteViewers.jl) and [KiteUtils](https://github.com/OpenSourceAWE/KiteUtils.jl)
