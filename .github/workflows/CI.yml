@@ -17,6 +17,8 @@ jobs:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
+    # Julia 1.14 is supported experimentally; its failures don't fail the workflow
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -28,6 +30,13 @@ jobs:
           - windows-latest
         arch:
           - x64
+        experimental:
+          - false
+        include:
+          - version: '1.14'
+            os: ubuntu-latest
+            arch: x64
+            experimental: true
 
     steps:
       - uses: actions/checkout@v7
@@ -35,6 +44,7 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+          include-all-prereleases: ${{ matrix.experimental }}
       - name: Remove plotting packages (Linux)
         if: runner.os == 'Linux'
         run: sed -i '/KiteViewers\|KitePlots\|NativeFileDialog\|Joysticks\|MakieControlPlots\|PyPlot/d' test/Project.toml

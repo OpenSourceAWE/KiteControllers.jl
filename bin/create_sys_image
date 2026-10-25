@@ -129,6 +129,8 @@ fi
 # if the current julia version is not supported, install Julia 1.12
 if [[ $julia_major == "1.12" ]] || [[ $julia_major == "1.13" ]]; then
     echo "Supported Julia version found!"
+elif [[ $julia_major == "1.14" ]]; then
+    echo "Julia 1.14 is supported experimentally!"
 else
     echo "The current Julia version is not supported, installing Julia 1.12!"
     juliaup add 1.12
