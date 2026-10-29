@@ -30,6 +30,19 @@ include("examples/matlab/test_async_machine_step.jl")
 compares the Matlab implementation with the Julia `AsyncMachine`: acceleration, partial
 derivatives, brake and rate limit of the set speed, and measures the time per call.
 
+## Example in Matlab
+
+`winch_example.m` uses the winch model in Matlab alone, without Julia. In Matlab, in this folder:
+
+```matlab
+winch_example
+```
+
+It simulates the winch for a profile of the set speed (start with the brake engaged, reel out,
+reel in, stop) with a prescribed tether force, and plots set speed, reel-out speed, acceleration,
+force and brake. A second figure shows the acceleration as a function of the reel-out speed for a
+synchronous speed of 4 m/s. Use it as a starting point for changing the Matlab model.
+
 ## Full power cycles
 
 ```julia
