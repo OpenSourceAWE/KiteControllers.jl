@@ -1,0 +1,12 @@
+[deps]
+KiteUtils = "90980105-b163-44e5-ba9f-8b1c83bb0533"
+MATLAB = "10e44e05-a98a-55b3-a45b-ba969058deb6"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+WinchModels = "7dcfa46b-7979-4771-bbf4-0aee0da42e1f"
+
+[sources]
+WinchModels = {path = "/home/ufechner/repos/WinchModels.jl"}
+
+[compat]
+MATLAB = "0.10"

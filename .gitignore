@@ -46,3 +46,4 @@ install_version_1.13.txt
 install_version_1.14.txt
 bin/kps-image-1.13.so
 *.bak
+examples/matlab/Manifest*.toml
