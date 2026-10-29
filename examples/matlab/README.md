@@ -31,3 +31,15 @@ include("examples/matlab/test_async_machine_step.jl")
 
 compares the Matlab implementation with the Julia `AsyncMachine`: acceleration, partial
 derivatives, brake and rate limit of the set speed, and measures the time per call.
+
+## Benchmark of the Matlab engine
+
+```julia
+include("examples/matlab/bench_engine.jl")
+```
+
+measures the time of one call of Matlab from Julia for different ways of calling it (step 0 of
+PlanMatlab.md), using the dummy functions `bench_step.m` and `bench_step_vec.m`. Each
+`engEvalString` costs milliseconds, and `mxcall` and the exception check of `eval_string` need
+several of them; the `MatlabMachine` therefore uses one unchecked `eval_string` with the inputs as
+text and reads back one vector.
