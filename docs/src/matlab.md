@@ -190,6 +190,45 @@ keep its own state in persistent variables, but the brake and the rate limited s
 returned, because KiteModels saves and restores them. The partial derivatives must describe the
 acceleration within the time step well; the accuracy of the simulation depends on them.
 
+### Testing the model in Matlab
+
+[`examples/matlab/winch_example.m`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/matlab/winch_example.m)
+runs the winch model in Matlab alone, without Julia. Use it to try out changes of the model before
+running it in the full simulation. In Matlab, in the folder `examples/matlab`:
+
+```matlab
+winch_example
+```
+
+The script sets the parameters as Julia loads them for `system.yaml` and simulates the winch for
+20 s with a time step of 50 ms. The set speed follows a profile, and the tether force is
+prescribed for each part:
+
+| time | set speed | tether force | |
+| --- | --- | --- | --- |
+| 0 to 2 s | 0 | 1000 N | brake engaged |
+| 2 to 8 s | 4 m/s | 3000 N | reel-out |
+| 8 to 14 s | -6 m/s | 800 N | reel-in |
+| 14 to 20 s | 0 | 1000 N | brake engaged again |
+
+As in the Julia simulation, `async_machine_step` is called once per time step. The speed is
+integrated with the linearized implicit Euler method, using the partial derivative `dacc_dv`:
+`v(t+dt) = v(t) + dt * acc0 / (1 - dt * dacc_dv)`. An explicit Euler step would be unstable,
+because the torque-slip curve of the machine is steep.
+
+![Simulation of the winch in Matlab](winch_example_time.png)
+
+The reel-out speed follows the set speed with the maximal acceleration of 4 m/s², and differs from
+it by at most 0.063 m/s while reeling out. At t = 14 s the brake stops the winch within about
+0.3 s. While the brake is engaged, the rate limited set speed keeps its last value.
+
+A second figure shows the acceleration as a function of the reel-out speed for a synchronous speed
+of 4 m/s, the torque-slip curve of the asynchronous machine. Near the synchronous speed the curve is
+steep and almost linear, further away it is strongly curved: there, the linearization within the
+time step is least accurate.
+
+![Acceleration over reel-out speed](winch_example_curve.png)
+
 ## Limitations
 
 - Only the asynchronous machine is available in Matlab, not the `TorqueControlledMachine`.
