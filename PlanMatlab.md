@@ -118,19 +118,23 @@ A Matlab call there would make the simulation orders of magnitude slower.
 - Energy `e_mech` differs by less than 1 % from the run with the Julia `AsyncMachine`.
 - Measured time per step is reported; real-time capability is stated in the docs.
 
-Results of `examples/matlab/compare_full_cycle.jl` (460 s, three power cycles, no turbulence):
+Results of `examples/matlab/compare_full_cycle.jl` (460 s, no turbulence) for the projects in
+`data/`; hydra10_951 uses the same settings as `system.yaml`, hydra20_600_TI0 the same as
+hydra20_600:
 
-| | AsyncMachine | MatlabMachine | diff |
-| --- | --- | --- | --- |
-| energy `e_mech` | 654.2 Wh | 654.3 Wh | 0.014 % |
-| mean force | 2470.1 N | 2470.0 N | -0.005 % |
-| max force | 3784.2 N | 3792.7 N | 0.225 % |
-| reel-out speed min/max | -7.935 / 2.738 m/s | -7.935 / 2.742 m/s | |
+| project | energy AsyncMachine | energy MatlabMachine | diff | cycles | same states until | max diff until then (force / v_ro / length) |
+| --- | --- | --- | --- | --- | --- | --- |
+| system.yaml, hydra10_951 | 654.2 Wh | 654.3 Wh | 0.014 % | 3 | 210 s | 4.0 N / 0.031 m/s / 7 mm |
+| hydra20_426 | 752.3 Wh | 752.4 Wh | 0.018 % | 2 | 99 s | 1.6 N / 0.027 m/s / 1 mm |
+| hydra20_600 | 1759.4 Wh | 1760.2 Wh | 0.044 % | 3 | 235 s | 8.5 N / 0.076 m/s / 28 mm |
+| hydra20_920 | 1555.1 Wh | 1557.8 Wh | 0.177 % | 3 | 373 s | 52 N / 0.42 m/s / 47 mm |
 
-The energy criterion is met. Until t = 210 s both runs pass through the same sequence of the
-states of the flight path planner at the same time steps, with differences of at most 4 N in force,
-0.031 m/s in reel-out speed and 7 mm in tether length; afterwards a state change happens one time
-step earlier or later and the runs diverge, as expected for a chaotic system.
+The energy criterion is met for all projects. Mean and maximum force differ by at most 0.13 %,
+minimum and maximum reel-out speed by at most 3 mm/s. "Same states until" is the time until which
+both runs pass through the same sequence of the states of the flight path planner at the same time
+steps; afterwards a state change happens one time step earlier or later and the runs diverge.
+The time per step with the `MatlabMachine` is 1.53 to 1.55 ms median and 2.1 to 2.4 ms p99 for all
+projects.
 
 ## Open questions
 - Later: `TorqueControlledMachine` in Matlab, using the same per-step interface.
