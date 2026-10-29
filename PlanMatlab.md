@@ -48,9 +48,10 @@ Conclusions:
   2.0 ms maximum per time step.
 - Numbers are formatted with Julia's `repr` (shortest representation that round-trips), so they
   arrive in Matlab unchanged; a test checks this, including `NaN` and `Inf`.
-- About 2.1 ms per time step in total (Matlab call plus about 0.8 ms of Julia simulation):
-  real-time capable up to a time-lapse factor of 12 (4.2 ms budget per step), 18 is marginal
-  (2.8 ms), 24 is not (2.1 ms). The docs state this limit.
+- Time per step over full power cycles (`compare_full_cycle.jl`, without viewer): 0.07 ms
+  median with the Julia `AsyncMachine`, 1.55 ms median and 2.2 ms p99 with the `MatlabMachine`.
+  Real-time capable up to a time-lapse factor of 18 (2.8 ms budget per step), 24 is marginal
+  (2.1 ms). The 3D viewer of autopilot.jl needs additional time. The docs state this limit.
 
 ## Constraint: no Matlab call in the DAE residual
 `calc_acceleration` is evaluated inside the DAE residual, many times per time step (Newton
@@ -116,6 +117,20 @@ A Matlab call there would make the simulation orders of magnitude slower.
 - `autopilot_matlab.jl` completes a full power cycle with the Matlab winch model.
 - Energy `e_mech` differs by less than 1 % from the run with the Julia `AsyncMachine`.
 - Measured time per step is reported; real-time capability is stated in the docs.
+
+Results of `examples/matlab/compare_full_cycle.jl` (460 s, three power cycles, no turbulence):
+
+| | AsyncMachine | MatlabMachine | diff |
+| --- | --- | --- | --- |
+| energy `e_mech` | 654.2 Wh | 654.3 Wh | 0.014 % |
+| mean force | 2470.1 N | 2470.0 N | -0.005 % |
+| max force | 3784.2 N | 3792.7 N | 0.225 % |
+| reel-out speed min/max | -7.935 / 2.738 m/s | -7.935 / 2.742 m/s | |
+
+The energy criterion is met. Until t = 210 s both runs pass through the same sequence of the
+states of the flight path planner at the same time steps, with differences of at most 4 N in force,
+0.031 m/s in reel-out speed and 7 mm in tether length; afterwards a state change happens one time
+step earlier or later and the runs diverge, as expected for a chaotic system.
 
 ## Open questions
 - Later: `TorqueControlledMachine` in Matlab, using the same per-step interface.
