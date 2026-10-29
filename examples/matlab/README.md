@@ -43,6 +43,14 @@ Julia `AsyncMachine` and with the `MatlabMachine`, and compares the energy, the 
 reel-out speed and the time per step. It needs KiteModels and WinchModels with support for the
 `MatlabMachine`; until they are released, develop them in this environment.
 
+By default, it uses the project `system.yaml`. To compare other projects, define `PROJECTS`
+before including the script, e.g. `PROJECTS = ["hydra20_426.yml", "hydra20_600.yml"]`, or pass
+them as arguments:
+
+```bash
+julia --project=examples/matlab examples/matlab/compare_full_cycle.jl hydra20_426.yml hydra20_600.yml
+```
+
 ## Benchmark of the Matlab engine
 
 ```julia

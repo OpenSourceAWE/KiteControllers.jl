@@ -1,6 +1,10 @@
 # Fly the same power cycles twice, with the Julia AsyncMachine and with the MatlabMachine (the same
 # model, implemented in Matlab and linearized within each time step), and compare the results.
 # Without turbulence, so that both runs are deterministic. Needs a Matlab installation.
+#
+# Usage: julia --project=examples/matlab examples/matlab/compare_full_cycle.jl [project.yml ...]
+# without projects, system.yaml is used. When included, the projects are taken from the global
+# PROJECTS, if defined.
 using Pkg
 if dirname(Pkg.project().path) != @__DIR__
     Pkg.activate(@__DIR__)
@@ -9,6 +13,9 @@ using MATLAB, KiteControllers, KiteModels, KiteUtils, Statistics, Printf
 
 # the following values can be changed to match your interest
 MAX_TIME = 460.0  # simulation time [s]
+if !@isdefined(PROJECTS)
+    PROJECTS = isempty(ARGS) ? ["system.yaml"] : ARGS
+end
 # end of user parameter section #
 
 matlab_dir = @__DIR__
@@ -16,13 +23,13 @@ mat"addpath($matlab_dir)"
 set_data_path(joinpath(@__DIR__, "..", "..", "data"))
 
 """
-    fly(winch_model; max_time=MAX_TIME)
+    fly(winch_model, project; max_time=MAX_TIME)
 
 Simulate with the autopilot, as examples/autopilot.jl does, but without viewer and turbulence.
 Returns a named tuple with the time series and the time per step.
 """
-function fly(winch_model; max_time=MAX_TIME)
-    set = deepcopy(load_settings("system.yaml"))
+function fly(winch_model, project; max_time=MAX_TIME)
+    set = deepcopy(load_settings(project))
     set.winch_model = winch_model
     set.use_turbulence = 0.0
     dt = 1/set.sample_freq
@@ -72,35 +79,47 @@ function fly(winch_model; max_time=MAX_TIME)
     (; time, force, v_ro, length=length_, state, t_step, e_mech, cycles=ssc.fpp.fpca.cycle)
 end
 
-println("Flying with the AsyncMachine (Julia)...")
-ref = fly("AsyncMachine")
-println("Flying with the MatlabMachine (Matlab)...")
-mat = fly("MatlabMachine")
-
-skip = Int(round(10 / (ref.time[2] - ref.time[1])))  # ignore the first 10 s (compilation)
 rel(a, b) = (a - b) / abs(b) * 100
-@printf("\n%-28s %14s %14s %10s\n", "", "AsyncMachine", "MatlabMachine", "diff")
-@printf("%-28s %14.1f %14.1f %9.3f %%\n", "energy e_mech [Wh]", ref.e_mech, mat.e_mech,
-        rel(mat.e_mech, ref.e_mech))
-@printf("%-28s %14d %14d\n", "cycles", ref.cycles, mat.cycles)
-@printf("%-28s %14.1f %14.1f %9.3f %%\n", "mean force [N]", mean(ref.force), mean(mat.force),
-        rel(mean(mat.force), mean(ref.force)))
-@printf("%-28s %14.1f %14.1f %9.3f %%\n", "max force [N]", maximum(ref.force), maximum(mat.force),
-        rel(maximum(mat.force), maximum(ref.force)))
-@printf("%-28s %14.3f %14.3f\n", "min reel-out speed [m/s]", minimum(ref.v_ro), minimum(mat.v_ro))
-@printf("%-28s %14.3f %14.3f\n", "max reel-out speed [m/s]", maximum(ref.v_ro), maximum(mat.v_ro))
-for (name, t) in (("AsyncMachine", ref.t_step), ("MatlabMachine", mat.t_step))
-    t = t[skip:end] .* 1e3
-    @printf("time per step, %-14s median %.3f ms  p99 %.3f ms  max %.3f ms\n",
-            name, median(t), quantile(t, 0.99), maximum(t))
+
+"""
+    compare(project)
+
+Fly with both winch models and print the comparison.
+"""
+function compare(project)
+    println("\n$project: flying with the AsyncMachine (Julia)...")
+    ref = fly("AsyncMachine", project)
+    println("$project: flying with the MatlabMachine (Matlab)...")
+    mat = fly("MatlabMachine", project)
+
+    skip = Int(round(10 / (ref.time[2] - ref.time[1])))  # ignore the first 10 s (compilation)
+    @printf("\n%-28s %14s %14s %10s\n", project, "AsyncMachine", "MatlabMachine", "diff")
+    @printf("%-28s %14.1f %14.1f %9.3f %%\n", "energy e_mech [Wh]", ref.e_mech, mat.e_mech,
+            rel(mat.e_mech, ref.e_mech))
+    @printf("%-28s %14d %14d\n", "cycles", ref.cycles, mat.cycles)
+    @printf("%-28s %14.1f %14.1f %9.3f %%\n", "mean force [N]", mean(ref.force), mean(mat.force),
+            rel(mean(mat.force), mean(ref.force)))
+    @printf("%-28s %14.1f %14.1f %9.3f %%\n", "max force [N]", maximum(ref.force), maximum(mat.force),
+            rel(maximum(mat.force), maximum(ref.force)))
+    @printf("%-28s %14.3f %14.3f\n", "min reel-out speed [m/s]", minimum(ref.v_ro), minimum(mat.v_ro))
+    @printf("%-28s %14.3f %14.3f\n", "max reel-out speed [m/s]", maximum(ref.v_ro), maximum(mat.v_ro))
+    for (name, t) in (("AsyncMachine", ref.t_step), ("MatlabMachine", mat.t_step))
+        t = t[skip:end] .* 1e3
+        @printf("time per step, %-14s median %.3f ms  p99 %.3f ms  max %.3f ms\n",
+                name, median(t), quantile(t, 0.99), maximum(t))
+    end
+    # the difference of the time series, until the first change of the state of the flight path
+    # planner that happens at a different time step
+    first_diff = findfirst(ref.state .!= mat.state)
+    n = isnothing(first_diff) ? length(ref.time) : max(first_diff - 1, 1)
+    @printf("identical sequence of the flight path planner states until t = %.2f s\n", ref.time[n])
+    @printf("until then: max |Δforce| = %.1f N, max |Δv_ro| = %.4f m/s, max |Δlength| = %.4f m\n",
+            maximum(abs.(mat.force[1:n] .- ref.force[1:n])),
+            maximum(abs.(mat.v_ro[1:n] .- ref.v_ro[1:n])),
+            maximum(abs.(mat.length[1:n] .- ref.length[1:n])))
 end
-# the difference of the time series, until the first change of the state of the flight path
-# planner that happens at a different time step
-first_diff = findfirst(ref.state .!= mat.state)
-n = isnothing(first_diff) ? length(ref.time) : first_diff - 1
-@printf("identical sequence of the flight path planner states until t = %.2f s\n", ref.time[n])
-@printf("until then: max |Δforce| = %.1f N, max |Δv_ro| = %.4f m/s, max |Δlength| = %.4f m\n",
-        maximum(abs.(mat.force[1:n] .- ref.force[1:n])),
-        maximum(abs.(mat.v_ro[1:n] .- ref.v_ro[1:n])),
-        maximum(abs.(mat.length[1:n] .- ref.length[1:n])))
+
+for project in PROJECTS
+    compare(project)
+end
 nothing
