@@ -86,6 +86,51 @@ per time step, in `update_winch_state!` of WinchModels.jl:
 - Within the time step, the residual uses the first order expansion
   `acc0 + dacc_dv*(speed - speed0) + dacc_dF*(force - force0)`, evaluated in Julia.
 
+### Linearization within the time step
+
+Within one time step, the set speed, the state of the brake and the parameters are constant, so
+the acceleration of the winch is a function of the reel-out speed `v` and the tether force `F`
+only:
+
+```text
+acc = f(v, F)
+```
+
+At the start of each time step, Matlab evaluates this function once at the current point
+`(v0, F0)` and returns its value and its two slopes:
+
+```text
+acc0    = f(v0, F0)
+dacc_dv = ∂f/∂v (v0, F0)
+dacc_dF = ∂f/∂F (v0, F0)
+```
+
+During the time step, the DAE solver needs the acceleration many times, at slightly different
+values of `v` and `F`. Instead of calling Matlab, it uses the tangent plane through this point,
+the first two terms of the Taylor series (first order expansion):
+
+```text
+acc ≈ acc0 + dacc_dv * (v - v0) + dacc_dF * (F - F0)
+```
+
+The error of this approximation depends on how curved `f` is:
+
+- In the force there is no error: the force enters the torque balance linearly, so `dacc_dF` is
+  constant.
+- In the speed there is an error: the motor torque depends on the slip `δ = ω_sync - ω` as
+  `δ / (R² + L²δ²)`, and the Coulomb friction is a smooth sign function of the speed. The error grows
+  approximately with `½ ∂²f/∂v² (v - v0)²`, quadratically with the change of the speed within the
+  time step and with the curvature of the torque-slip curve.
+- With the brake engaged there is no error: the acceleration is `brake_acc * v`, which is linear.
+
+The error is therefore largest when the speed changes a lot within one time step in a strongly
+curved part of the torque-slip curve, for example at the transitions between reel-out and reel-in.
+Over full power cycles the effect is small, see [Accuracy](@ref). If more accuracy were needed,
+Matlab could also return the second derivative `∂²f/∂v²`, and Julia would add the quadratic term;
+this still needs only one call of Matlab per time step.
+
+### Calling Matlab
+
 The parameters (gear ratio, drum radius, inertia, friction, maximal acceleration, motor data) are
 sent to Matlab once, before the first time step. The Matlab engine is called by the package
 extension `WinchModelsMATLABExt`, which is loaded by `using MATLAB`: one evaluation per time step
