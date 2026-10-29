@@ -32,6 +32,17 @@ include("examples/matlab/test_async_machine_step.jl")
 compares the Matlab implementation with the Julia `AsyncMachine`: acceleration, partial
 derivatives, brake and rate limit of the set speed, and measures the time per call.
 
+## Full power cycles
+
+```julia
+include("examples/matlab/compare_full_cycle.jl")
+```
+
+flies the power cycles of `examples/autopilot.jl` twice, without viewer and turbulence, with the
+Julia `AsyncMachine` and with the `MatlabMachine`, and compares the energy, the tether force, the
+reel-out speed and the time per step. It needs KiteModels and WinchModels with support for the
+`MatlabMachine`; until they are released, develop them in this environment.
+
 ## Benchmark of the Matlab engine
 
 ```julia
