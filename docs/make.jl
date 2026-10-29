@@ -15,6 +15,7 @@ makedocs(
         "Flight Path Controller" => "flight_path_controller.md",
         "Examples"  => "examples.md",
         "Projects and Turbulence" => "projects.md",
+        "Winch Model in Matlab" => "matlab.md",
         "Learning Control"  => "learning.md",
     ],
     checkdocs = :exports,
