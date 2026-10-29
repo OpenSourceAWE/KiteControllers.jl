@@ -4,8 +4,8 @@
 
 print_usage() {
     cat <<'EOF'
-Usage: bin/run_julia [-h|--help] [julia options]
-       bin/run_julia script.jl [script args...]
+Usage: bin/run_julia [-h|--help] [--nosysimage] [julia options]
+       bin/run_julia [--nosysimage] script.jl [script args...]
 
 Start an interactive Julia REPL for KiteControllers, usually via the alias `jl`.
 
@@ -17,7 +17,8 @@ The script
     and the tests activate their own projects
   - uses all threads (-t auto) and, for Julia 1.10 and newer, --gcthreads=4,1
   - uses the system image bin/kps-image-<julia version>.so if it exists
-    (create it with bin/create_sys_image)
+    (create it with bin/create_sys_image), unless --nosysimage is given; use it to work
+    on development versions of packages that are in the system image
   - loads Revise, if it is available (e.g. in the global environment), and then
     KiteControllers
   - defines the functions
@@ -35,6 +36,7 @@ bin/batch_pilot and bin/batch_plot use this.
 Examples:
   bin/run_julia
   bin/run_julia -t 4
+  bin/run_julia --nosysimage
   bin/run_julia -e 'println("ok")'
   bin/run_julia examples/batch_pilot.jl hydra20_426
 EOF
@@ -46,6 +48,18 @@ case "${1:-}" in
         exit 0
         ;;
 esac
+
+# --nosysimage: start Julia without the system image; remove it from the arguments
+use_sysimage=true
+args=()
+for arg in "$@"; do
+    if [[ "$arg" == "--nosysimage" ]]; then
+        use_sysimage=false
+    else
+        args+=("$arg")
+    fi
+done
+set -- ${args[@]+"${args[@]}"}
 
 if [[ $(basename "$(pwd)") == "bin" ]]; then
     cd ..
@@ -77,7 +91,9 @@ if [[ $julia_major =~ ^1\.1[0-9]$ ]]; then
 fi
 
 SOFILE="bin/kps-image-${julia_major}.so"
-if [[ -f "$SOFILE" ]]; then
+if [[ $use_sysimage == false ]]; then
+    echo "Not using a system image (--nosysimage)"
+elif [[ -f "$SOFILE" ]]; then
     echo "Found system image $SOFILE"
     JULIA_ARGS+=(-J "$SOFILE")
 fi
