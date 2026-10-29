@@ -21,9 +21,10 @@ KiteControllers = {path = "../.."}
 KitePlots = {path = "../../lib/KitePlots"}
 
 [compat]
-KiteModels = "0.13"
+KiteModels = "0.13.2"
 KiteViewers = "0.7"
 LaTeXStrings = "1.4"
 MATLAB = "0.10"
 MakieControlPlots = "0.1.5"
 NativeFileDialog = "0.2.1"
+WinchModels = "0.3.13"

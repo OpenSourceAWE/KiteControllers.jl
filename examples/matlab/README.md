@@ -9,6 +9,7 @@ step. See [PlanMatlab.md](../../PlanMatlab.md) for the design.
 
 - Matlab R2020b or newer, and a license that allows starting the Matlab engine
 - Linux: `csh` (the Matlab engine is started with it)
+- WinchModels.jl 0.3.13 and KiteModels.jl 0.13.2 or newer (installed by `Pkg.instantiate()`)
 
 ## Setup
 
@@ -19,9 +20,6 @@ ENV["MATLAB_ROOT"] = "/usr/local/MATLAB/R2021a"   # only if the wrong Matlab is 
 Pkg.instantiate()
 Pkg.build("MATLAB")
 ```
-
-Until the new versions of WinchModels.jl and KiteModels.jl are released, use the development
-versions, e.g. `Pkg.develop(path="../WinchModels.jl")`.
 
 ## Test
 
@@ -40,8 +38,7 @@ include("examples/matlab/compare_full_cycle.jl")
 
 flies the power cycles of `examples/autopilot.jl` twice, without viewer and turbulence, with the
 Julia `AsyncMachine` and with the `MatlabMachine`, and compares the energy, the tether force, the
-reel-out speed and the time per step. It needs KiteModels and WinchModels with support for the
-`MatlabMachine`; until they are released, develop them in this environment.
+reel-out speed and the time per step.
 
 By default, it uses the project `system.yaml`. To compare other projects, define `PROJECTS`
 before including the script, e.g. `PROJECTS = ["hydra20_426.yml", "hydra20_600.yml"]`, or pass
