@@ -72,6 +72,8 @@ app::KiteApp = KiteApp(deepcopy(load_settings(PROJECT)), 0, 0, true, nothing, no
 let use_turbulence = KiteControllers.get_use_turbulence(PROJECT)
     isnothing(use_turbulence) || (app.set.use_turbulence = use_turbulence)
 end
+# autopilot_matlab.jl defines WINCH_MODEL to replace the winch model of the project
+@isdefined(WINCH_MODEL) && (app.set.winch_model = WINCH_MODEL)
 app.max_time      = app.set.sim_time
 app.next_max_time = app.max_time
 
@@ -574,6 +576,7 @@ on(viewer_menu(:menu_project).i_selected) do _
                 let use_turbulence = KiteControllers.get_use_turbulence(PROJECT)
                     isnothing(use_turbulence) || (app.set.use_turbulence = use_turbulence)
                 end
+                @isdefined(WINCH_MODEL) && (app.set.winch_model = WINCH_MODEL)
                 app.max_time      = app.set.sim_time
                 app.next_max_time = app.max_time
                 app.initialized = false

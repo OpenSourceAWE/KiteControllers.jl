@@ -11,6 +11,7 @@ include("select_project.jl")
 options = ["select_project()",
            "set_turbulence = set_default_turbulence()",
            "autopilot_4p = include(\"autopilot.jl\")",
+           "autopilot_matlab = include(\"autopilot_matlab.jl\")",
            "batch_pilot = include(\"batch_pilot.jl\")",
            "batch_plot = include(\"batch_plot.jl\")",
            "create_wind_fields = include(\"create_wind_fields.jl\")",

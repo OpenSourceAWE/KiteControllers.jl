@@ -39,6 +39,11 @@ The primary example demonstrating the complete control stack.
 You can select one of the four, pre-defined projects, run the simulation, and on the left you have menu options to 
 print the statistics or show one of the many 2D plots, visualizing the results.
 
+## [autopilot_matlab.jl](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/autopilot_matlab.jl) — Autopilot with the Winch Model in Matlab
+
+Runs autopilot.jl with the winch model implemented in Matlab instead of the winch model of the
+selected project. Needs a Matlab installation, see [Winch Model in Matlab](@ref).
+
 ## [parking_4p.jl](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/parking_4p.jl) — Parking Controller
 
 Demonstrates how to bring a four-line kite to a stable parking position at
