@@ -17,8 +17,8 @@ drum, friction and brake. It is a starting point for your own Matlab winch model
 - Matlab R2020b or newer, with a license that allows starting the Matlab engine. Matlab Coder is
   not needed. Octave is not supported.
 - On Linux, `csh` (the Matlab engine is started with it).
-- WinchModels.jl and KiteModels.jl with support for the `MatlabMachine`. Until they are released,
-  use the development versions (branch `matlab-machine`).
+- WinchModels.jl 0.3.13 and KiteModels.jl 0.13.2 or newer, which support the `MatlabMachine`;
+  `Pkg.instantiate()` installs them (see Setup).
 
 ## Setup
 
@@ -63,11 +63,15 @@ In your own scripts, set the winch model in the settings file of the project:
 ```
 
 and load MATLAB.jl and add the folder of the Matlab function to the Matlab path before the first
-time step:
+time step. Start the Matlab engine before `Pkg` or `Downloads` are loaded, which KiteUtils.jl and
+the packages that use it do: with Matlab R2025a, starting the engine later crashes Julia
+(segmentation fault), probably because Julia and Matlab use different versions of libcurl.
+`mat"..."` starts the engine:
 
 ```julia
-using MATLAB, KiteModels
+using MATLAB
 mat"addpath('examples/matlab')"
+using KiteModels
 ```
 
 `KPS3` and `KPS4` then create a `MatlabMachine`. An unknown value of `winch_model` stops with an
@@ -161,6 +165,12 @@ One time step with the Matlab winch takes about 1.5 ms (median) and 2.2 ms (99th
 measured with Matlab R2021a on Linux, compared to less than 0.1 ms with the Julia winch model.
 The simulation is real-time capable up to a time-lapse factor of about 18 (2.8 ms per time step of
 50 ms); 24 is too fast. The 3D viewer of autopilot.jl needs additional time.
+
+The speed of the Matlab engine depends on the computer and the Matlab version. On a laptop with
+Matlab R2025a, one time step took about 4.3 ms (median) and 7 ms (99th percentile), and a call of
+the engine was about 2.5 times slower than with R2021a on the first computer. There, the simulation
+is real-time capable up to a time-lapse factor of about 6; with 12 it missed every deadline.
+Choose the time-lapse factor in the menu of autopilot.jl accordingly.
 [`examples/matlab/bench_engine.jl`](https://github.com/OpenSourceAWE/KiteControllers.jl/blob/main/examples/matlab/bench_engine.jl)
 measures the cost of different ways of calling Matlab.
 

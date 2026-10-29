@@ -1,13 +1,15 @@
 # Compare the Matlab implementation of the winch model (async_machine_step.m, used by the
 # MatlabMachine of WinchModels.jl) with the Julia AsyncMachine. Needs a Matlab installation.
-using Pkg
-if dirname(Pkg.project().path) != @__DIR__
-    Pkg.activate(@__DIR__)
+# Start the Matlab engine before Pkg or Downloads are loaded (KiteUtils loads Pkg): with
+# Matlab R2025a, starting it later crashes Julia (segmentation fault). Therefore this environment
+# is activated without Pkg.
+if dirname(Base.active_project()) != @__DIR__
+    Base.set_active_project(joinpath(@__DIR__, "Project.toml"))
 end
-using MATLAB, WinchModels, KiteUtils, Statistics, Test
-
+using MATLAB
 matlab_dir = @__DIR__
 mat"addpath($matlab_dir)"
+using WinchModels, KiteUtils, Statistics, Test
 set_data_path(joinpath(@__DIR__, "..", "..", "data"))
 set = load_settings("system.yaml")
 

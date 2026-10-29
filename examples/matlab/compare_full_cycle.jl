@@ -5,11 +5,16 @@
 # Usage: julia --project=examples/matlab examples/matlab/compare_full_cycle.jl [project.yml ...]
 # without projects, system.yaml is used. When included, the projects are taken from the global
 # PROJECTS, if defined.
-using Pkg
-if dirname(Pkg.project().path) != @__DIR__
-    Pkg.activate(@__DIR__)
+# Start the Matlab engine before Pkg or Downloads are loaded (KiteUtils loads Pkg): with
+# Matlab R2025a, starting it later crashes Julia (segmentation fault). Therefore this environment
+# is activated without Pkg.
+if dirname(Base.active_project()) != @__DIR__
+    Base.set_active_project(joinpath(@__DIR__, "Project.toml"))
 end
-using MATLAB, KiteControllers, KiteModels, KiteUtils, Statistics, Printf
+using MATLAB
+matlab_dir = @__DIR__
+mat"addpath($matlab_dir)"
+using KiteControllers, KiteModels, KiteUtils, Statistics, Printf
 
 # the following values can be changed to match your interest
 MAX_TIME = 460.0  # simulation time [s]
@@ -18,8 +23,6 @@ if !@isdefined(PROJECTS)
 end
 # end of user parameter section #
 
-matlab_dir = @__DIR__
-mat"addpath($matlab_dir)"
 set_data_path(joinpath(@__DIR__, "..", "..", "data"))
 
 """

@@ -2,16 +2,19 @@
 # step 0 of PlanMatlab.md. Every engEvalString costs milliseconds, so the number of engine calls
 # per Matlab call decides the speed. eval_string checks for Matlab exceptions by default, which
 # needs another eval and two reads.
-using Pkg
-if dirname(Pkg.project().path) != @__DIR__
-    Pkg.activate(@__DIR__)
+# Start the Matlab engine before Pkg or Downloads are loaded (KiteUtils loads Pkg): with
+# Matlab R2025a, starting it later crashes Julia (segmentation fault). Therefore this environment
+# is activated without Pkg.
+if dirname(Base.active_project()) != @__DIR__
+    Base.set_active_project(joinpath(@__DIR__, "Project.toml"))
 end
-using MATLAB, Statistics, Printf
+using MATLAB
 
 const N = 500
 
 matlab_dir = @__DIR__
 mat"addpath($matlab_dir)"
+using Statistics, Printf
 println(mat"version")
 
 p = Dict("gear_ratio" => 6.2, "drum_radius" => 0.1615, "inertia_total" => 0.024,
