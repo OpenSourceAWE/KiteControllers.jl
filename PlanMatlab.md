@@ -23,27 +23,34 @@ Step 0 (spike, done): measure the cost of one call of the Matlab engine on the t
 The design below needs one call per time step (`dt = 0.05 s`); the mean time per step of the
 pure-Julia simulation is about 0.8 ms (autopilot.jl, DFBDF).
 
-Results (R2021a Update 8, MATLAB.jl, Linux):
+Results (R2021a Update 8, MATLAB.jl, Linux; reproduce with `examples/matlab/bench_engine.jl`):
 
 | Call | median | p99 | max |
 | --- | --- | --- | --- |
-| `mxcall(:plus, 1, 1.0, 2.0)` | 17.0 ms | 18.9 ms | 21.9 ms |
-| `mxcall(:spike_step, 5, ...)` (7 inputs incl. struct, 5 outputs) | 57.3 ms | 60.7 ms | 64.9 ms |
-| `eval_string("1;")` | 4.0 ms | 4.7 ms | 4.9 ms |
-| packed `mxcall` (one input vector, one output vector) | 12.9 ms | 14.5 ms | 14.8 ms |
-| `eval_string` with the inputs as text + `get_mvariable` | 4.6 ms | 5.0 ms | 5.5 ms |
+| `mxcall(:plus, 1, 1.0, 2.0)` | 17.1 ms | 19.1 ms | 19.5 ms |
+| `mxcall` with 7 inputs incl. struct, 5 outputs | 57.3 ms | 63.6 ms | 893 ms |
+| packed `mxcall` (one input vector, one output vector) | 13.0 ms | 14.7 ms | 15.8 ms |
+| `eval_string("1;")` | 3.9 ms | 4.4 ms | 4.8 ms |
+| `eval_string` with the inputs as text + `get_mvariable` | 4.6 ms | 5.2 ms | 8.3 ms |
+| the same with the exception check of MATLAB.jl disabled | 1.16 ms | 1.44 ms | 1.53 ms |
+
+The single maximum of 893 ms is an outlier of one `mxcall` run.
 
 Conclusions:
-- Each `engEvalString` costs about 4 ms; reading a variable costs about 0.6 ms. `mxcall` is slow
-  because it needs several engine calls per Matlab call.
-- Interface: one `eval_string` per time step, with all inputs written into the command as text,
-  followed by one `get_mvariable` of a packed output vector. The parameters are passed once at
-  initialization and kept in a persistent variable in Matlab.
-- Numbers are formatted with Julia's `repr`/`string` (shortest representation that round-trips),
-  so they arrive in Matlab unchanged; a test checks this, including `NaN` and `Inf`.
-- About 5.4 ms per time step in total (Matlab call plus Julia simulation): real-time capable up to
-  a time-lapse factor of 6 (8.3 ms budget per step), 9 is marginal (5.6 ms), 12 and more are not.
-  The docs state this limit.
+- `mxcall` is slow because it needs one engine call per input and output plus the evaluation.
+  `eval_string` is slow because, by default, MATLAB.jl checks for a Matlab exception after each
+  evaluation, which costs two more evaluations and two reads.
+- Interface (implemented in WinchModelsMATLABExt): one `eval_string` per time step with the
+  exception check disabled, all inputs written into the command as text, and a `try/catch` in
+  the command that reports Matlab errors; then one `get_mvariable` of a packed output vector.
+  The parameters are passed once at initialization and kept in a persistent variable in Matlab.
+- Measured with the real `async_machine_step.m` (`test_async_machine_step.jl`): 1.29 ms median,
+  2.0 ms maximum per time step.
+- Numbers are formatted with Julia's `repr` (shortest representation that round-trips), so they
+  arrive in Matlab unchanged; a test checks this, including `NaN` and `Inf`.
+- About 2.1 ms per time step in total (Matlab call plus about 0.8 ms of Julia simulation):
+  real-time capable up to a time-lapse factor of 12 (4.2 ms budget per step), 18 is marginal
+  (2.8 ms), 24 is not (2.1 ms). The docs state this limit.
 
 ## Constraint: no Matlab call in the DAE residual
 `calc_acceleration` is evaluated inside the DAE residual, many times per time step (Newton
