@@ -25,6 +25,9 @@ else
     # runs; invokelatest, because MATLAB is loaded while this block runs
     @eval using MATLAB
     Base.invokelatest(MATLAB.eval_string, "addpath('$(replace(MATLAB_ENV, "'" => "''"))');")
+    Base.invokelatest(MATLAB.eval_string, "matlab_version_jl = version; ")
+    @info "Using Matlab $(Base.invokelatest(MATLAB.get_variable, :matlab_version_jl))"
+    Base.invokelatest(MATLAB.eval_string, "clear matlab_version_jl;")
     WINCH_MODEL = "MatlabMachine"
     include("autopilot.jl")
 end
