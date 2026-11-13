@@ -21,7 +21,8 @@ julia --project -t auto -J "bin/kps-image-${julia_major}.so" \
 # Desktop
 # 1.12.7         : 24:40
 # 1.13.3         : 21:50
-# 1.14+opt alpha2: 16:15
+# 1.14+opt-alpha2: 16:15
+# 1.14+opt-beta1 : 12:59
 
 # Laptop Ryzen 7840U
 # 1.13.3         : 23:19
