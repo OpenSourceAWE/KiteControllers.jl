@@ -21,7 +21,7 @@ Construct with `FPPSettings(true)` to auto-load from disk, or `FPPSettings()` fo
 - `heading_offset_int::Float64`: heading lead angle for the turn around the intermediate point [°].
 - `heading_offset_high::Float64`: heading lead angle for elevation angles > 47.5° [°].
 - `heading_offset_up::Float64`: heading lead angle before finishing the up-turn [°].
-- `heading_upper_turn::Float64`: heading angle that triggers the upper turn [°].
+- `heading_upper_turn::Float64`: heading above which the upper turn ends [°].
 - `k_factor::Float64`: scaling factor for the attractor distance.
 - `timeout::Float64`: maximum number of time steps allowed in a single planner state before a forced transition.
 - `corr_vec::Vector{Float64}`: elevation-angle correction look-up table (12 entries).
@@ -50,7 +50,7 @@ Construct with `FPPSettings(true)` to auto-load from disk, or `FPPSettings()` fo
     heading_offset_high::Float64 = 54.0
     "degrees, before finishing the up-turn"
     heading_offset_up::Float64 = 60.0
-    heading_upper_turn::Float64 = 360.0-25.0
+    heading_upper_turn::Float64 = 25.0
     k_factor::Float64 = 1.0
     timeout::Float64 = 145
     corr_vec::Vector{Float64} = [24.02, 36.08, 32.70, 25.40, 19.85, 16.13, 13.55, 11.42, 9.32, 7.38, 5.58, 3.84]

@@ -88,7 +88,7 @@ function simulate(integrator)
             println("phi: ", rad2deg(phi))
             last_phi_printed = phi
         end
-        on_est_sysstate(fpc, phi, beta, -psi, -chi, omega, v_a; u_d=u_d)
+        on_est_sysstate(fpc, phi, beta, psi, chi, omega, v_a; u_d=u_d)
         steering = calc_steering(fpc, true)
         on_timer(fpc)
         set_depower_steering(kps4.kcu, u_d, steering)
@@ -125,6 +125,7 @@ KiteControllers.save_log(logger, "tmp")
 lg = KiteControllers.load_log("tmp")
 sl = lg.syslog
 psi = rad2deg.(wrap2pi.(sl.heading))
-plotx(sl.time, rad2deg.(sl.azimuth), rad2deg.(sl.elevation), sl.steering, sl.v_reelout, sl.var_06, rad2deg.(sl.var_07), -psi,
-      ylabels=["azimuth", "elevation", "steering", "v_reelout", "ndi_gain", "chi_set", "-psi"], 
+plotx(sl.time, rad2deg.(sl.azimuth), rad2deg.(sl.elevation), sl.steering, sl.v_reelout,
+      sl.var_06, rad2deg.(sl.var_07), psi,
+      ylabels=["azimuth", "elevation", "steering", "v_reelout", "ndi_gain", "chi_set", "psi"], 
       fig="fpc_low_right")

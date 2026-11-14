@@ -211,22 +211,22 @@ end
     on_new_systate(fpp::FlightPathPlanner, phi, beta, heading, course, v_a, u_d)
 
 Forward the current estimated kite system state to the [`FlightPathController`](@ref)
-by calling `on_est_sysstate`. Sign conventions are applied before forwarding: azimuth and
-heading angles are negated to match the controller's coordinate frame.
+by calling `on_est_sysstate`. The azimuth is negated to match the controller's coordinate
+frame; heading and course are passed on unchanged.
 
 # Arguments
 - `fpp`:     the `FlightPathPlanner` instance.
 - `phi`:     azimuth angle of the kite in radians (positive to the left).
 - `beta`:    elevation angle of the kite in radians.
-- `heading`: kite heading angle `ψ` in radians, in the range `0 .. 2π`.
-- `course`:  kite course angle `χ` in radians, in the range `0 .. 2π`.
+- `heading`: kite heading angle `ψ` in radians, positive to the right (KiteUtils).
+- `course`:  kite course angle `χ` in radians, positive to the right (KiteUtils).
 - `v_a`:     apparent wind speed in m/s.
 - `u_d`:     relative depower setting of the kite, in the range `0.0 .. 1.0`.
 """
 function on_new_systate(fpp::FlightPathPlanner, phi, beta, heading, course, v_a, u_d)
     psi = wrap2pi(heading)
     chi = wrap2pi(course)
-    on_est_sysstate(fpp.fpca.fpc, -phi, beta, -psi, -chi, fpp.fpca._omega, v_a, u_d=u_d)
+    on_est_sysstate(fpp.fpca.fpc, -phi, beta, psi, chi, fpp.fpca._omega, v_a, u_d=u_d)
 end
 
 """
@@ -239,7 +239,8 @@ the transition conditions defined in Tables 5.3–5.6 of the PhD thesis are sati
 - `fpp`:     the `FlightPathPlanner` instance.
 - `depower`: relative depower setting of the kite, in the range `0.0 .. 1.0`.
 - `length`:  tether length in metres.
-- `heading`: kite heading angle `ψ` in radians, in the range `0 .. 2π`.
+- `heading`: kite heading angle `ψ` in radians, in the range `0 .. 2π`, positive to the right
+  seen from the ground station.
 - `height`:  kite height above ground in metres.
 
 # State read from `fpp.fpca`
@@ -279,12 +280,12 @@ function on_new_data(fpp::FlightPathPlanner, depower, length, heading, height, _
             fpp.fpca.high = true
             _switch(fpp, FLY_LEFT)
         end
-    elseif state == UPPER_TURN && psi > π && psi < deg2rad(fpp.fpps.heading_upper_turn)
+    elseif state == UPPER_TURN && psi > deg2rad(fpp.fpps.heading_upper_turn) && psi < π
         _switch(fpp, LOW_RIGHT)
     elseif state == LOW_RIGHT && phi < -phi_1
         fpp.fpca.fig8 += 1
         _switch(fpp, LOW_LEFT) # was LOW_TURN
-    elseif state == LOW_TURN && psi < deg2rad(180.0 + fpp.fpps.heading_offset_int)          
+    elseif state == LOW_TURN && psi > deg2rad(180.0 - fpp.fpps.heading_offset_int)
         _switch(fpp, LOW_LEFT)
     elseif state == LOW_LEFT  && phi > -phi_2 # &&
         _switch(fpp, TURN_LEFT)
@@ -292,7 +293,8 @@ function on_new_data(fpp::FlightPathPlanner, depower, length, heading, height, _
     elseif state == FLY_LEFT  && phi > fpp.fpca._phi_sw 
         fpp.fpca.fig8 += 1            
         _switch(fpp, TURN_LEFT)
-    elseif state == TURN_LEFT && (psi > deg2rad(180.0 - fpp.fpca._heading_offset) || fpp.timeout > fpp.fpps.timeout)
+    elseif state == TURN_LEFT && (psi < deg2rad(180.0 + fpp.fpca._heading_offset) ||
+                                  fpp.timeout > fpp.fpps.timeout)
         _switch(fpp, FLY_RIGHT)
     elseif state == FLY_RIGHT && phi >= phi_3
         if ! fpp.finish
@@ -302,7 +304,8 @@ function on_new_data(fpp::FlightPathPlanner, depower, length, heading, height, _
         _switch(fpp, UP_TURN_LEFT)
     elseif state == FLY_RIGHT && phi < -fpp.fpca._phi_sw # && 
         _switch(fpp, TURN_RIGHT)
-    elseif state == TURN_RIGHT && (psi < deg2rad(180.0 + fpp.fpca._heading_offset) || fpp.timeout > fpp.fpps.timeout) 
+    elseif state == TURN_RIGHT && (psi > deg2rad(180.0 - fpp.fpca._heading_offset) ||
+                                   fpp.timeout > fpp.fpps.timeout)
         if fpp.fpps.log_level > 1
             println("timeout TURN_RIGHT: $(fpp.timeout)")
         elseif fpp.fpps.log_level > 0
