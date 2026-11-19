@@ -68,7 +68,7 @@ function simulate(integrator)
     on_new_systate(ssc, sys_state)
     while true
         if i > 100
-            heading = calc_heading(kps; neg_azimuth=true, one_point=false)
+            heading = calc_heading(kps)
             steering = calc_steering(ssc, 0; heading)
             time = i * dt
             # disturbance

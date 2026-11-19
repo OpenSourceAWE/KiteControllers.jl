@@ -26,7 +26,7 @@ try
         @test fpps.heading_offset_int  ≈ 32.0
         @test fpps.heading_offset_high ≈ 54.0
         @test fpps.heading_offset_up   ≈ 60.0
-        @test fpps.heading_upper_turn  ≈ 335.0
+        @test fpps.heading_upper_turn  ≈ 25.0
         @test fpps.k_factor           ≈ 1.0
         @test fpps.timeout            ≈ 145.0
         @test length(fpps.corr_vec)   == 12

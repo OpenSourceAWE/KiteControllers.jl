@@ -62,7 +62,7 @@ function fly(winch_model, project; max_time=MAX_TIME)
     for i in 1:steps
         if i > 100
             dp = max(KiteControllers.get_depower(ssc), 0.22)
-            heading  = calc_heading(kps4; neg_azimuth=true, one_point=false)
+            heading  = calc_heading(kps4)
             azimuth  = -calc_azimuth(kps4)
             steering = -calc_steering(ssc; heading, azimuth)
             set_depower_steering(kps4.kcu, dp, steering)
