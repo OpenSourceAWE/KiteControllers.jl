@@ -52,7 +52,7 @@ function simulate(integrator)
             depower = KiteControllers.get_depower(ssc)
             # println("dp: ", dp)
             if depower < 0.22; depower = 0.22; end
-            heading = calc_heading(kps4; neg_azimuth=true)
+            heading = calc_heading(kps4)
             steering = calc_steering(ssc, jsaxes.x; heading)
             set_depower_steering(kps4.kcu, depower, steering)
             println("depower: ", depower, " steering: ", round(steering, digits=3))

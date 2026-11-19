@@ -78,7 +78,7 @@ function simulate(integrator, kps4, ssc, PARKING::Ref{Bool}, stopped=true)
             if i > 100
                 dp = KiteControllers.get_depower(ssc)
                 if dp < 0.22 dp = 0.22 end
-                heading = calc_heading(kps4::KPS4; neg_azimuth=true, one_point=false)
+                heading = calc_heading(kps4::KPS4)
                 ssc.sys_state.heading = heading
                 ssc.sys_state.azimuth = -calc_azimuth(kps4)
                 steering = -calc_steering(ssc)

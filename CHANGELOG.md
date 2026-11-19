@@ -4,6 +4,7 @@
 ### Changed
 - BREAKING: the flight path planner, the flight path controller and `SystemStateControl` take the heading and the course in the right-handed convention of KiteUtils after v0.14.2 and the KiteModels release that follows it: zero towards zenith, positive to the right as seen from the ground station, the opposite sign of before. Fed that convention, they fly the same figure of eight and park the same way as before. Code that passes its own heading or course to `on_new_systate`, `on_new_data` or `calc_steering(ssc; heading)` negates it.
 - BREAKING: `heading_upper_turn` in `FPPSettings` and in `data/fpp_settings*.yaml` is 25° instead of 335°: the upper turn ends once the heading lies between it and 180°. A settings file of your own that sets it takes 360° minus its old value.
+- the examples that compute the heading themselves call `calc_heading(kps)` of the KiteModels release that follows KiteUtils, which has no `neg_azimuth` keyword; they now steer on the geometric heading instead of one computed at the negated azimuth
 - the parking controller of `examples/parking_controller.jl` takes the heading and its set value positive to the right and returns the steering of the kite model directly; its reference values are re-derived for that sign, and `test_calc_steering` passes again (its turn rate and steering references were stale)
 
 ## KiteControllers v0.4.2 - 2026-10-24
